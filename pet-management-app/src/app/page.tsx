@@ -6,6 +6,8 @@ import { UpcomingReminders } from '@/components/UpcomingReminders'
 import { AuthGuard } from '@/components/AuthGuard'
 
 export default function Dashboard() {
+  console.log("🏠 Dashboard component rendering");
+  
   const stats = [
     {
       title: 'Total Pets',
@@ -37,6 +39,8 @@ export default function Dashboard() {
     }
   ]
 
+  console.log("📊 Stats data:", stats);
+
   return (
     <AuthGuard>
       <div className="space-y-8">
@@ -58,23 +62,26 @@ export default function Dashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {stats.map((stat) => (
-            <div key={stat.title} className="stat-card">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {stat.value}
-                  </p>
-                </div>
-                <div className={`p-3 rounded-full ${stat.bgColor}`}>
-                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
+          {stats.map((stat, index) => {
+            console.log(`📈 Rendering stat card ${index + 1}:`, stat.title);
+            return (
+              <div key={stat.title} className="stat-card">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {stat.title}
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {stat.value}
+                    </p>
+                  </div>
+                  <div className={`p-3 rounded-full ${stat.bgColor}`}>
+                    <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Main Content Grid */}
