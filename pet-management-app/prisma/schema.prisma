@@ -1,0 +1,226 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  pets      Pet[]
+  expenses  Expense[]
+  
+  @@map("users")
+}
+
+model Pet {
+  id              String    @id @default(cuid())
+  name            String
+  breed           String?
+  species         String    // dog, cat, bird, etc.
+  gender          String?   // male, female, unknown
+  birthDate       DateTime?
+  adoptionDate    DateTime?
+  microchipNumber String?
+  photo           String?   // URL or file path
+  description     String?
+  isActive        Boolean   @default(true)
+  
+  // Relationships
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  healthRecords   HealthRecord[]
+  vaccinations    Vaccination[]
+  medications     Medication[]
+  appointments    Appointment[]
+  feedingSchedules FeedingSchedule[]
+  activities      Activity[]
+  documents       Document[]
+  expenses        Expense[]
+  reminders       Reminder[]
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@map("pets")
+}
+
+model HealthRecord {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime
+  vetName     String?
+  diagnosis   String?
+  treatment   String?
+  notes       String?
+  
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("health_records")
+}
+
+model Vaccination {
+  id            String   @id @default(cuid())
+  vaccineName   String
+  dateGiven     DateTime
+  nextDueDate   DateTime?
+  batchNumber   String?
+  vetName       String?
+  notes         String?
+  
+  petId         String
+  pet           Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("vaccinations")
+}
+
+model Medication {
+  id            String   @id @default(cuid())
+  medicationName String
+  dosage        String
+  frequency     String   // daily, twice daily, etc.
+  startDate     DateTime
+  endDate       DateTime?
+  instructions  String?
+  prescribedBy  String?
+  isActive      Boolean  @default(true)
+  
+  petId         String
+  pet           Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("medications")
+}
+
+model Appointment {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime
+  duration    Int?     // minutes
+  location    String?
+  vetName     String?
+  appointmentType String? // checkup, vaccination, surgery, etc.
+  status      String   @default("scheduled") // scheduled, completed, cancelled
+  
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("appointments")
+}
+
+model FeedingSchedule {
+  id          String   @id @default(cuid())
+  mealType    String   // breakfast, lunch, dinner, snack
+  time        String   // HH:MM format
+  foodType    String?
+  amount      String?
+  instructions String?
+  isActive    Boolean  @default(true)
+  
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("feeding_schedules")
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  activityType String  // walk, play, training, grooming
+  duration    Int?     // minutes
+  distance    Float?   // km
+  date        DateTime
+  notes       String?
+  
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("activities")
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  fileName    String
+  fileUrl     String
+  fileType    String   // pdf, jpg, png, etc.
+  category    String   // vaccination, adoption, insurance, etc.
+  
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("documents")
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  title       String
+  amount      Float
+  category    String   // food, vet, toys, grooming, etc.
+  date        DateTime
+  description String?
+  receipt     String?  // URL to receipt image
+  
+  petId       String?
+  pet         Pet?     @relation(fields: [petId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("expenses")
+}
+
+model Reminder {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime
+  reminderType String  // vaccination, appointment, medication, etc.
+  isCompleted Boolean  @default(false)
+  notifyBefore Int     @default(24) // hours before due date
+  
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("reminders")
+}
