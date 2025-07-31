@@ -10,10 +10,6 @@ export function useFeatures(userId?: string) {
   const [availableFeatures, setAvailableFeatures] = useState<FeatureConfig[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadFeatures()
-  }, [userId, session, status, loadFeatures])
-
   const loadFeatures = useCallback(async () => {
     if (status === 'loading') return
     
@@ -39,6 +35,10 @@ export function useFeatures(userId?: string) {
       setLoading(false)
     }
   }, [status, userId, session?.user?.id])
+
+  useEffect(() => {
+    loadFeatures()
+  }, [loadFeatures])
 
   const isFeatureEnabled = (featureName: string): boolean => {
     return ClientFeatureManager.isFeatureEnabled(featureName, enabledFeatures)
