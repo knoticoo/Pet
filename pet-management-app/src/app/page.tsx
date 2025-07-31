@@ -41,15 +41,15 @@ export default function Dashboard() {
     <AuthGuard>
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
               Welcome back! Here's an overview of your pets' care.
             </p>
           </div>
           <Link href="/pets/new">
-            <Button className="flex items-center space-x-2">
+            <Button className="flex items-center space-x-2 w-full md:w-auto">
               <Plus className="h-4 w-4" />
               <span>Add Pet</span>
             </Button>
@@ -57,7 +57,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {stats.map((stat) => (
             <div key={stat.title} className="stat-card">
               <div className="flex items-center justify-between">
@@ -78,7 +78,7 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Recent Pets */}
           <div className="card p-6">
             <div className="flex items-center justify-between mb-6">
@@ -109,7 +109,7 @@ export default function Dashboard() {
         {/* Quick Actions */}
         <div className="card p-6">
           <h2 className="text-xl font-semibold text-foreground mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <Link href="/appointments/new">
               <Button variant="outline" className="w-full h-24 flex flex-col space-y-2">
                 <Calendar className="h-6 w-6" />
