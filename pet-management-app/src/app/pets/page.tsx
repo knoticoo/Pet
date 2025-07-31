@@ -1,9 +1,73 @@
+'use client'
+
 import { Heart, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
+import { useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
+
+interface Pet {
+  id: string
+  name: string
+  species: string
+  breed: string
+  birthDate: string
+  description?: string
+}
 
 export default function PetsPage() {
+  const { data: session } = useSession()
+  const [pets, setPets] = useState<Pet[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchPets()
+    }
+  }, [session])
+
+  const fetchPets = async () => {
+    try {
+      const response = await fetch('/api/pets')
+      if (response.ok) {
+        const data = await response.json()
+        setPets(data)
+      }
+    } catch (error) {
+      console.error('Error fetching pets:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const calculateAge = (birthDate: string) => {
+    const today = new Date()
+    const birth = new Date(birthDate)
+    const age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      return Math.max(0, age - 1)
+    }
+    return age
+  }
+
+  const getGradientColor = (species: string) => {
+    switch (species.toLowerCase()) {
+      case 'dog':
+        return 'from-blue-400 to-blue-600'
+      case 'cat':
+        return 'from-purple-400 to-purple-600'
+      case 'bird':
+        return 'from-green-400 to-green-600'
+      case 'fish':
+        return 'from-cyan-400 to-cyan-600'
+      default:
+        return 'from-pink-400 to-pink-600'
+    }
+  }
+
   return (
     <AuthGuard>
       <div className="space-y-8">
@@ -23,72 +87,57 @@ export default function PetsPage() {
           </Link>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground mt-4">Loading your pets...</p>
+          </div>
+        )}
+
         {/* Pets Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Sample pet cards - replace with actual data */}
-          <div className="pet-card">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-pink-400 to-pink-600 rounded-full flex items-center justify-center">
-                <Heart className="h-8 w-8 text-white" />
+        {!loading && pets.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {pets.map((pet) => (
+              <div key={pet.id} className="pet-card cursor-pointer hover:shadow-md transition-shadow">
+                <Link href={`/pets/${pet.id}`}>
+                  <div className="flex items-center space-x-4 mb-4">
+                    <div className={`w-16 h-16 bg-gradient-to-br ${getGradientColor(pet.species)} rounded-full flex items-center justify-center`}>
+                      <Heart className="h-8 w-8 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">{pet.name}</h3>
+                      <p className="text-muted-foreground text-sm">
+                        {pet.breed} • {calculateAge(pet.birthDate)} years old
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p>Species: {pet.species}</p>
+                    {pet.description && <p>{pet.description}</p>}
+                  </div>
+                </Link>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Buddy</h3>
-                <p className="text-muted-foreground text-sm">Golden Retriever • 3 years old</p>
-              </div>
-            </div>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>Last checkup: 2 weeks ago</p>
-              <p>Next appointment: In 1 month</p>
-            </div>
+            ))}
           </div>
-
-          <div className="pet-card">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                <Heart className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Whiskers</h3>
-                <p className="text-muted-foreground text-sm">Persian Cat • 2 years old</p>
-              </div>
-            </div>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>Last checkup: 1 week ago</p>
-              <p>Next appointment: In 3 weeks</p>
-            </div>
-          </div>
-
-          <div className="pet-card">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
-                <Heart className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Charlie</h3>
-                <p className="text-muted-foreground text-sm">Labrador Mix • 5 years old</p>
-              </div>
-            </div>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>Last checkup: 3 days ago</p>
-              <p>Next appointment: In 2 months</p>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Empty state if no pets */}
-        <div className="text-center py-12 hidden">
-          <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No pets yet</h3>
-          <p className="text-muted-foreground mb-6">
-            Start by adding your first pet to begin tracking their care.
-          </p>
-          <Link href="/pets/new">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Your First Pet
-            </Button>
-          </Link>
-        </div>
+        {!loading && pets.length === 0 && (
+          <div className="text-center py-12">
+            <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">No pets yet</h3>
+            <p className="text-muted-foreground mb-6">
+              Start by adding your first pet to begin tracking their care.
+            </p>
+            <Link href="/pets/new">
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Your First Pet
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </AuthGuard>
   )
