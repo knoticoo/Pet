@@ -16,7 +16,7 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react'
-import { CORE_FEATURES, AVAILABLE_FEATURES, FeatureConfig } from '@/lib/features'
+import { CORE_FEATURES, AVAILABLE_FEATURES, FeatureConfig } from '@/lib/features-client'
 
 interface FeatureStatus {
   name: string
