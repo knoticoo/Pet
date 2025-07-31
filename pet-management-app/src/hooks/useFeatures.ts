@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
-import { featureManager, FeatureConfig } from '@/lib/features'
+import { FeatureConfig, ClientFeatureManager } from '@/lib/features-client'
 
 export function useFeatures(userId?: string) {
   const { data: session, status } = useSession()
@@ -12,33 +12,39 @@ export function useFeatures(userId?: string) {
 
   useEffect(() => {
     loadFeatures()
-  }, [userId, session, status])
+  }, [userId, session, status, loadFeatures])
 
-  const loadFeatures = async () => {
+  const loadFeatures = useCallback(async () => {
     if (status === 'loading') return
     
     try {
-      await featureManager.initializeFeatures()
-      
       const currentUserId = userId || session?.user?.id
-      const features = currentUserId 
-        ? await featureManager.getUserEnabledFeatures(currentUserId)
-        : await featureManager.getEnabledFeatures()
+      const url = currentUserId 
+        ? `/api/features?userId=${currentUserId}`
+        : '/api/features'
+      
+      const response = await fetch(url)
+      if (!response.ok) {
+        throw new Error('Failed to fetch features')
+      }
+      
+      const data = await response.json()
+      const features = data.features
       
       setAvailableFeatures(features)
-      setEnabledFeatures(new Set(features.map(f => f.name)))
+      setEnabledFeatures(new Set(features.map((f: FeatureConfig) => f.name)))
     } catch (error) {
       console.error('Failed to load features:', error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [status, userId, session?.user?.id])
 
   const isFeatureEnabled = (featureName: string): boolean => {
-    return enabledFeatures.has(featureName)
+    return ClientFeatureManager.isFeatureEnabled(featureName, enabledFeatures)
   }
 
-  const hasPermission = (featureName: string, permission?: string): boolean => {
+  const hasPermission = (featureName: string, _permission?: string): boolean => {
     if (!isFeatureEnabled(featureName)) return false
     
     // In a real app, you would check specific permissions here
@@ -47,7 +53,7 @@ export function useFeatures(userId?: string) {
   }
 
   const getFeatureConfig = (featureName: string): FeatureConfig | undefined => {
-    return availableFeatures.find(f => f.name === featureName)
+    return ClientFeatureManager.getFeatureConfig(featureName)
   }
 
   const refreshFeatures = () => {
