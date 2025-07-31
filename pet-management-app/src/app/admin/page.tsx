@@ -1,10 +1,45 @@
-import { Suspense } from 'react'
+'use client'
+
+import { Suspense, useState } from 'react'
 import { AdminFeatureManager } from '@/components/admin/AdminFeatureManager'
 import { AdminStats } from '@/components/admin/AdminStats'
 import { AdminGuard } from '@/components/admin/AdminGuard'
-import { Shield, Settings, Users, Puzzle } from 'lucide-react'
+import { Shield, Settings, Users, Puzzle, Database, LogIn, Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export default function AdminPanel() {
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [message, setMessage] = useState('')
+
+  const handleSystemAction = async (action: string) => {
+    setActionLoading(action)
+    setMessage('')
+
+    try {
+      // Simulate system actions (in a real app, these would call actual APIs)
+      switch (action) {
+        case 'backup':
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          setMessage('Database backup completed successfully')
+          break
+        case 'cache':
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          setMessage('Application cache cleared successfully')
+          break
+        case 'logs':
+          // In a real app, this would open a log viewer
+          setMessage('Log viewer would open here (not implemented in demo)')
+          break
+        default:
+          setMessage('Unknown action')
+      }
+    } catch (error) {
+      setMessage('An error occurred while performing the action')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
   return (
     <AdminGuard>
       <div className="space-y-8">
@@ -18,6 +53,12 @@ export default function AdminPanel() {
             </p>
           </div>
         </div>
+
+        {message && (
+          <div className="bg-blue-50 border border-blue-200 text-blue-600 px-4 py-3 rounded-md">
+            {message}
+          </div>
+        )}
 
         {/* Stats Grid */}
         <Suspense fallback={<div>Loading stats...</div>}>
@@ -48,39 +89,78 @@ export default function AdminPanel() {
                 <h3 className="font-semibold text-foreground">System Settings</h3>
               </div>
               <div className="space-y-3">
-                <button className="w-full text-left p-3 rounded-lg border hover:bg-accent transition-colors">
-                  <div className="font-medium">Database Backup</div>
-                  <div className="text-sm text-muted-foreground">Create system backup</div>
-                </button>
-                <button className="w-full text-left p-3 rounded-lg border hover:bg-accent transition-colors">
-                  <div className="font-medium">Cache Management</div>
-                  <div className="text-sm text-muted-foreground">Clear application cache</div>
-                </button>
-                <button className="w-full text-left p-3 rounded-lg border hover:bg-accent transition-colors">
-                  <div className="font-medium">Log Viewer</div>
-                  <div className="text-sm text-muted-foreground">View system logs</div>
-                </button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left p-3 h-auto"
+                  onClick={() => handleSystemAction('backup')}
+                  disabled={actionLoading === 'backup'}
+                >
+                  <div className="flex items-center space-x-3">
+                    <Database className="h-5 w-5" />
+                    <div>
+                      <div className="font-medium">
+                        {actionLoading === 'backup' ? 'Creating Backup...' : 'Database Backup'}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Create system backup</div>
+                    </div>
+                  </div>
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left p-3 h-auto"
+                  onClick={() => handleSystemAction('cache')}
+                  disabled={actionLoading === 'cache'}
+                >
+                  <div className="flex items-center space-x-3">
+                    <Trash2 className="h-5 w-5" />
+                    <div>
+                      <div className="font-medium">
+                        {actionLoading === 'cache' ? 'Clearing Cache...' : 'Cache Management'}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Clear application cache</div>
+                    </div>
+                  </div>
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left p-3 h-auto"
+                  onClick={() => handleSystemAction('logs')}
+                  disabled={actionLoading === 'logs'}
+                >
+                  <div className="flex items-center space-x-3">
+                    <LogIn className="h-5 w-5" />
+                    <div>
+                      <div className="font-medium">Log Viewer</div>
+                      <div className="text-sm text-muted-foreground">View system logs</div>
+                    </div>
+                  </div>
+                </Button>
               </div>
             </div>
 
-            {/* User Management */}
+            {/* Quick Stats Summary */}
             <div className="card p-6">
               <div className="flex items-center space-x-3 mb-4">
                 <Users className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-foreground">User Management</h3>
+                <h3 className="font-semibold text-foreground">Quick Overview</h3>
               </div>
               <div className="space-y-3">
                 <div className="p-3 rounded-lg bg-muted">
-                  <div className="font-medium">Total Users</div>
-                  <div className="text-2xl font-bold text-primary">1,234</div>
+                  <div className="font-medium">System Status</div>
+                  <div className="text-2xl font-bold text-green-600">Operational</div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted">
-                  <div className="font-medium">Active Today</div>
-                  <div className="text-2xl font-bold text-green-600">89</div>
+                  <div className="font-medium">Last Backup</div>
+                  <div className="text-sm text-muted-foreground">
+                    {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
+                  </div>
                 </div>
-                <button className="w-full p-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
-                  Manage Users
-                </button>
+                <div className="p-3 rounded-lg bg-muted">
+                  <div className="font-medium">Server Uptime</div>
+                  <div className="text-sm text-muted-foreground">99.9% this month</div>
+                </div>
               </div>
             </div>
           </div>

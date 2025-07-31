@@ -1,65 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { featureManager } from '@/lib/features'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
-    // Get all features from database
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 })
+    }
+
     const features = await prisma.feature.findMany({
       orderBy: [
+        { isCore: 'desc' }, // Core features first
         { category: 'asc' },
         { displayName: 'asc' }
       ]
     })
 
-    return NextResponse.json({ features })
+    return NextResponse.json(features)
   } catch (error) {
     console.error('Error fetching features:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch features' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch features' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { action, featureNames } = await request.json()
-
-    switch (action) {
-      case 'enable-all':
-        for (const featureName of featureNames) {
-          await featureManager.enableFeature(featureName)
-        }
-        break
-      
-      case 'disable-all':
-        for (const featureName of featureNames) {
-          await featureManager.disableFeature(featureName)
-        }
-        break
-      
-      case 'reset-defaults':
-        // Reset all features to their default state
-        await featureManager.initializeFeatures()
-        break
-      
-      default:
-        return NextResponse.json(
-          { error: 'Invalid action' },
-          { status: 400 }
-        )
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 })
     }
 
-    return NextResponse.json({
-      success: true,
-      message: `Bulk action '${action}' completed successfully`
+    const body = await request.json()
+    const { name, displayName, description, category, isCore = false } = body
+
+    // Check if feature already exists
+    const existingFeature = await prisma.feature.findUnique({
+      where: { name }
     })
+
+    if (existingFeature) {
+      return NextResponse.json({ error: 'Feature already exists' }, { status: 400 })
+    }
+
+    const feature = await prisma.feature.create({
+      data: {
+        name,
+        displayName,
+        description,
+        category,
+        isCore,
+        isEnabled: true
+      }
+    })
+
+    return NextResponse.json(feature, { status: 201 })
   } catch (error) {
-    console.error('Error performing bulk action:', error)
-    return NextResponse.json(
-      { error: 'Failed to perform bulk action' },
-      { status: 500 }
-    )
+    console.error('Error creating feature:', error)
+    return NextResponse.json({ error: 'Failed to create feature' }, { status: 500 })
   }
 }

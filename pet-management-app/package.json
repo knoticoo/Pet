@@ -12,9 +12,10 @@
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "db:reset": "prisma db push --force-reset",
+    "db:seed": "tsx prisma/seed.ts",
     "seed:features": "tsx src/lib/seed-features.ts",
     "create:admin": "tsx src/lib/create-admin.ts",
-    "setup": "npm run db:generate && npm run db:push && npm run seed:features && npm run create:admin",
+    "setup": "npm run db:generate && npm run db:push && npm run db:seed",
     "clean": "rm -rf .next node_modules prisma/dev.db",
     "fresh-install": "npm run clean && npm install && npm run setup"
   },
