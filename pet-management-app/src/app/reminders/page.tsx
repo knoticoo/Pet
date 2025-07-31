@@ -1,70 +1,113 @@
-import { Bell, Plus, Calendar, Clock, CheckCircle, AlertCircle } from 'lucide-react'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Bell, Plus, Calendar, Clock, CheckCircle, AlertCircle, Trash2, Edit } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 
+interface Reminder {
+  id: string
+  title: string
+  description?: string
+  dueDate: string
+  reminderType: string
+  isCompleted: boolean
+  notifyBefore: number
+  pet: {
+    id: string
+    name: string
+    species: string
+  }
+}
+
 export default function RemindersPage() {
-  // Sample reminders data - replace with actual data fetching
-  const reminders = [
-    {
-      id: '1',
-      title: 'Annual Vaccination Due',
-      description: 'Time for Buddy\'s annual vaccination shots',
-      dueDate: new Date('2024-02-20T09:00:00'),
-      reminderType: 'vaccination',
-      isCompleted: false,
-      notifyBefore: 24,
-      pet: { name: 'Buddy', species: 'dog' }
-    },
-    {
-      id: '2',
-      title: 'Heartworm Medication',
-      description: 'Monthly heartworm prevention for Whiskers',
-      dueDate: new Date('2024-02-15T18:00:00'),
-      reminderType: 'medication',
-      isCompleted: false,
-      notifyBefore: 24,
-      pet: { name: 'Whiskers', species: 'cat' }
-    },
-    {
-      id: '3',
-      title: 'Grooming Appointment',
-      description: 'Charlie needs his monthly grooming',
-      dueDate: new Date('2024-02-25T14:00:00'),
-      reminderType: 'grooming',
-      isCompleted: false,
-      notifyBefore: 48,
-      pet: { name: 'Charlie', species: 'dog' }
-    },
-    {
-      id: '4',
-      title: 'Dental Checkup Follow-up',
-      description: 'Follow-up appointment after dental cleaning',
-      dueDate: new Date('2024-01-30T10:00:00'),
-      reminderType: 'appointment',
-      isCompleted: true,
-      notifyBefore: 24,
-      pet: { name: 'Buddy', species: 'dog' }
+  const [reminders, setReminders] = useState<Reminder[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    fetchReminders()
+  }, [])
+
+  const fetchReminders = async () => {
+    try {
+      const response = await fetch('/api/reminders')
+      if (response.ok) {
+        const data = await response.json()
+        setReminders(data)
+      } else {
+        setError('Failed to fetch reminders')
+      }
+    } catch (error) {
+      setError('An error occurred while fetching reminders')
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
+
+  const toggleReminderComplete = async (id: string, isCompleted: boolean) => {
+    try {
+      const response = await fetch(`/api/reminders/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isCompleted: !isCompleted }),
+      })
+
+      if (response.ok) {
+        const updatedReminder = await response.json()
+        setReminders(prev => 
+          prev.map(reminder => 
+            reminder.id === id ? updatedReminder : reminder
+          )
+        )
+      } else {
+        setError('Failed to update reminder')
+      }
+    } catch (error) {
+      setError('An error occurred while updating reminder')
+    }
+  }
+
+  const deleteReminder = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this reminder?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/reminders/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        setReminders(prev => prev.filter(reminder => reminder.id !== id))
+      } else {
+        setError('Failed to delete reminder')
+      }
+    } catch (error) {
+      setError('An error occurred while deleting reminder')
+    }
+  }
 
   const activeReminders = reminders.filter(r => !r.isCompleted)
   const completedReminders = reminders.filter(r => r.isCompleted)
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: string) => {
     return new Intl.DateTimeFormat('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
-    }).format(date)
+    }).format(new Date(date))
   }
 
-  const formatTime = (date: Date) => {
+  const formatTime = (date: string) => {
     return new Intl.DateTimeFormat('en-US', {
       hour: '2-digit',
       minute: '2-digit'
-    }).format(date)
+    }).format(new Date(date))
   }
 
   const getTypeColor = (type: string) => {
@@ -89,14 +132,28 @@ export default function RemindersPage() {
     }
   }
 
-  const isOverdue = (date: Date) => {
-    return date < new Date()
+  const isOverdue = (date: string) => {
+    return new Date(date) < new Date()
   }
 
-  const isUpcoming = (date: Date) => {
+  const isUpcoming = (date: string) => {
     const now = new Date()
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
-    return date >= now && date <= tomorrow
+    const reminderDate = new Date(date)
+    return reminderDate >= now && reminderDate <= tomorrow
+  }
+
+  if (loading) {
+    return (
+      <AuthGuard>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Bell className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
+            <p className="text-muted-foreground">Loading reminders...</p>
+          </div>
+        </div>
+      </AuthGuard>
+    )
   }
 
   return (
@@ -117,6 +174,12 @@ export default function RemindersPage() {
             </Button>
           </Link>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+            {error}
+          </div>
+        )}
 
         {/* Active Reminders */}
         <div className="space-y-6">
@@ -155,7 +218,9 @@ export default function RemindersPage() {
                             )}
                           </div>
                           
-                          <p className="text-sm text-muted-foreground mb-3">{reminder.description}</p>
+                          {reminder.description && (
+                            <p className="text-sm text-muted-foreground mb-3">{reminder.description}</p>
+                          )}
                           
                           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                             <div className="flex items-center space-x-1">
@@ -175,9 +240,20 @@ export default function RemindersPage() {
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(reminder.reminderType)}`}>
                           {reminder.reminderType}
                         </span>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => toggleReminderComplete(reminder.id, reminder.isCompleted)}
+                        >
                           <CheckCircle className="h-4 w-4 mr-1" />
                           Mark Done
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => deleteReminder(reminder.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
@@ -221,6 +297,20 @@ export default function RemindersPage() {
                       <div className="flex items-center space-x-2">
                         <CheckCircle className="h-5 w-5 text-green-600" />
                         <span className="text-sm text-green-600 font-medium">Completed</span>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => toggleReminderComplete(reminder.id, reminder.isCompleted)}
+                        >
+                          Undo
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => deleteReminder(reminder.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>

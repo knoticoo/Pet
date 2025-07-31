@@ -10,6 +10,7 @@ import Link from 'next/link'
 export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -24,6 +25,7 @@ export default function SignIn() {
       const result = await signIn('credentials', {
         email,
         password,
+        rememberMe: rememberMe.toString(),
         redirect: false,
       })
 
@@ -53,7 +55,7 @@ export default function SignIn() {
             Sign in to PetCare
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Use the demo credentials below to get started
+            Welcome back! Please sign in to your account
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -110,6 +112,28 @@ export default function SignIn() {
             </div>
           </div>
 
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                Remember me for 30 days
+              </label>
+            </div>
+
+            <div className="text-sm">
+              <Link href="/auth/forgot-password" className="font-medium text-primary hover:text-primary/80">
+                Forgot your password?
+              </Link>
+            </div>
+          </div>
+
           <div>
             <Button
               type="submit"
@@ -121,11 +145,12 @@ export default function SignIn() {
           </div>
 
           <div className="text-center">
-            <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-md text-sm">
-              <strong>Demo Admin Account:</strong><br />
-              Email: malinovskis@me.com<br />
-              Password: Millie1991
-            </div>
+            <p className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link href="/auth/signup" className="font-medium text-primary hover:text-primary/80">
+                Sign up here
+              </Link>
+            </p>
           </div>
         </form>
       </div>
