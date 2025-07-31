@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { FileText, Upload, Download, Trash2, Eye, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { AuthGuard } from '@/components/AuthGuard'
+import { useSession } from 'next-auth/react'
 
 interface Document {
   id: string
@@ -12,187 +14,193 @@ interface Document {
   uploadDate: string
   petId?: string
   petName?: string
+  url?: string
 }
 
-// Mock data for demonstration
-const mockDocuments: Document[] = [
-  {
-    id: '1',
-    name: 'Vaccination Record.pdf',
-    type: 'pdf',
-    size: '2.3 MB',
-    uploadDate: '2024-01-15',
-    petId: '1',
-    petName: 'Pet 1'
-  },
-  {
-    id: '2',
-    name: 'Medical History.pdf',
-    type: 'pdf',
-    size: '1.8 MB',
-    uploadDate: '2024-01-10',
-    petId: '2',
-    petName: 'Pet 2'
-  },
-  {
-    id: '3',
-    name: 'Insurance Certificate.pdf',
-    type: 'pdf',
-    size: '0.9 MB',
-    uploadDate: '2024-01-08',
-    petId: '1',
-    petName: 'Pet 1'
-  }
-]
-
 export default function DocumentsPage() {
-  const [documents, setDocuments] = useState<Document[]>(mockDocuments)
+  const { data: session } = useSession()
+  const [documents, setDocuments] = useState<Document[]>([])
+  const [loading, setLoading] = useState(true)
   const [selectedPet, setSelectedPet] = useState<string>('all')
+  const [pets, setPets] = useState<any[]>([])
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchDocuments()
+      fetchPets()
+    }
+  }, [session])
+
+  const fetchDocuments = async () => {
+    try {
+      const response = await fetch('/api/documents')
+      if (response.ok) {
+        const data = await response.json()
+        setDocuments(data)
+      }
+    } catch (error) {
+      console.error('Error fetching documents:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchPets = async () => {
+    try {
+      const response = await fetch('/api/pets')
+      if (response.ok) {
+        const data = await response.json()
+        setPets(data)
+      }
+    } catch (error) {
+      console.error('Error fetching pets:', error)
+    }
+  }
 
   const filteredDocuments = selectedPet === 'all' 
     ? documents 
     : documents.filter(doc => doc.petId === selectedPet)
 
-  const handleDelete = (id: string) => {
-    setDocuments(docs => docs.filter(doc => doc.id !== id))
+  const getFileIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'pdf':
+        return '📄'
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return '🖼️'
+      case 'doc':
+      case 'docx':
+        return '📝'
+      default:
+        return '📁'
+    }
   }
 
-  const handleUpload = () => {
-    // TODO: Implement actual upload functionality
-    alert('Upload functionality not yet implemented')
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
-  const handleView = (id: string) => {
-    // TODO: Implement document viewing
-    alert(`View document functionality not yet implemented for document ${id}`)
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }).format(date)
   }
 
-  const handleDownload = (id: string) => {
-    // TODO: Implement document download
-    alert(`Download functionality not yet implemented for document ${id}`)
+  const handleDelete = async (documentId: string) => {
+    if (confirm('Are you sure you want to delete this document?')) {
+      try {
+        const response = await fetch(`/api/documents/${documentId}`, {
+          method: 'DELETE'
+        })
+        if (response.ok) {
+          setDocuments(documents.filter(doc => doc.id !== documentId))
+        }
+      } catch (error) {
+        console.error('Error deleting document:', error)
+      }
+    }
+  }
+
+  if (loading) {
+    return (
+      <AuthGuard>
+        <div className="space-y-8">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground mt-4">Loading documents...</p>
+          </div>
+        </div>
+      </AuthGuard>
+    )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Documents</h1>
-          <p className="text-muted-foreground mt-2">
-            Store and organize your pet documents securely
-          </p>
+    <AuthGuard>
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Documents</h1>
+            <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
+              Store and manage your pet documents and records.
+            </p>
+          </div>
+          <Button className="flex items-center space-x-2 w-full md:w-auto">
+            <Upload className="h-4 w-4" />
+            <span>Upload Document</span>
+          </Button>
         </div>
-        <Button onClick={handleUpload} className="flex items-center space-x-2">
-          <Plus className="h-4 w-4" />
-          <span>Upload Document</span>
-        </Button>
-      </div>
 
-      {/* Filter Bar */}
-      <div className="bg-card rounded-lg border p-4">
-        <div className="flex items-center space-x-4">
-          <label htmlFor="pet-filter" className="text-sm font-medium text-foreground">
-            Filter by Pet:
-          </label>
+        {/* Filter */}
+        <div className="flex space-x-4">
           <select
-            id="pet-filter"
             value={selectedPet}
             onChange={(e) => setSelectedPet(e.target.value)}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">All Pets</option>
-            {/* TODO: Replace with dynamic pet data */}
+            {pets.map((pet) => (
+              <option key={pet.id} value={pet.id}>
+                {pet.name}
+              </option>
+            ))}
           </select>
         </div>
-      </div>
 
-      {/* Documents Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredDocuments.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-foreground mb-2">No documents found</h3>
-            <p className="text-muted-foreground mb-4">
-              {selectedPet === 'all' 
-                ? 'Upload your first document to get started'
-                : 'No documents found for the selected pet'
-              }
-            </p>
-            <Button onClick={handleUpload} variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              Upload Document
-            </Button>
-          </div>
-        ) : (
-          filteredDocuments.map((document) => (
-            <div key={document.id} className="card p-4 space-y-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <FileText className="h-6 w-6 text-primary" />
+        {/* Documents Grid */}
+        {filteredDocuments.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredDocuments.map((document) => (
+              <div key={document.id} className="card p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="text-3xl">{getFileIcon(document.type)}</div>
+                    <div>
+                      <h3 className="font-medium text-foreground truncate">{document.name}</h3>
+                      <p className="text-sm text-muted-foreground">{document.size}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-foreground truncate">
-                      {document.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {document.petName && `${document.petName} • `}
-                      {document.size}
-                    </p>
+                  <div className="flex space-x-2">
+                    {document.url && (
+                      <Button size="sm" variant="outline" onClick={() => window.open(document.url, '_blank')}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button size="sm" variant="outline" onClick={() => handleDelete(document.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
+                
+                <div className="space-y-2 text-sm text-muted-foreground">
+                  <p>Uploaded: {formatDate(document.uploadDate)}</p>
+                  {document.petName && <p>Pet: {document.petName}</p>}
+                </div>
               </div>
-
-              <div className="text-xs text-muted-foreground">
-                Uploaded on {new Intl.DateTimeFormat('en-US').format(new Date(document.uploadDate))}
-              </div>
-
-              <div className="flex items-center space-x-2 pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleView(document.id)}
-                  className="flex-1"
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  View
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDownload(document.id)}
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDelete(document.id)}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">No documents yet</h3>
+            <p className="text-muted-foreground mb-6">
+              Upload your first document to start organizing your pet records.
+            </p>
+            <Button>
+              <Upload className="h-4 w-4 mr-2" />
+              Upload First Document
+            </Button>
+          </div>
         )}
       </div>
-
-      {/* Upload Area */}
-      <div className="border-2 border-dashed border-border rounded-lg p-8 text-center bg-card">
-        <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-foreground mb-2">
-          Drag and drop files here
-        </h3>
-        <p className="text-muted-foreground mb-4">
-          or click to browse your files
-        </p>
-        <Button onClick={handleUpload} variant="outline">
-          Choose Files
-        </Button>
-        <p className="text-xs text-muted-foreground mt-2">
-          Supports PDF, JPG, PNG files up to 10MB
-        </p>
-      </div>
-    </div>
+    </AuthGuard>
   )
 }
