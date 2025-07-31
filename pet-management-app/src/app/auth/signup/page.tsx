@@ -66,9 +66,9 @@ export default function SignUp() {
           router.push('/auth/signin?message=Account created successfully. Please sign in.')
         }, 2000)
       }
-    } catch (error) {
-      setError('An error occurred. Please try again.')
-    } finally {
+         } catch {
+       setError('An error occurred. Please try again.')
+     } finally {
       setLoading(false)
     }
   }
