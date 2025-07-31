@@ -10,6 +10,8 @@ interface AdminStatsData {
   systemHealth: number
   userGrowth: number
   petGrowth: number
+  usersThisMonth?: number
+  petsThisMonth?: number
 }
 
 export function AdminStats() {
@@ -22,6 +24,7 @@ export function AdminStats() {
     petGrowth: 0
   })
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     loadStats()
@@ -29,20 +32,16 @@ export function AdminStats() {
 
   const loadStats = async () => {
     try {
-      // In a real app, this would fetch from your API
-      // Mock data for demonstration
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
-      
-      setStats({
-        totalUsers: 1234,
-        totalPets: 2847,
-        activeFeatures: 8,
-        systemHealth: 98.5,
-        userGrowth: 12.5,
-        petGrowth: 8.3
-      })
+      const response = await fetch('/api/admin/stats')
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data)
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to load admin stats')
+      }
     } catch (error) {
-      console.error('Failed to load admin stats:', error)
+      setError('An error occurred while fetching admin stats')
     } finally {
       setLoading(false)
     }
@@ -69,7 +68,7 @@ export function AdminStats() {
     },
     {
       title: 'Active Features',
-      value: `${stats.activeFeatures}/12`,
+      value: `${stats.activeFeatures}`,
       icon: Activity,
       color: 'text-green-600',
       bgColor: 'bg-green-100',
@@ -105,6 +104,18 @@ export function AdminStats() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="col-span-full">
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+            {error}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {statCards.map((stat) => (
@@ -121,10 +132,16 @@ export function AdminStats() {
                 <div className="flex items-center space-x-1 mt-1">
                   {stat.growth > 0 ? (
                     <TrendingUp className="h-3 w-3 text-green-600" />
-                  ) : (
+                  ) : stat.growth < 0 ? (
                     <TrendingDown className="h-3 w-3 text-red-600" />
-                  )}
-                  <span className={`text-xs ${stat.growth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  ) : null}
+                  <span className={`text-xs ${
+                    stat.growth > 0 
+                      ? 'text-green-600' 
+                      : stat.growth < 0 
+                      ? 'text-red-600' 
+                      : 'text-muted-foreground'
+                  }`}>
                     {stat.growth > 0 ? '+' : ''}{stat.growth}%
                   </span>
                   <span className="text-xs text-muted-foreground">

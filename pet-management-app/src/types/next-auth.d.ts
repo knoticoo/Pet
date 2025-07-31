@@ -7,16 +7,19 @@ declare module "next-auth" {
       email: string
       name?: string
       isAdmin: boolean
+      rememberMe?: boolean
     }
   }
 
   interface User {
     isAdmin: boolean
+    rememberMe?: boolean
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     isAdmin: boolean
+    rememberMe?: boolean
   }
 }

@@ -1,9 +1,43 @@
+'use client'
+
+import { useState } from 'react'
 import { Heart, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
+import { useRouter } from 'next/navigation'
 
 export default function NewPetPage() {
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    
+    const formData = new FormData(e.currentTarget)
+    const petData = {
+      name: formData.get('name'),
+      species: formData.get('species'),
+      breed: formData.get('breed'),
+      age: formData.get('age'),
+      weight: formData.get('weight'),
+      color: formData.get('color'),
+      notes: formData.get('notes'),
+    }
+    
+    // TODO: Implement actual pet creation API call
+    // console.log('Creating pet:', petData)
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    setIsSubmitting(false)
+    
+    // Redirect back to pets page
+    router.push('/pets')
+  }
+
   return (
     <AuthGuard>
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -25,7 +59,7 @@ export default function NewPetPage() {
 
         {/* Form */}
         <div className="card p-6">
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
@@ -133,9 +167,9 @@ export default function NewPetPage() {
             </div>
 
             <div className="flex space-x-4 pt-6">
-              <Button type="submit" className="flex-1">
+              <Button type="submit" className="flex-1" disabled={isSubmitting}>
                 <Heart className="h-4 w-4 mr-2" />
-                Add Pet
+                {isSubmitting ? 'Adding...' : 'Add Pet'}
               </Button>
               <Link href="/pets" className="flex-1">
                 <Button type="button" variant="outline" className="w-full">

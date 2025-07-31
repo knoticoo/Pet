@@ -1,9 +1,102 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { Bell, ArrowLeft, Calendar, Clock, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
+import { useRouter } from 'next/navigation'
+
+interface Pet {
+  id: string
+  name: string
+  species: string
+  breed?: string
+}
 
 export default function NewReminderPage() {
+  const router = useRouter()
+  const [pets, setPets] = useState<Pet[]>([])
+  const [loading, setLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    fetchPets()
+  }, [])
+
+  const fetchPets = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/pets')
+      if (response.ok) {
+        const data = await response.json()
+        setPets(data)
+      } else {
+        setError('Failed to fetch pets')
+      }
+    } catch (error) {
+      setError('An error occurred while fetching pets')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setError('')
+    
+    const formData = new FormData(e.currentTarget)
+    const dueDate = formData.get('dueDate') as string
+    const dueTime = formData.get('dueTime') as string
+    
+    // Combine date and time
+    const combinedDateTime = dueTime 
+      ? `${dueDate}T${dueTime}:00`
+      : `${dueDate}T09:00:00`
+    
+    const reminderData = {
+      petId: formData.get('petId'),
+      title: formData.get('title'),
+      description: formData.get('description'),
+      dueDate: combinedDateTime,
+      reminderType: formData.get('reminderType'),
+      notifyBefore: formData.get('notifyBefore') || '24',
+    }
+    
+    try {
+      const response = await fetch('/api/reminders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reminderData),
+      })
+      
+      if (response.ok) {
+        router.push('/reminders')
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to create reminder')
+      }
+    } catch (error) {
+      setError('An error occurred while creating reminder')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const fillTemplate = (title: string, type: string, description: string) => {
+    const titleInput = document.getElementById('title') as HTMLInputElement
+    const typeSelect = document.getElementById('reminderType') as HTMLSelectElement
+    const descInput = document.getElementById('description') as HTMLTextAreaElement
+    
+    if (titleInput) titleInput.value = title
+    if (typeSelect) typeSelect.value = type
+    if (descInput) descInput.value = description
+  }
+
   return (
     <AuthGuard>
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -25,7 +118,13 @@ export default function NewReminderPage() {
 
         {/* Form */}
         <div className="card p-6">
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+                {error}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label htmlFor="pet" className="block text-sm font-medium text-foreground mb-2">
@@ -35,13 +134,21 @@ export default function NewReminderPage() {
                   id="pet"
                   name="petId"
                   required
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  disabled={loading}
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
                 >
                   <option value="">Choose a pet</option>
-                  <option value="1">Buddy (Golden Retriever)</option>
-                  <option value="2">Whiskers (Persian Cat)</option>
-                  <option value="3">Charlie (Labrador Mix)</option>
+                  {pets.map(pet => (
+                    <option key={pet.id} value={pet.id}>
+                      {pet.name} ({pet.breed ? `${pet.breed} ` : ''}{pet.species})
+                    </option>
+                  ))}
                 </select>
+                {pets.length === 0 && !loading && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    No pets found. <Link href="/pets/new" className="text-primary hover:underline">Add a pet first</Link>.
+                  </p>
+                )}
               </div>
 
               <div className="md:col-span-2">
@@ -87,6 +194,7 @@ export default function NewReminderPage() {
                 <select
                   id="notifyBefore"
                   name="notifyBefore"
+                  defaultValue="24"
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="1">1 hour before</option>
@@ -107,6 +215,7 @@ export default function NewReminderPage() {
                   id="dueDate"
                   name="dueDate"
                   required
+                  min={new Date().toISOString().split('T')[0]}
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
@@ -119,6 +228,7 @@ export default function NewReminderPage() {
                   type="time"
                   id="dueTime"
                   name="dueTime"
+                  defaultValue="09:00"
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
@@ -138,9 +248,9 @@ export default function NewReminderPage() {
             </div>
 
             <div className="flex space-x-4 pt-6">
-              <Button type="submit" className="flex-1">
+              <Button type="submit" className="flex-1" disabled={isSubmitting}>
                 <Bell className="h-4 w-4 mr-2" />
-                Create Reminder
+                {isSubmitting ? 'Creating...' : 'Create Reminder'}
               </Button>
               <Link href="/reminders" className="flex-1">
                 <Button type="button" variant="outline" className="w-full">
@@ -177,16 +287,7 @@ export default function NewReminderPage() {
             <button
               type="button"
               className="text-left p-3 rounded-lg border hover:bg-gray-50 transition-colors"
-              onClick={() => {
-                // Pre-fill form with vaccination template
-                const titleInput = document.getElementById('title') as HTMLInputElement
-                const typeSelect = document.getElementById('reminderType') as HTMLSelectElement
-                const descInput = document.getElementById('description') as HTMLTextAreaElement
-                
-                if (titleInput) titleInput.value = 'Annual Vaccination Due'
-                if (typeSelect) typeSelect.value = 'vaccination'
-                if (descInput) descInput.value = 'Time for annual vaccination shots'
-              }}
+              onClick={() => fillTemplate('Annual Vaccination Due', 'vaccination', 'Time for annual vaccination shots')}
             >
               <div className="flex items-center space-x-3">
                 <span className="text-xl">💉</span>
@@ -200,15 +301,7 @@ export default function NewReminderPage() {
             <button
               type="button"
               className="text-left p-3 rounded-lg border hover:bg-gray-50 transition-colors"
-              onClick={() => {
-                const titleInput = document.getElementById('title') as HTMLInputElement
-                const typeSelect = document.getElementById('reminderType') as HTMLSelectElement
-                const descInput = document.getElementById('description') as HTMLTextAreaElement
-                
-                if (titleInput) titleInput.value = 'Monthly Heartworm Medication'
-                if (typeSelect) typeSelect.value = 'medication'
-                if (descInput) descInput.value = 'Monthly heartworm prevention dose'
-              }}
+              onClick={() => fillTemplate('Monthly Heartworm Medication', 'medication', 'Monthly heartworm prevention dose')}
             >
               <div className="flex items-center space-x-3">
                 <span className="text-xl">💊</span>
@@ -222,15 +315,7 @@ export default function NewReminderPage() {
             <button
               type="button"
               className="text-left p-3 rounded-lg border hover:bg-gray-50 transition-colors"
-              onClick={() => {
-                const titleInput = document.getElementById('title') as HTMLInputElement
-                const typeSelect = document.getElementById('reminderType') as HTMLSelectElement
-                const descInput = document.getElementById('description') as HTMLTextAreaElement
-                
-                if (titleInput) titleInput.value = 'Grooming Appointment'
-                if (typeSelect) typeSelect.value = 'grooming'
-                if (descInput) descInput.value = 'Regular grooming session'
-              }}
+              onClick={() => fillTemplate('Grooming Appointment', 'grooming', 'Regular grooming session')}
             >
               <div className="flex items-center space-x-3">
                 <span className="text-xl">✂️</span>
@@ -244,15 +329,7 @@ export default function NewReminderPage() {
             <button
               type="button"
               className="text-left p-3 rounded-lg border hover:bg-gray-50 transition-colors"
-              onClick={() => {
-                const titleInput = document.getElementById('title') as HTMLInputElement
-                const typeSelect = document.getElementById('reminderType') as HTMLSelectElement
-                const descInput = document.getElementById('description') as HTMLTextAreaElement
-                
-                if (titleInput) titleInput.value = 'Health Checkup'
-                if (typeSelect) typeSelect.value = 'checkup'
-                if (descInput) descInput.value = 'Routine health examination'
-              }}
+              onClick={() => fillTemplate('Health Checkup', 'checkup', 'Routine health examination')}
             >
               <div className="flex items-center space-x-3">
                 <span className="text-xl">🩺</span>

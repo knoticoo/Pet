@@ -8,35 +8,35 @@ import { formatDate } from '@/lib/utils'
 const mockReminders = [
   {
     id: '1',
-    title: 'Buddy - Annual Vaccination',
+    title: 'Pet 1 - Annual Vaccination',
     type: 'vaccination',
-    dueDate: new Date('2024-02-15'),
-    petName: 'Buddy',
-    priority: 'high'
+    dueDate: new Date('2024-02-20'),
+    petName: 'Pet 1',
+    isCompleted: false
   },
   {
     id: '2',
-    title: 'Whiskers - Flea Treatment',
+    title: 'Pet 2 - Flea Treatment',
     type: 'medication',
-    dueDate: new Date('2024-02-18'),
-    petName: 'Whiskers',
-    priority: 'medium'
+    dueDate: new Date('2024-02-25'),
+    petName: 'Pet 2',
+    isCompleted: false
   },
   {
     id: '3',
-    title: 'Charlie - Vet Checkup',
-    type: 'appointment',
-    dueDate: new Date('2024-02-22'),
-    petName: 'Charlie',
-    priority: 'low'
+    title: 'Pet 3 - Vet Checkup',
+    type: 'checkup',
+    dueDate: new Date('2024-03-01'),
+    petName: 'Pet 3',
+    isCompleted: false
   },
   {
     id: '4',
-    title: 'Buddy - Grooming',
+    title: 'Pet 1 - Grooming',
     type: 'grooming',
-    dueDate: new Date('2024-02-25'),
-    petName: 'Buddy',
-    priority: 'low'
+    dueDate: new Date('2024-03-05'),
+    petName: 'Pet 1',
+    isCompleted: false
   }
 ]
 
