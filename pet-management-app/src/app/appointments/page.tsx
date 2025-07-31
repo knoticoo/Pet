@@ -45,19 +45,19 @@ export default function AppointmentsPage() {
   const pastAppointments = appointments.filter(apt => apt.status === 'completed')
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
+    return new Intl.DateTimeFormat('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
       day: 'numeric'
-    })
+    }).format(date)
   }
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
+    return new Intl.DateTimeFormat('en-US', {
       hour: '2-digit',
       minute: '2-digit'
-    })
+    }).format(date)
   }
 
   const getStatusColor = (status: string) => {

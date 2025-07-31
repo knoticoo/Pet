@@ -1,9 +1,44 @@
+'use client'
+
+import { useState } from 'react'
 import { Calendar, ArrowLeft, Clock, MapPin, User } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
+import { useRouter } from 'next/navigation'
 
 export default function NewAppointmentPage() {
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    
+    const formData = new FormData(e.currentTarget)
+    const appointmentData = {
+      petId: formData.get('petId'),
+      title: formData.get('title'),
+      date: formData.get('date'),
+      time: formData.get('time'),
+      duration: formData.get('duration'),
+      appointmentType: formData.get('appointmentType'),
+      vetName: formData.get('vetName'),
+      location: formData.get('location'),
+      description: formData.get('description'),
+    }
+    
+    // TODO: Implement actual appointment creation API call
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    setIsSubmitting(false)
+    
+    // Redirect back to appointments page
+    router.push('/appointments')
+  }
+
   return (
     <AuthGuard>
       <div className="space-y-8 max-w-2xl mx-auto">
@@ -25,7 +60,7 @@ export default function NewAppointmentPage() {
 
         {/* Form */}
         <div className="card p-6">
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label htmlFor="pet" className="block text-sm font-medium text-foreground mb-2">
@@ -38,9 +73,7 @@ export default function NewAppointmentPage() {
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="">Choose a pet</option>
-                  <option value="1">Buddy (Golden Retriever)</option>
-                  <option value="2">Whiskers (Persian Cat)</option>
-                  <option value="3">Charlie (Labrador Mix)</option>
+                  {/* TODO: Replace with dynamic pet data */}
                 </select>
               </div>
 
@@ -67,6 +100,7 @@ export default function NewAppointmentPage() {
                   id="date"
                   name="date"
                   required
+                  min={new Date().toISOString().split('T')[0]}
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
@@ -91,6 +125,7 @@ export default function NewAppointmentPage() {
                 <select
                   id="duration"
                   name="duration"
+                  defaultValue="60"
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="30">30 minutes</option>
@@ -169,9 +204,9 @@ export default function NewAppointmentPage() {
             </div>
 
             <div className="flex space-x-4 pt-6">
-              <Button type="submit" className="flex-1">
+              <Button type="submit" className="flex-1" disabled={isSubmitting}>
                 <Calendar className="h-4 w-4 mr-2" />
-                Schedule Appointment
+                {isSubmitting ? 'Scheduling...' : 'Schedule Appointment'}
               </Button>
               <Link href="/appointments" className="flex-1">
                 <Button type="button" variant="outline" className="w-full">

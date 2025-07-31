@@ -38,9 +38,7 @@ export default function NewReminderPage() {
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="">Choose a pet</option>
-                  <option value="1">Buddy (Golden Retriever)</option>
-                  <option value="2">Whiskers (Persian Cat)</option>
-                  <option value="3">Charlie (Labrador Mix)</option>
+                  {/* TODO: Replace with dynamic pet data */}
                 </select>
               </div>
 

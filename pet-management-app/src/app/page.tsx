@@ -6,8 +6,6 @@ import { UpcomingReminders } from '@/components/UpcomingReminders'
 import { AuthGuard } from '@/components/AuthGuard'
 
 export default function Dashboard() {
-  console.log("🏠 Dashboard component rendering");
-  
   const stats = [
     {
       title: 'Total Pets',
@@ -39,8 +37,6 @@ export default function Dashboard() {
     }
   ]
 
-  console.log("📊 Stats data:", stats);
-
   return (
     <AuthGuard>
       <div className="space-y-8">
@@ -63,7 +59,6 @@ export default function Dashboard() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {stats.map((stat, index) => {
-            console.log(`📈 Rendering stat card ${index + 1}:`, stat.title);
             return (
               <div key={stat.title} className="stat-card">
                 <div className="flex items-center justify-between">

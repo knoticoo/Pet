@@ -23,7 +23,7 @@ const mockDocuments: Document[] = [
     size: '2.3 MB',
     uploadDate: '2024-01-15',
     petId: '1',
-    petName: 'Max'
+    petName: 'Pet 1'
   },
   {
     id: '2',
@@ -32,7 +32,7 @@ const mockDocuments: Document[] = [
     size: '1.8 MB',
     uploadDate: '2024-01-10',
     petId: '2',
-    petName: 'Luna'
+    petName: 'Pet 2'
   },
   {
     id: '3',
@@ -41,7 +41,7 @@ const mockDocuments: Document[] = [
     size: '0.9 MB',
     uploadDate: '2024-01-08',
     petId: '1',
-    petName: 'Max'
+    petName: 'Pet 1'
   }
 ]
 
@@ -58,8 +58,18 @@ export default function DocumentsPage() {
   }
 
   const handleUpload = () => {
-    // Mock upload functionality
-    console.log('Upload functionality would be implemented here')
+    // TODO: Implement actual upload functionality
+    alert('Upload functionality not yet implemented')
+  }
+
+  const handleView = (id: string) => {
+    // TODO: Implement document viewing
+    alert(`View document functionality not yet implemented for document ${id}`)
+  }
+
+  const handleDownload = (id: string) => {
+    // TODO: Implement document download
+    alert(`Download functionality not yet implemented for document ${id}`)
   }
 
   return (
@@ -90,8 +100,7 @@ export default function DocumentsPage() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="all">All Pets</option>
-            <option value="1">Max</option>
-            <option value="2">Luna</option>
+            {/* TODO: Replace with dynamic pet data */}
           </select>
         </div>
       </div>
@@ -134,14 +143,14 @@ export default function DocumentsPage() {
               </div>
 
               <div className="text-xs text-muted-foreground">
-                Uploaded on {new Date(document.uploadDate).toLocaleDateString()}
+                Uploaded on {new Intl.DateTimeFormat('en-US').format(new Date(document.uploadDate))}
               </div>
 
               <div className="flex items-center space-x-2 pt-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => console.log('View document:', document.id)}
+                  onClick={() => handleView(document.id)}
                   className="flex-1"
                 >
                   <Eye className="h-4 w-4 mr-2" />
@@ -150,7 +159,7 @@ export default function DocumentsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => console.log('Download document:', document.id)}
+                  onClick={() => handleDownload(document.id)}
                 >
                   <Download className="h-4 w-4" />
                 </Button>
