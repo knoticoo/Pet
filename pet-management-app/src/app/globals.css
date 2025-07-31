@@ -2,24 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Debug: Add a visible indicator that CSS is loaded */
-html {
-  --debug-css-loaded: 1;
-}
-
-html::before {
-  content: "CSS Loaded ✓";
-  position: fixed;
-  top: 0;
-  left: 0;
-  background: #10b981;
-  color: white;
-  padding: 4px 8px;
-  font-size: 12px;
-  z-index: 10000;
-  pointer-events: none;
-}
-
 :root {
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
@@ -97,9 +79,4 @@ html::before {
   a:focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2;
   }
-}
-
-/* Debug: Test Tailwind utilities */
-.debug-tailwind-test {
-  @apply bg-red-500 text-white p-4 m-2 rounded-lg shadow-lg;
 }

@@ -1,7 +1,21 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  webpack: (config, { isServer }) => {
+  // Reduce logging in development
+  logging: {
+    fetches: {
+      fullUrl: false,
+    },
+  },
+  
+  // Experimental features to reduce verbose output
+  experimental: {
+    logging: {
+      level: 'error', // Only show errors, not CSS loading messages
+    },
+  },
+  
+  webpack: (config, { isServer, dev }) => {
     if (!isServer) {
       // Exclude Prisma from client-side bundles
       config.resolve.fallback = {
@@ -16,6 +30,15 @@ const nextConfig: NextConfig = {
         '@prisma/client': 'commonjs @prisma/client',
       });
     }
+    
+    // Reduce webpack logging in development
+    if (dev) {
+      config.stats = 'errors-warnings';
+      config.infrastructureLogging = {
+        level: 'error',
+      };
+    }
+    
     return config;
   },
 };
