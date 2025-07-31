@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Heart, Home, Calendar, DollarSign, FileText, Settings, Bell, Shield, LogOut, User } from 'lucide-react'
+import { Heart, Home, Calendar, DollarSign, FileText, Settings, Bell, Shield, LogOut, User, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useFeatures } from '@/hooks/useFeatures'
 import { signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
+import { useState } from 'react'
 
 // Base navigation items that are always available
 const baseNavigation = [
@@ -31,6 +32,7 @@ const systemNavigation = [
 export function Navigation() {
   const pathname = usePathname()
   const { enabledFeatures, isAdmin, isAuthenticated, user } = useFeatures()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   // Build navigation based on enabled features
   const getVisibleNavigation = () => {
@@ -127,30 +129,74 @@ export function Navigation() {
             </Button>
           </div>
           
-          {/* Mobile menu button - simplified for now */}
+          {/* Mobile menu button */}
           <div className="md:hidden">
-            <div className="flex flex-col space-y-1">
-              {visibleNavigation.slice(0, 4).map((item) => {
-                const isActive = pathname === item.href
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={cn(
-                      'flex items-center space-x-2 px-2 py-1 rounded text-xs',
-                      isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
-                    )}
-                  >
-                    <item.icon className="h-3 w-3" />
-                    <span>{item.name}</span>
-                  </Link>
-                )
-              })}
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2"
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
           </div>
         </div>
+        
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t bg-white">
+            <div className="container mx-auto px-4 py-4 max-w-7xl">
+              <div className="space-y-2">
+                {visibleNavigation.map((item) => {
+                  const isActive = pathname === item.href
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={cn(
+                        'flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors',
+                        isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      )}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.name}</span>
+                    </Link>
+                  )
+                })}
+                
+                <div className="pt-4 mt-4 border-t">
+                  <div className="flex items-center space-x-3 px-4 py-2 text-sm text-muted-foreground">
+                    <User className="h-4 w-4" />
+                    <span>{user?.name || user?.email}</span>
+                    {isAdmin && (
+                      <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
+                        Admin
+                      </span>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false)
+                      signOut()
+                    }}
+                    className="w-full justify-start mt-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <LogOut className="h-4 w-4 mr-3" />
+                    Sign Out
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   )

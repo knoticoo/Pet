@@ -53,10 +53,7 @@ export default function SignIn() {
             Sign in to PetCare
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link href="/auth/signup" className="font-medium text-primary hover:text-primary/80">
-              create a new account
-            </Link>
+            Use the demo credentials below to get started
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
