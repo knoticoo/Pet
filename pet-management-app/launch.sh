@@ -121,7 +121,7 @@ start_server() {
     echo "🎉 Setup complete! Starting PetCare application..."
     echo ""
     echo "📝 Admin Credentials:"
-    echo "   Email: alinovskis@me.com"
+    echo "   Email: malinovskis@me.com"
     echo "   Password: Millie1991"
     echo ""
     echo "🌐 Application will be available at: http://localhost:3000"

@@ -66,7 +66,7 @@ npm run dev
 ## 🔑 **Admin Access**
 
 ### **Demo Admin Credentials:**
-- **Email**: `alinovskis@me.com`
+- **Email**: `malinovskis@me.com`
 - **Password**: `Millie1991`
 
 ### **Admin Panel URL:**

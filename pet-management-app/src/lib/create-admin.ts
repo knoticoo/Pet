@@ -5,7 +5,7 @@ export async function createAdminUser() {
   try {
     console.log('🔐 Creating admin user...')
     
-    const email = 'alinovskis@me.com'
+    const email = 'malinovskis@me.com'
     const password = 'Millie1991'
     const name = 'Admin User'
     

@@ -126,7 +126,7 @@ export default function SignIn() {
           <div className="text-center">
             <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-md text-sm">
               <strong>Demo Admin Account:</strong><br />
-              Email: alinovskis@me.com<br />
+              Email: malinovskis@me.com<br />
               Password: Millie1991
             </div>
           </div>
