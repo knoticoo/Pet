@@ -1,50 +1,63 @@
+'use client'
+
 import { Calendar, Plus, Clock, MapPin, User } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
+import { useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
+
+interface Appointment {
+  id: string
+  title: string
+  date: string
+  duration: number
+  location?: string
+  vetName?: string
+  appointmentType: string
+  status: string
+  notes?: string
+  petId: string
+  pet: {
+    name: string
+    species: string
+  }
+}
 
 export default function AppointmentsPage() {
-  // Sample appointments data - replace with actual data fetching
-  const appointments = [
-    {
-      id: '1',
-      title: 'Annual Checkup',
-      date: new Date('2024-02-15T10:00:00'),
-      duration: 60,
-      location: 'Downtown Veterinary Clinic',
-      vetName: 'Dr. Sarah Johnson',
-      appointmentType: 'checkup',
-      status: 'scheduled',
-      pet: { name: 'Buddy', species: 'dog' }
-    },
-    {
-      id: '2',
-      title: 'Vaccination Update',
-      date: new Date('2024-02-20T14:30:00'),
-      duration: 30,
-      location: 'Pet Care Center',
-      vetName: 'Dr. Michael Chen',
-      appointmentType: 'vaccination',
-      status: 'scheduled',
-      pet: { name: 'Whiskers', species: 'cat' }
-    },
-    {
-      id: '3',
-      title: 'Dental Cleaning',
-      date: new Date('2024-01-28T09:00:00'),
-      duration: 90,
-      location: 'Animal Hospital',
-      vetName: 'Dr. Emily Rodriguez',
-      appointmentType: 'dental',
-      status: 'completed',
-      pet: { name: 'Charlie', species: 'dog' }
+  const { data: session } = useSession()
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchAppointments()
     }
-  ]
+  }, [session])
 
-  const upcomingAppointments = appointments.filter(apt => apt.status === 'scheduled')
-  const pastAppointments = appointments.filter(apt => apt.status === 'completed')
+  const fetchAppointments = async () => {
+    try {
+      const response = await fetch('/api/appointments')
+      if (response.ok) {
+        const data = await response.json()
+        setAppointments(data)
+      }
+    } catch (error) {
+      console.error('Error fetching appointments:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const formatDate = (date: Date) => {
+  const upcomingAppointments = appointments.filter(apt => 
+    apt.status === 'scheduled' && new Date(apt.date) > new Date()
+  )
+  const pastAppointments = appointments.filter(apt => 
+    apt.status === 'completed' || new Date(apt.date) <= new Date()
+  )
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
     return new Intl.DateTimeFormat('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -53,7 +66,8 @@ export default function AppointmentsPage() {
     }).format(date)
   }
 
-  const formatTime = (date: Date) => {
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString)
     return new Intl.DateTimeFormat('en-US', {
       hour: '2-digit',
       minute: '2-digit'
@@ -77,6 +91,19 @@ export default function AppointmentsPage() {
       case 'dental': return 'bg-teal-100 text-teal-800'
       default: return 'bg-gray-100 text-gray-800'
     }
+  }
+
+  if (loading) {
+    return (
+      <AuthGuard>
+        <div className="space-y-8">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground mt-4">Loading appointments...</p>
+          </div>
+        </div>
+      </AuthGuard>
+    )
   }
 
   return (

@@ -19,7 +19,9 @@ export async function GET(request: NextRequest) {
         id: true,
         name: true,
         species: true,
-        breed: true
+        breed: true,
+        birthDate: true,
+        description: true
       },
       orderBy: {
         name: 'asc'
@@ -41,7 +43,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, species, breed, age, weight, color, notes } = body
+    const { name, species, breed, birthDate, age, weight, color, notes } = body
+
+    // Calculate birth date from age if birthDate not provided
+    let calculatedBirthDate = birthDate
+    if (!calculatedBirthDate && age) {
+      const currentYear = new Date().getFullYear()
+      calculatedBirthDate = new Date(currentYear - parseInt(age), 0, 1)
+    }
 
     const pet = await prisma.pet.create({
       data: {
@@ -49,9 +58,9 @@ export async function POST(request: NextRequest) {
         species,
         breed,
         description: notes,
+        birthDate: calculatedBirthDate ? new Date(calculatedBirthDate) : null,
         userId: session.user.id,
-        // If age is provided, calculate approximate birth date
-        birthDate: age ? new Date(new Date().getFullYear() - parseInt(age), 0, 1) : null
+        isActive: true
       }
     })
 

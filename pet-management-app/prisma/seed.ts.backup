@@ -150,8 +150,65 @@ async function main() {
 
   console.log(`✨ Created ${allFeatures.length} features`)
 
-  // Removed demo user and demo pets - clean database!
-  console.log('✅ Database seeding completed! (No demo data created)')
+  // Create a demo regular user
+  const demoUser = await prisma.user.upsert({
+    where: { email: 'demo@petcare.com' },
+    update: {},
+    create: {
+      email: 'demo@petcare.com',
+      name: 'Demo User',
+      password: await bcrypt.hash('demo123', 10),
+      isAdmin: false,
+    },
+  })
+
+  console.log('👤 Created demo user:', demoUser.email)
+
+  // Create some demo pets for the demo user
+  const demoPets = [
+    {
+      name: 'Buddy',
+      species: 'dog',
+      breed: 'Golden Retriever',
+      birthDate: new Date('2020-05-15'),
+      description: 'Friendly and energetic golden retriever',
+      userId: demoUser.id
+    },
+    {
+      name: 'Whiskers',
+      species: 'cat',
+      breed: 'Persian',
+      birthDate: new Date('2019-08-22'),
+      description: 'Calm and fluffy Persian cat',
+      userId: demoUser.id
+    },
+    {
+      name: 'Charlie',
+      species: 'dog',
+      breed: 'Labrador Mix',
+      birthDate: new Date('2021-03-10'),
+      description: 'Playful rescue dog',
+      userId: demoUser.id
+    }
+  ]
+
+  for (const pet of demoPets) {
+    const petId = `${pet.name.toLowerCase()}-${demoUser.id.slice(-8)}`
+    await prisma.pet.upsert({
+      where: { 
+        id: petId
+      },
+      update: {},
+      create: {
+        ...pet,
+        id: petId
+      },
+    })
+  }
+
+  console.log(`🐕 Created ${demoPets.length} demo pets`)
+
+  console.log('✅ Database seeding completed!')
 }
 
 main()
