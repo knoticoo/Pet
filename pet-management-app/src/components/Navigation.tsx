@@ -56,8 +56,8 @@ export function Navigation() {
 
   if (!isAuthenticated) {
     return (
-      <nav className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4">
+      <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
+        <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
               <Heart className="h-8 w-8 text-primary" />
@@ -77,8 +77,8 @@ export function Navigation() {
   }
 
   return (
-    <nav className="bg-white shadow-sm border-b">
-      <div className="container mx-auto px-4">
+    <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
+      <div className="container mx-auto px-4 max-w-7xl">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
             <Heart className="h-8 w-8 text-primary" />
@@ -127,12 +127,28 @@ export function Navigation() {
             </Button>
           </div>
           
+          {/* Mobile menu button - simplified for now */}
           <div className="md:hidden">
-            <button className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent">
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+            <div className="flex flex-col space-y-1">
+              {visibleNavigation.slice(0, 4).map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      'flex items-center space-x-2 px-2 py-1 rounded text-xs',
+                      isActive
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    <item.icon className="h-3 w-3" />
+                    <span>{item.name}</span>
+                  </Link>
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>
