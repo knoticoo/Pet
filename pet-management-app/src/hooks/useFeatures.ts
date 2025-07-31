@@ -1,31 +1,32 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { featureManager, FeatureConfig } from '@/lib/features'
 
 export function useFeatures(userId?: string) {
+  const { data: session, status } = useSession()
   const [enabledFeatures, setEnabledFeatures] = useState<Set<string>>(new Set())
   const [availableFeatures, setAvailableFeatures] = useState<FeatureConfig[]>([])
   const [loading, setLoading] = useState(true)
-  const [isAdmin, setIsAdmin] = useState(false) // In a real app, this would come from user context
 
   useEffect(() => {
     loadFeatures()
-  }, [userId])
+  }, [userId, session, status])
 
   const loadFeatures = async () => {
+    if (status === 'loading') return
+    
     try {
       await featureManager.initializeFeatures()
       
-      const features = userId 
-        ? await featureManager.getUserEnabledFeatures(userId)
+      const currentUserId = userId || session?.user?.id
+      const features = currentUserId 
+        ? await featureManager.getUserEnabledFeatures(currentUserId)
         : await featureManager.getEnabledFeatures()
       
       setAvailableFeatures(features)
       setEnabledFeatures(new Set(features.map(f => f.name)))
-      
-      // Mock admin check - in a real app, this would check user permissions
-      setIsAdmin(true) // For demo purposes, always admin
     } catch (error) {
       console.error('Failed to load features:', error)
     } finally {
@@ -56,8 +57,10 @@ export function useFeatures(userId?: string) {
   return {
     enabledFeatures,
     availableFeatures,
-    loading,
-    isAdmin,
+    loading: loading || status === 'loading',
+    isAdmin: session?.user?.isAdmin || false,
+    isAuthenticated: !!session,
+    user: session?.user,
     isFeatureEnabled,
     hasPermission,
     getFeatureConfig,
