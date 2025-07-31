@@ -14,11 +14,13 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
+  isAdmin   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  pets      Pet[]
-  expenses  Expense[]
+  pets         Pet[]
+  expenses     Expense[]
+  userFeatures UserFeature[]
   
   @@map("users")
 }
@@ -223,4 +225,40 @@ model Reminder {
   updatedAt   DateTime @updatedAt
   
   @@map("reminders")
+}
+
+model Feature {
+  id          String   @id @default(cuid())
+  name        String   @unique // pets, health-tracking, appointments, etc.
+  displayName String   // "Pet Management", "Health Tracking", etc.
+  description String?
+  category    String   // core, health, finance, social, etc.
+  isEnabled   Boolean  @default(true)
+  isCore      Boolean  @default(false) // core features cannot be disabled
+  config      String?  // JSON configuration for the feature
+  version     String   @default("1.0.0")
+  
+  userFeatures UserFeature[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("features")
+}
+
+model UserFeature {
+  id        String   @id @default(cuid())
+  userId    String
+  featureId String
+  isEnabled Boolean  @default(true)
+  config    String?  // User-specific configuration
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feature   Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, featureId])
+  @@map("user_features")
 }

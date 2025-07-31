@@ -2,21 +2,55 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Heart, Home, Calendar, DollarSign, FileText, Settings, Bell } from 'lucide-react'
+import { Heart, Home, Calendar, DollarSign, FileText, Settings, Bell, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useFeatures } from '@/hooks/useFeatures'
 
-const navigation = [
-  { name: 'Dashboard', href: '/', icon: Home },
-  { name: 'My Pets', href: '/pets', icon: Heart },
-  { name: 'Appointments', href: '/appointments', icon: Calendar },
-  { name: 'Expenses', href: '/expenses', icon: DollarSign },
-  { name: 'Documents', href: '/documents', icon: FileText },
-  { name: 'Reminders', href: '/reminders', icon: Bell },
-  { name: 'Settings', href: '/settings', icon: Settings },
+// Base navigation items that are always available
+const baseNavigation = [
+  { name: 'Dashboard', href: '/', icon: Home, feature: 'dashboard' },
+  { name: 'My Pets', href: '/pets', icon: Heart, feature: 'pets' },
+]
+
+// Feature-dependent navigation items
+const featureNavigation = [
+  { name: 'Appointments', href: '/appointments', icon: Calendar, feature: 'appointments' },
+  { name: 'Expenses', href: '/expenses', icon: DollarSign, feature: 'expenses' },
+  { name: 'Documents', href: '/documents', icon: FileText, feature: 'documents' },
+  { name: 'Reminders', href: '/reminders', icon: Bell, feature: 'reminders' },
+]
+
+// Admin and settings (always available)
+const systemNavigation = [
+  { name: 'Settings', href: '/settings', icon: Settings, feature: 'settings' },
+  { name: 'Admin', href: '/admin', icon: Shield, feature: 'admin', adminOnly: true },
 ]
 
 export function Navigation() {
   const pathname = usePathname()
+  const { enabledFeatures, isAdmin } = useFeatures()
+
+  // Build navigation based on enabled features
+  const getVisibleNavigation = () => {
+    const navigation = [...baseNavigation]
+    
+    // Add feature-dependent items if enabled
+    featureNavigation.forEach(item => {
+      if (enabledFeatures.has(item.feature)) {
+        navigation.push(item)
+      }
+    })
+    
+    // Add system navigation
+    systemNavigation.forEach(item => {
+      if (item.adminOnly && !isAdmin) return
+      navigation.push(item)
+    })
+    
+    return navigation
+  }
+
+  const visibleNavigation = getVisibleNavigation()
 
   return (
     <nav className="bg-white shadow-sm border-b">
@@ -28,7 +62,7 @@ export function Navigation() {
           </div>
           
           <div className="hidden md:flex items-center space-x-8">
-            {navigation.map((item) => {
+            {visibleNavigation.map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link
