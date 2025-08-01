@@ -6,7 +6,8 @@ import { AdminStats } from '@/components/admin/AdminStats'
 import { AdminGuard } from '@/components/admin/AdminGuard'
 import { AdminSystemSettings } from '@/components/admin/AdminSystemSettings'
 import { AdminUserManagement } from '@/components/admin/AdminUserManagement'
-import { Shield, Settings, Users, Puzzle, Database, LogIn, Trash2 } from 'lucide-react'
+import { AdminPluginManager } from '@/components/admin/AdminPluginManager'
+import { Shield, Settings, Users, Puzzle, Database, LogIn, Trash2, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function AdminPanel() {
@@ -53,6 +54,7 @@ export default function AdminPanel() {
     { id: 'users', label: 'User Management', icon: Users },
     { id: 'settings', label: 'System Settings', icon: Settings },
     { id: 'features', label: 'Features', icon: Puzzle },
+    { id: 'plugins', label: 'Plugins', icon: Sparkles },
   ]
 
   return (
@@ -214,6 +216,18 @@ export default function AdminPanel() {
               </div>
               <Suspense fallback={<div>Loading features...</div>}>
                 <AdminFeatureManager />
+              </Suspense>
+            </div>
+          )}
+
+          {activeTab === 'plugins' && (
+            <div className="card p-6">
+              <div className="flex items-center space-x-3 mb-6">
+                <Sparkles className="h-6 w-6 text-primary" />
+                <h2 className="text-xl font-semibold text-foreground">Plugin Management</h2>
+              </div>
+              <Suspense fallback={<div>Loading plugins...</div>}>
+                <AdminPluginManager />
               </Suspense>
             </div>
           )}
