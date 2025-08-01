@@ -1,8 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { FeatureConfig, ClientFeatureManager } from '@/lib/features-client'
+
+// Cache for features to avoid unnecessary API calls
+const featuresCache = new Map<string, { features: FeatureConfig[], timestamp: number }>()
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
 
 export function useFeatures(userId?: string) {
   const { data: session, status } = useSession()
@@ -10,8 +14,22 @@ export function useFeatures(userId?: string) {
   const [availableFeatures, setAvailableFeatures] = useState<FeatureConfig[]>([])
   const [loading, setLoading] = useState(true)
 
+  // Memoize the cache key to avoid recreating it on every render
+  const cacheKey = useMemo(() => {
+    return userId || session?.user?.id || 'anonymous'
+  }, [userId, session?.user?.id])
+
   const loadFeatures = useCallback(async () => {
     if (status === 'loading') return
+    
+    // Check cache first
+    const cached = featuresCache.get(cacheKey)
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      setAvailableFeatures(cached.features)
+      setEnabledFeatures(new Set(cached.features.map((f: FeatureConfig) => f.name)))
+      setLoading(false)
+      return
+    }
     
     try {
       const currentUserId = userId || session?.user?.id
@@ -20,9 +38,9 @@ export function useFeatures(userId?: string) {
         : '/api/features'
       
       const response = await fetch(url, {
-        credentials: 'include', // Ensure cookies are sent
+        credentials: 'include',
         headers: {
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'max-age=300', // 5 minutes client-side cache
         }
       })
       
@@ -37,6 +55,9 @@ export function useFeatures(userId?: string) {
       
       const data = await response.json()
       const features = data.features
+      
+      // Update cache
+      featuresCache.set(cacheKey, { features, timestamp: Date.now() })
       
       setAvailableFeatures(features)
       setEnabledFeatures(new Set(features.map((f: FeatureConfig) => f.name)))
@@ -53,31 +74,36 @@ export function useFeatures(userId?: string) {
     } finally {
       setLoading(false)
     }
-  }, [status, userId, session?.user?.id])
+  }, [status, cacheKey, userId, session?.user?.id])
 
   useEffect(() => {
     loadFeatures()
   }, [loadFeatures])
 
-  const isFeatureEnabled = (featureName: string): boolean => {
-    return ClientFeatureManager.isFeatureEnabled(featureName, enabledFeatures)
-  }
+  // Memoize expensive calculations
+  const memoizedValues = useMemo(() => ({
+    isFeatureEnabled: (featureName: string): boolean => {
+      return ClientFeatureManager.isFeatureEnabled(featureName, enabledFeatures)
+    },
 
-  const hasPermission = (featureName: string, _permission?: string): boolean => {
-    if (!isFeatureEnabled(featureName)) return false
-    
-    // In a real app, you would check specific permissions here
-    // For now, just return true if feature is enabled
-    return true
-  }
+    hasPermission: (featureName: string, _permission?: string): boolean => {
+      if (!ClientFeatureManager.isFeatureEnabled(featureName, enabledFeatures)) return false
+      
+      // In a real app, you would check specific permissions here
+      // For now, just return true if feature is enabled
+      return true
+    },
 
-  const getFeatureConfig = (featureName: string): FeatureConfig | undefined => {
-    return ClientFeatureManager.getFeatureConfig(featureName)
-  }
+    getFeatureConfig: (featureName: string): FeatureConfig | undefined => {
+      return ClientFeatureManager.getFeatureConfig(featureName)
+    },
 
-  const refreshFeatures = () => {
-    loadFeatures()
-  }
+    refreshFeatures: () => {
+      // Clear cache and reload
+      featuresCache.delete(cacheKey)
+      loadFeatures()
+    }
+  }), [enabledFeatures, cacheKey, loadFeatures])
 
   return {
     enabledFeatures,
@@ -86,9 +112,6 @@ export function useFeatures(userId?: string) {
     isAdmin: session?.user?.isAdmin || false,
     isAuthenticated: !!session,
     user: session?.user,
-    isFeatureEnabled,
-    hasPermission,
-    getFeatureConfig,
-    refreshFeatures
+    ...memoizedValues
   }
 }

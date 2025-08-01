@@ -8,6 +8,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "analyze": "ANALYZE=true npm run build",
+    "build:analyze": "npm run analyze",
+    "perf": "npm run build && npm run analyze",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
@@ -43,6 +46,8 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
+    "@next/bundle-analyzer": "^15.4.5",
+    "@tailwindcss/line-clamp": "^0.4.4",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.10.5",
     "@types/react": "^19.0.2",
