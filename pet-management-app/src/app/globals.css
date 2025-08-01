@@ -51,25 +51,25 @@
 
 /* Cat Theme */
 .theme-cats {
-  --background: #F8F8FF;
-  --foreground: #2F2F2F;
-  --card: #F0F8FF;
-  --card-foreground: #2F2F2F;
-  --popover: #F0F8FF;
-  --popover-foreground: #2F2F2F;
-  --primary: #9370DB;
-  --primary-foreground: #ffffff;
-  --secondary: #DDA0DD;
-  --secondary-foreground: #2F2F2F;
-  --muted: #E6E6FA;
-  --muted-foreground: #8A7C8A;
-  --accent: #E6E6FA;
-  --accent-foreground: #2F2F2F;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #DDA0DD;
-  --input: #DDA0DD;
-  --ring: #9370DB;
+  --background: 240 100% 99%;
+  --foreground: 0 0% 18%;
+  --card: 210 100% 98%;
+  --card-foreground: 0 0% 18%;
+  --popover: 210 100% 98%;
+  --popover-foreground: 0 0% 18%;
+  --primary: 270 50% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 300 47% 75%;
+  --secondary-foreground: 0 0% 18%;
+  --muted: 240 100% 94%;
+  --muted-foreground: 300 10% 50%;
+  --accent: 240 100% 94%;
+  --accent-foreground: 0 0% 18%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 300 47% 75%;
+  --input: 300 47% 75%;
+  --ring: 270 50% 60%;
 }
 
 /* Bird Theme */
