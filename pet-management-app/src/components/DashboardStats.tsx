@@ -3,6 +3,7 @@
 import { Heart, Calendar, DollarSign, Bell } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import { t } from '@/lib/translations'
 
 interface Stats {
   totalPets: number
@@ -78,36 +79,36 @@ export function DashboardStats() {
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('ru-RU', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'RUB'
     }).format(amount)
   }
 
   const statsData = [
     {
-      title: 'Total Pets',
+      title: t('stats.totalPets'),
       value: loading ? '...' : stats.totalPets.toString(),
       icon: Heart,
       color: 'text-pink-600',
       bgColor: 'bg-pink-100'
     },
     {
-      title: 'Upcoming Appointments',
+      title: t('stats.upcomingAppointments'),
       value: loading ? '...' : stats.upcomingAppointments.toString(),
       icon: Calendar,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100'
     },
     {
-      title: 'Monthly Expenses',
+      title: t('stats.monthlyExpenses'),
       value: loading ? '...' : formatCurrency(stats.monthlyExpenses),
       icon: DollarSign,
       color: 'text-green-600',
       bgColor: 'bg-green-100'
     },
     {
-      title: 'Active Reminders',
+      title: t('stats.activeReminders'),
       value: loading ? '...' : stats.activeReminders.toString(),
       icon: Bell,
       color: 'text-yellow-600',

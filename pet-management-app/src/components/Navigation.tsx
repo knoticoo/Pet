@@ -8,31 +8,32 @@ import { useFeatures } from '@/hooks/useFeatures'
 import { signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
-
-// Base navigation items that are always available
-const baseNavigation = [
-  { name: 'Dashboard', href: '/', icon: Home, feature: 'dashboard' },
-  { name: 'My Pets', href: '/pets', icon: Heart, feature: 'pets' },
-]
-
-// Feature-dependent navigation items
-const featureNavigation = [
-  { name: 'Appointments', href: '/appointments', icon: Calendar, feature: 'appointments' },
-  { name: 'Expenses', href: '/expenses', icon: DollarSign, feature: 'expenses' },
-  { name: 'Documents', href: '/documents', icon: FileText, feature: 'documents' },
-  { name: 'Reminders', href: '/reminders', icon: Bell, feature: 'reminders' },
-]
-
-// Admin and settings (always available)
-const systemNavigation = [
-  { name: 'Settings', href: '/settings', icon: Settings, feature: 'settings' },
-  { name: 'Admin', href: '/admin', icon: Shield, feature: 'admin', adminOnly: true },
-]
+import { t } from '@/lib/translations'
 
 export function Navigation() {
   const pathname = usePathname()
   const { enabledFeatures, isAdmin, isAuthenticated, user } = useFeatures()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  // Base navigation items that are always available
+  const baseNavigation = [
+    { name: t('navigation.dashboard'), href: '/', icon: Home, feature: 'dashboard' },
+    { name: t('navigation.myPets'), href: '/pets', icon: Heart, feature: 'pets' },
+  ]
+
+  // Feature-dependent navigation items
+  const featureNavigation = [
+    { name: t('navigation.appointments'), href: '/appointments', icon: Calendar, feature: 'appointments' },
+    { name: t('navigation.expenses'), href: '/expenses', icon: DollarSign, feature: 'expenses' },
+    { name: t('navigation.documents'), href: '/documents', icon: FileText, feature: 'documents' },
+    { name: t('navigation.reminders'), href: '/reminders', icon: Bell, feature: 'reminders' },
+  ]
+
+  // Admin and settings (always available)
+  const systemNavigation = [
+    { name: t('navigation.settings'), href: '/settings', icon: Settings, feature: 'settings' },
+    { name: t('navigation.admin'), href: '/admin', icon: Shield, feature: 'admin', adminOnly: true },
+  ]
 
   // Build navigation based on enabled features
   const getVisibleNavigation = () => {
@@ -63,12 +64,12 @@ export function Navigation() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
               <Heart className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-foreground">PetCare</span>
+              <span className="text-xl font-bold text-foreground">ПетКеа</span>
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/auth/signin">
                 <Button variant="outline" size="sm">
-                  Sign In
+                  {t('auth.signIn')}
                 </Button>
               </Link>
             </div>
@@ -84,7 +85,7 @@ export function Navigation() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-2">
             <Heart className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-foreground">PetCare</span>
+            <span className="text-xl font-bold text-foreground">ПетКеа</span>
           </div>
           
           <div className="hidden md:flex items-center space-x-8">
@@ -114,7 +115,7 @@ export function Navigation() {
               <span>{user?.name || user?.email}</span>
               {isAdmin && (
                 <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
-                  Admin
+                  {t('navigation.admin')}
                 </span>
               )}
             </div>
@@ -125,7 +126,7 @@ export function Navigation() {
               className="flex items-center space-x-2"
             >
               <LogOut className="h-4 w-4" />
-              <span className="hidden md:inline">Sign Out</span>
+              <span className="hidden md:inline">{t('auth.signOut')}</span>
             </Button>
           </div>
           
@@ -177,7 +178,7 @@ export function Navigation() {
                     <span>{user?.name || user?.email}</span>
                     {isAdmin && (
                       <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
-                        Admin
+                        {t('navigation.admin')}
                       </span>
                     )}
                   </div>
@@ -190,7 +191,7 @@ export function Navigation() {
                     className="w-full justify-start mt-2 text-muted-foreground hover:text-foreground"
                   >
                     <LogOut className="h-4 w-4 mr-3" />
-                    Sign Out
+                    {t('auth.signOut')}
                   </Button>
                 </div>
               </div>

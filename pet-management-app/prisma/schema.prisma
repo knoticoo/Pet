@@ -188,6 +188,9 @@ model Appointment {
   petId       String
   pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
   
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -241,6 +244,9 @@ model Document {
   petId       String
   pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
   
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
@@ -279,6 +285,9 @@ model Reminder {
   
   petId       String
   pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -362,7 +371,7 @@ model Payment {
   id               String   @id @default(cuid())
   userId           String
   stripePaymentId  String   @unique
-  amount           Decimal  @db.Decimal(10, 2)
+  amount           Float
   currency         String   @default("usd")
   status           String   // "succeeded", "pending", "failed"
   description      String?

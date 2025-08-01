@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import { t } from '@/lib/translations'
 
 interface Pet {
   id: string
@@ -98,15 +99,15 @@ export default function PetsPage() {
         {/* Header */}
         <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">My Pets</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('pets.title')}</h1>
             <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
-              Manage and track all your beloved pets.
+              Управляйте и отслеживайте всех ваших любимых питомцев.
             </p>
           </div>
           <Link href="/pets/new">
             <Button className="flex items-center space-x-2 w-full md:w-auto">
               <Plus className="h-4 w-4" />
-              <span>Add New Pet</span>
+              <span>{t('pets.addNew')}</span>
             </Button>
           </Link>
         </div>
@@ -115,7 +116,7 @@ export default function PetsPage() {
         {loading && (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground mt-4">Loading your pets...</p>
+            <p className="text-muted-foreground mt-4">{t('common.loading')}</p>
           </div>
         )}
 
@@ -132,12 +133,12 @@ export default function PetsPage() {
                     <div>
                       <h3 className="text-lg font-semibold text-foreground">{pet.name}</h3>
                       <p className="text-muted-foreground text-sm">
-                        {pet.breed} • {calculateAge(pet.birthDate)} years old
+                        {pet.breed} • {calculateAge(pet.birthDate)} лет
                       </p>
                     </div>
                   </div>
                   <div className="space-y-2 text-sm text-muted-foreground">
-                    <p>Species: {pet.species}</p>
+                    <p>{t('pets.species')}: {pet.species}</p>
                     {pet.description && <p>{pet.description}</p>}
                   </div>
                 </Link>
@@ -150,14 +151,14 @@ export default function PetsPage() {
         {!loading && pets.length === 0 && (
           <div className="text-center py-12">
             <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">No pets yet</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('pets.noPets')}</h3>
             <p className="text-muted-foreground mb-6">
-              Start by adding your first pet to begin tracking their care.
+              {t('pets.addFirstPet')}
             </p>
             <Link href="/pets/new">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Your First Pet
+                Добавить первого питомца
               </Button>
             </Link>
           </div>
