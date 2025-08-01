@@ -4,39 +4,9 @@ import { Button } from '@/components/ui/button'
 import { RecentPets } from '@/components/RecentPets'
 import { UpcomingReminders } from '@/components/UpcomingReminders'
 import { AuthGuard } from '@/components/AuthGuard'
+import { DashboardStats } from '@/components/DashboardStats'
 
 export default function Dashboard() {
-  const stats = [
-    {
-      title: 'Total Pets',
-      value: '3',
-      icon: Heart,
-      color: 'text-pink-600',
-      bgColor: 'bg-pink-100'
-    },
-    {
-      title: 'Upcoming Appointments',
-      value: '2',
-      icon: Calendar,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100'
-    },
-    {
-      title: 'Monthly Expenses',
-      value: '$245',
-      icon: DollarSign,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100'
-    },
-    {
-      title: 'Active Reminders',
-      value: '5',
-      icon: Bell,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-100'
-    }
-  ]
-
   return (
     <AuthGuard>
       <div className="space-y-8">
@@ -57,27 +27,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {stats.map((stat, index) => {
-            return (
-              <div key={stat.title} className="stat-card">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {stat.title}
-                    </p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {stat.value}
-                    </p>
-                  </div>
-                  <div className={`p-3 rounded-full ${stat.bgColor}`}>
-                    <stat.icon className={`h-6 w-6 ${stat.color}`} />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <DashboardStats />
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">

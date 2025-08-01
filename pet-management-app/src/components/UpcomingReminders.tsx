@@ -3,48 +3,29 @@
 import { Bell, Calendar, Pill, Heart, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
+import { useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
 
-// Mock data - in a real app, this would come from your database
-const mockReminders = [
-  {
-    id: '1',
-    title: 'Pet 1 - Annual Vaccination',
-    type: 'vaccination',
-    dueDate: new Date('2024-02-20'),
-    petName: 'Pet 1',
-    isCompleted: false
-  },
-  {
-    id: '2',
-    title: 'Pet 2 - Flea Treatment',
-    type: 'medication',
-    dueDate: new Date('2024-02-25'),
-    petName: 'Pet 2',
-    isCompleted: false
-  },
-  {
-    id: '3',
-    title: 'Pet 3 - Vet Checkup',
-    type: 'checkup',
-    dueDate: new Date('2024-03-01'),
-    petName: 'Pet 3',
-    isCompleted: false
-  },
-  {
-    id: '4',
-    title: 'Pet 1 - Grooming',
-    type: 'grooming',
-    dueDate: new Date('2024-03-05'),
-    petName: 'Pet 1',
-    isCompleted: false
+interface Reminder {
+  id: string
+  title: string
+  description?: string
+  dueDate: string
+  reminderType: string
+  isCompleted: boolean
+  pet: {
+    id: string
+    name: string
+    species: string
   }
-]
+}
 
 const reminderIcons = {
   vaccination: Heart,
   medication: Pill,
   appointment: Calendar,
   grooming: Bell,
+  checkup: Calendar,
   default: Bell
 }
 
@@ -55,9 +36,44 @@ const priorityColors = {
 }
 
 export function UpcomingReminders() {
-  const getDaysUntilDue = (dueDate: Date) => {
+  const { data: session } = useSession()
+  const [reminders, setReminders] = useState<Reminder[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchReminders()
+    } else {
+      setLoading(false)
+    }
+  }, [session])
+
+  const fetchReminders = async () => {
+    try {
+      const response = await fetch('/api/reminders?status=active')
+      if (response.ok) {
+        const data = await response.json()
+        // Filter to upcoming reminders only (not overdue)
+        const upcomingReminders = data.filter((reminder: Reminder) => {
+          const dueDate = new Date(reminder.dueDate)
+          const today = new Date()
+          return dueDate >= today
+        })
+        setReminders(upcomingReminders)
+      } else {
+        console.error('Failed to fetch reminders:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Error fetching reminders:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getDaysUntilDue = (dueDate: string) => {
     const today = new Date()
-    const diffTime = dueDate.getTime() - today.getTime()
+    const due = new Date(dueDate)
+    const diffTime = due.getTime() - today.getTime()
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     return diffDays
   }
@@ -76,7 +92,22 @@ export function UpcomingReminders() {
     return 'text-muted-foreground'
   }
 
-  if (mockReminders.length === 0) {
+  const getPriorityFromDays = (days: number) => {
+    if (days < 0 || days <= 1) return 'high'
+    if (days <= 3) return 'medium'
+    return 'low'
+  }
+
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+        <p className="text-muted-foreground mt-4">Loading reminders...</p>
+      </div>
+    )
+  }
+
+  if (reminders.length === 0) {
     return (
       <div className="text-center py-8">
         <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -93,14 +124,15 @@ export function UpcomingReminders() {
 
   return (
     <div className="space-y-3">
-      {mockReminders.slice(0, 4).map((reminder) => {
+      {reminders.slice(0, 4).map((reminder) => {
         const daysUntil = getDaysUntilDue(reminder.dueDate)
-        const ReminderIcon = reminderIcons[reminder.type as keyof typeof reminderIcons] || reminderIcons.default
+        const priority = getPriorityFromDays(daysUntil)
+        const ReminderIcon = reminderIcons[reminder.reminderType as keyof typeof reminderIcons] || reminderIcons.default
         
         return (
           <Link key={reminder.id} href={`/reminders/${reminder.id}`}>
             <div className="flex items-center space-x-3 p-3 rounded-lg border hover:shadow-sm transition-shadow cursor-pointer">
-              <div className={`p-2 rounded-full ${priorityColors[reminder.priority as keyof typeof priorityColors]}`}>
+              <div className={`p-2 rounded-full ${priorityColors[priority as keyof typeof priorityColors]}`}>
                 <ReminderIcon className="h-4 w-4" />
               </div>
               
@@ -110,7 +142,11 @@ export function UpcomingReminders() {
                 </h4>
                 <div className="flex items-center space-x-2 mt-1">
                   <span className="text-sm text-muted-foreground">
-                    {formatDate(reminder.dueDate)}
+                    {formatDate(new Date(reminder.dueDate))}
+                  </span>
+                  <span className="text-xs">•</span>
+                  <span className="text-sm text-muted-foreground">
+                    {reminder.pet.name}
                   </span>
                   <span className="text-xs">•</span>
                   <span className={`text-sm font-medium ${getUrgencyColor(daysUntil)}`}>
@@ -127,13 +163,13 @@ export function UpcomingReminders() {
         )
       })}
       
-      {mockReminders.length > 4 && (
+      {reminders.length > 4 && (
         <div className="text-center pt-2">
           <Link 
             href="/reminders"
             className="text-sm text-primary hover:underline"
           >
-            View all {mockReminders.length} reminders
+            View all {reminders.length} reminders
           </Link>
         </div>
       )}

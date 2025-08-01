@@ -26,16 +26,29 @@ export default function NewPetPage() {
       notes: formData.get('notes'),
     }
     
-    // TODO: Implement actual pet creation API call
-    // console.log('Creating pet:', petData)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    setIsSubmitting(false)
-    
-    // Redirect back to pets page
-    router.push('/pets')
+    try {
+      const response = await fetch('/api/pets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(petData),
+      })
+
+      if (response.ok) {
+        // Successfully created pet, redirect to pets page
+        router.push('/pets')
+      } else {
+        const errorData = await response.json()
+        console.error('Error creating pet:', errorData)
+        alert('Failed to create pet. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error creating pet:', error)
+      alert('Failed to create pet. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (

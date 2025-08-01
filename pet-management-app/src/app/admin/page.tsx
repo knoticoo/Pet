@@ -16,24 +16,29 @@ export default function AdminPanel() {
     setMessage('')
 
     try {
-      // Simulate system actions (in a real app, these would call actual APIs)
-      switch (action) {
-        case 'backup':
-          await new Promise(resolve => setTimeout(resolve, 2000))
-          setMessage('Database backup completed successfully')
-          break
-        case 'cache':
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          setMessage('Application cache cleared successfully')
-          break
-        case 'logs':
-          // In a real app, this would open a log viewer
-          setMessage('Log viewer would open here (not implemented in demo)')
-          break
-        default:
-          setMessage('Unknown action')
+      const response = await fetch('/api/admin/actions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setMessage(data.message)
+        
+        // Handle special actions
+        if (data.action === 'redirect_to_logs') {
+          // In a real app, you might redirect to a log viewer
+          setMessage(data.message + ' (Log viewer would open in a real implementation)')
+        }
+      } else {
+        setMessage(data.error || 'An error occurred while performing the action')
       }
     } catch (error) {
+      console.error('Error performing admin action:', error)
       setMessage('An error occurred while performing the action')
     } finally {
       setActionLoading(null)
