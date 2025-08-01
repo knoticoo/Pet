@@ -22,6 +22,8 @@ interface ConsultationInput {
 export class AIVetService {
   private static instance: AIVetService
   private ollamaEndpoint = process.env.OLLAMA_ENDPOINT || 'http://localhost:11434'
+  private ollamaModel = process.env.OLLAMA_MODEL || 'llama3.1:8b'
+  private freeLimit = parseInt(process.env.AI_VET_FREE_LIMIT || '3')
 
   static getInstance(): AIVetService {
     if (!AIVetService.instance) {
@@ -126,60 +128,66 @@ export class AIVetService {
 
   private async getAIAnalysis(input: ConsultationInput): Promise<SymptomAnalysis | null> {
     try {
-      // Use Ollama (free, self-hosted)
+      // First check if Ollama is available
+      const isAvailable = await this.isOllamaAvailable()
+      if (!isAvailable) {
+        console.log('Ollama service not available, using rule-based fallback')
+        return null
+      }
+
       const prompt = this.buildVetPrompt(input)
       
       const response = await fetch(`${this.ollamaEndpoint}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'llama3.1:8b', // Free model
+          model: this.ollamaModel,
           prompt: prompt,
           stream: false,
           options: {
-            temperature: 0.3, // Lower temperature for medical advice
-            top_p: 0.9
+            temperature: 0.3,
+            top_p: 0.9,
+            num_predict: 500, // Limit response length
+            stop: ['END_ANALYSIS'] // Stop token
           }
-        })
-      })
+        }),
+        timeout: 30000 // 30 second timeout for AI analysis
+      } as any)
 
       if (!response.ok) {
-        throw new Error('Ollama not available')
+        throw new Error(`Ollama API error: ${response.status}`)
       }
 
       const data = await response.json()
       return this.parseAIResponse(data.response)
     } catch (error) {
+      console.log('AI analysis failed:', error)
       return null // Fallback to rule-based
     }
   }
 
   private buildVetPrompt(input: ConsultationInput): string {
-    return `You are a veterinary AI assistant. Analyze these pet symptoms and provide guidance.
+    return `You are a veterinary AI assistant providing preliminary guidance only. This is NOT a substitute for professional veterinary care.
 
 Pet Information:
 - Species: ${input.petSpecies}
-- Breed: ${input.petBreed}
+- Breed: ${input.petBreed}  
 - Age: ${input.petAge} years
 - Symptoms: ${input.symptoms}
 - Duration: ${input.duration}
 
-Please provide:
-1. Severity level (low/medium/high/emergency)
-2. Possible causes (3-5 most likely)
-3. Home care recommendations
-4. Whether vet visit is needed
-5. Urgency score (1-10)
+Analyze the symptoms and provide structured guidance. Be conservative and always recommend professional care when in doubt.
 
-IMPORTANT: Always recommend professional veterinary care for serious symptoms. This is preliminary guidance only.
-
-Response format:
-SEVERITY: [level]
+Respond in this exact format:
+SEVERITY: [low/medium/high/emergency]
 URGENCY: [1-10]
 VET_NEEDED: [yes/no]
-CAUSES: [cause1, cause2, cause3]
-RECOMMENDATIONS: [rec1, rec2, rec3]
-NEXT_STEPS: [step1, step2, step3]`
+CAUSES: [possible cause 1], [possible cause 2], [possible cause 3]
+RECOMMENDATIONS: [care recommendation 1], [care recommendation 2], [care recommendation 3]
+NEXT_STEPS: [next step 1], [next step 2], [next step 3]
+
+Important: Always recommend veterinary consultation for concerning symptoms.
+END_ANALYSIS`
   }
 
   private parseAIResponse(response: string): SymptomAnalysis {
@@ -300,10 +308,75 @@ NEXT_STEPS: [step1, step2, step3]`
     return count
   }
 
-  async canUserConsult(userId: string): Promise<{ canConsult: boolean; remaining: number }> {
+  // Test if Ollama is available
+  async isOllamaAvailable(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.ollamaEndpoint}/api/tags`, {
+        method: 'GET',
+        timeout: 5000 // 5 second timeout
+      } as any)
+      
+      if (response.ok) {
+        const data = await response.json()
+        // Check if our model is available
+        return data.models?.some((model: any) => model.name.includes(this.ollamaModel.split(':')[0]))
+      }
+      return false
+    } catch (error) {
+      console.log('Ollama not available:', error)
+      return false
+    }
+  }
+
+  // Add method to check system status
+  async getSystemStatus(): Promise<{
+    ollamaAvailable: boolean
+    modelLoaded: boolean
+    systemHealth: 'good' | 'degraded' | 'down'
+  }> {
+    try {
+      const isAvailable = await this.isOllamaAvailable()
+      
+      if (!isAvailable) {
+        return {
+          ollamaAvailable: false,
+          modelLoaded: false,
+          systemHealth: 'down'
+        }
+      }
+
+      // Test model with simple query
+      const testResponse = await fetch(`${this.ollamaEndpoint}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: this.ollamaModel,
+          prompt: 'Test: Say "OK"',
+          stream: false,
+          options: { num_predict: 5 }
+        }),
+        timeout: 10000
+      } as any)
+
+      const modelLoaded = testResponse.ok
+      
+      return {
+        ollamaAvailable: true,
+        modelLoaded,
+        systemHealth: modelLoaded ? 'good' : 'degraded'
+      }
+    } catch (error) {
+      return {
+        ollamaAvailable: false,
+        modelLoaded: false,
+        systemHealth: 'down'
+      }
+    }
+  }
+
+  async canUserConsult(userId: string): Promise<{ canConsult: boolean; remaining: number; systemStatus: string }> {
     const currentMonth = new Date()
     const consultationCount = await this.getUserConsultationCount(userId, currentMonth)
-    const freeLimit = 3 // Free tier limit
 
     // Check if user has premium subscription
     const user = await prisma.user.findUnique({
@@ -312,10 +385,20 @@ NEXT_STEPS: [step1, step2, step3]`
     })
 
     const isPremium = user?.subscriptionTier === 'premium'
-    const canConsult = isPremium || consultationCount < freeLimit
-    const remaining = isPremium ? 999 : Math.max(0, freeLimit - consultationCount)
+    const canConsult = isPremium || consultationCount < this.freeLimit
+    const remaining = isPremium ? 999 : Math.max(0, this.freeLimit - consultationCount)
 
-    return { canConsult, remaining }
+    // Check system status
+    const status = await this.getSystemStatus()
+    let systemStatus = 'available'
+    
+    if (status.systemHealth === 'down') {
+      systemStatus = 'AI temporarily unavailable - using rule-based analysis'
+    } else if (status.systemHealth === 'degraded') {
+      systemStatus = 'AI partially available'
+    }
+
+    return { canConsult, remaining, systemStatus }
   }
 }
 
