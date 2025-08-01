@@ -80,16 +80,15 @@ const availablePlugins: Plugin[] = [
     isEnabled: false,
     isCore: false,
     dependencies: ['ai-vet'],
-    settings: {
-      enableGrowthTimeline: true,
-      enableProfessionalSessions: true,
-      enablePhotoBooks: true,
-      enableHealthAnalysis: true,
-      maxStorageGB: 10,
-      autoBackup: true,
-      aiAnalysisEnabled: true,
-      watermarkEnabled: false
-    },
+          settings: {
+        enableGrowthTimeline: true,
+        enablePhotoBooks: true,
+        enableHealthAnalysis: true,
+        maxStorageGB: 10,
+        autoBackup: true,
+        aiAnalysisEnabled: true,
+        watermarkEnabled: false
+      },
     permissions: ['photography:read', 'photography:write', 'photography:manage']
   },
   {

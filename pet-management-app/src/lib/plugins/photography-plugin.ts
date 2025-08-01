@@ -12,7 +12,6 @@ export class PetPhotographyPlugin implements Plugin {
     dependencies: ['ai-vet'],
     settings: {
       enableGrowthTimeline: true,
-      enableProfessionalSessions: true,
       enablePhotoBooks: true,
       enableHealthAnalysis: true,
       maxStorageGB: 10,
