@@ -4,6 +4,7 @@ import { useFeatures } from '@/hooks/useFeatures'
 import { Heart } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { t } from '@/lib/translations'
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -17,7 +18,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Heart className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -28,14 +29,14 @@ export function AuthGuard({ children }: AuthGuardProps) {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center max-w-md">
           <Heart className="h-16 w-16 text-primary mx-auto mb-6" />
-          <h1 className="text-4xl font-bold text-foreground mb-4">Welcome to PetCare</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-4">{t('auth.welcomeTitle')}</h1>
           <p className="text-muted-foreground mb-8 text-lg">
-            Your comprehensive pet management system. Sign in to manage your pets, track their health, and never miss an important appointment.
+            {t('auth.welcomeDescription')}
           </p>
           <div className="space-y-4">
             <Link href="/auth/signin">
               <Button size="lg" className="w-full">
-                Sign In to Get Started
+                {t('auth.signInToStart')}
               </Button>
             </Link>
           </div>
