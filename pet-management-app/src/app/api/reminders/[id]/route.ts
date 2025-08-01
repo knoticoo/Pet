@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
+import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
@@ -9,6 +9,7 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions)
+    
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -16,9 +17,7 @@ export async function GET(
     const reminder = await prisma.reminder.findFirst({
       where: {
         id: params.id,
-        pet: {
-          userId: session.user.id
-        }
+        userId: session.user.id
       },
       include: {
         pet: {
@@ -38,7 +37,10 @@ export async function GET(
     return NextResponse.json(reminder)
   } catch (error) {
     console.error('Error fetching reminder:', error)
-    return NextResponse.json({ error: 'Failed to fetch reminder' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
@@ -48,20 +50,27 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions)
+    
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
-    const { title, description, dueDate, reminderType, notifyBefore, isCompleted } = body
+    const { 
+      title, 
+      description, 
+      dueDate, 
+      reminderType, 
+      isCompleted, 
+      isRecurring, 
+      recurringInterval 
+    } = body
 
     // Verify the reminder belongs to the user
     const existingReminder = await prisma.reminder.findFirst({
       where: {
         id: params.id,
-        pet: {
-          userId: session.user.id
-        }
+        userId: session.user.id
       }
     })
 
@@ -69,15 +78,17 @@ export async function PUT(
       return NextResponse.json({ error: 'Reminder not found' }, { status: 404 })
     }
 
-    const reminder = await prisma.reminder.update({
+    const updatedReminder = await prisma.reminder.update({
       where: { id: params.id },
       data: {
         title,
         description,
         dueDate: dueDate ? new Date(dueDate) : undefined,
         reminderType,
-        notifyBefore: notifyBefore ? parseInt(notifyBefore) : undefined,
-        isCompleted
+        isCompleted,
+        isRecurring,
+        recurringInterval,
+        updatedAt: new Date()
       },
       include: {
         pet: {
@@ -90,10 +101,13 @@ export async function PUT(
       }
     })
 
-    return NextResponse.json(reminder)
+    return NextResponse.json(updatedReminder)
   } catch (error) {
     console.error('Error updating reminder:', error)
-    return NextResponse.json({ error: 'Failed to update reminder' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
@@ -103,6 +117,7 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions)
+    
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -111,9 +126,7 @@ export async function DELETE(
     const existingReminder = await prisma.reminder.findFirst({
       where: {
         id: params.id,
-        pet: {
-          userId: session.user.id
-        }
+        userId: session.user.id
       }
     })
 
@@ -128,7 +141,10 @@ export async function DELETE(
     return NextResponse.json({ message: 'Reminder deleted successfully' })
   } catch (error) {
     console.error('Error deleting reminder:', error)
-    return NextResponse.json({ error: 'Failed to delete reminder' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
