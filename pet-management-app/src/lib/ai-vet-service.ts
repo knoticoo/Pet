@@ -22,8 +22,10 @@ interface ConsultationInput {
 export class AIVetService {
   private static instance: AIVetService
   private ollamaEndpoint = process.env.OLLAMA_ENDPOINT || 'http://localhost:11434'
+  private ollamaFallbackEndpoint = process.env.OLLAMA_FALLBACK_ENDPOINT || 'http://localhost:11435'
   private ollamaModel = process.env.OLLAMA_MODEL || 'llama3.1:8b'
   private freeLimit = parseInt(process.env.AI_VET_FREE_LIMIT || '3')
+  private activeEndpoint: string | null = null
 
   static getInstance(): AIVetService {
     if (!AIVetService.instance) {
@@ -128,16 +130,15 @@ export class AIVetService {
 
   private async getAIAnalysis(input: ConsultationInput): Promise<SymptomAnalysis | null> {
     try {
-      // First check if Ollama is available
-      const isAvailable = await this.isOllamaAvailable()
-      if (!isAvailable) {
-        console.log('Ollama service not available, using rule-based fallback')
+      const endpoint = await this.findWorkingEndpoint()
+      if (!endpoint) {
+        console.log('No working Ollama endpoint found, using rule-based fallback')
         return null
       }
 
       const prompt = this.buildVetPrompt(input)
       
-      const response = await fetch(`${this.ollamaEndpoint}/api/generate`, {
+      const response = await fetch(`${endpoint}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -147,11 +148,11 @@ export class AIVetService {
           options: {
             temperature: 0.3,
             top_p: 0.9,
-            num_predict: 500, // Limit response length
-            stop: ['END_ANALYSIS'] // Stop token
+            num_predict: 500,
+            stop: ['END_ANALYSIS']
           }
         }),
-        timeout: 30000 // 30 second timeout for AI analysis
+        timeout: 30000
       } as any)
 
       if (!response.ok) {
@@ -162,7 +163,9 @@ export class AIVetService {
       return this.parseAIResponse(data.response)
     } catch (error) {
       console.log('AI analysis failed:', error)
-      return null // Fallback to rule-based
+      // Reset active endpoint on failure
+      this.activeEndpoint = null
+      return null
     }
   }
 
@@ -308,17 +311,47 @@ END_ANALYSIS`
     return count
   }
 
+  // Find working Ollama endpoint
+  async findWorkingEndpoint(): Promise<string | null> {
+    if (this.activeEndpoint) {
+      return this.activeEndpoint
+    }
+
+    const endpoints = [this.ollamaEndpoint, this.ollamaFallbackEndpoint]
+    
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(`${endpoint}/api/tags`, {
+          method: 'GET',
+          timeout: 3000
+        } as any)
+        
+        if (response.ok) {
+          this.activeEndpoint = endpoint
+          console.log(`Found working Ollama at: ${endpoint}`)
+          return endpoint
+        }
+      } catch (error) {
+        console.log(`Ollama not available at ${endpoint}`)
+      }
+    }
+    
+    return null
+  }
+
   // Test if Ollama is available
   async isOllamaAvailable(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.ollamaEndpoint}/api/tags`, {
+      const endpoint = await this.findWorkingEndpoint()
+      if (!endpoint) return false
+
+      const response = await fetch(`${endpoint}/api/tags`, {
         method: 'GET',
-        timeout: 5000 // 5 second timeout
+        timeout: 5000
       } as any)
       
       if (response.ok) {
         const data = await response.json()
-        // Check if our model is available
         return data.models?.some((model: any) => model.name.includes(this.ollamaModel.split(':')[0]))
       }
       return false
@@ -333,20 +366,22 @@ END_ANALYSIS`
     ollamaAvailable: boolean
     modelLoaded: boolean
     systemHealth: 'good' | 'degraded' | 'down'
+    activeEndpoint: string | null
   }> {
     try {
-      const isAvailable = await this.isOllamaAvailable()
+      const endpoint = await this.findWorkingEndpoint()
       
-      if (!isAvailable) {
+      if (!endpoint) {
         return {
           ollamaAvailable: false,
           modelLoaded: false,
-          systemHealth: 'down'
+          systemHealth: 'down',
+          activeEndpoint: null
         }
       }
 
       // Test model with simple query
-      const testResponse = await fetch(`${this.ollamaEndpoint}/api/generate`, {
+      const testResponse = await fetch(`${endpoint}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -363,13 +398,15 @@ END_ANALYSIS`
       return {
         ollamaAvailable: true,
         modelLoaded,
-        systemHealth: modelLoaded ? 'good' : 'degraded'
+        systemHealth: modelLoaded ? 'good' : 'degraded',
+        activeEndpoint: endpoint
       }
     } catch (error) {
       return {
         ollamaAvailable: false,
         modelLoaded: false,
-        systemHealth: 'down'
+        systemHealth: 'down',
+        activeEndpoint: null
       }
     }
   }
