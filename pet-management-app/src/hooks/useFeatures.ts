@@ -19,8 +19,19 @@ export function useFeatures(userId?: string) {
         ? `/api/features?userId=${currentUserId}`
         : '/api/features'
       
-      const response = await fetch(url)
+      const response = await fetch(url, {
+        credentials: 'include', // Ensure cookies are sent
+        headers: {
+          'Cache-Control': 'no-cache',
+        }
+      })
+      
       if (!response.ok) {
+        // If unauthorized, don't throw error immediately - session might be refreshing
+        if (response.status === 401 && status !== 'unauthenticated') {
+          console.warn('Features request unauthorized, but session status is:', status)
+          return
+        }
         throw new Error('Failed to fetch features')
       }
       
@@ -31,6 +42,14 @@ export function useFeatures(userId?: string) {
       setEnabledFeatures(new Set(features.map((f: FeatureConfig) => f.name)))
     } catch (error) {
       console.error('Failed to load features:', error)
+      // Don't fail completely - provide default features
+      const defaultFeatures = [
+        { name: 'dashboard', displayName: 'Dashboard', category: 'core', isCore: true },
+        { name: 'pets', displayName: 'Pet Management', category: 'core', isCore: true },
+        { name: 'settings', displayName: 'Settings', category: 'core', isCore: true }
+      ]
+      setAvailableFeatures(defaultFeatures)
+      setEnabledFeatures(new Set(defaultFeatures.map(f => f.name)))
     } finally {
       setLoading(false)
     }

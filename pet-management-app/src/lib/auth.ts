@@ -113,7 +113,7 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth/signin",
     signUp: "/auth/signup"
   },
-  // Configure cookies for better persistence and background handling
+  // Configure cookies for better persistence, especially on mobile
   cookies: {
     sessionToken: {
       name: `next-auth.session-token`,
@@ -122,7 +122,7 @@ export const authOptions: NextAuthOptions = {
         sameSite: 'lax',
         path: '/',
         secure: process.env.NODE_ENV === 'production',
-        // Longer cookie expiry for better persistence
+        // Longer cookie expiry for better persistence on mobile
         maxAge: 30 * 24 * 60 * 60 // 30 days
       }
     },
@@ -146,6 +146,8 @@ export const authOptions: NextAuthOptions = {
       }
     }
   },
+  // Improve mobile session handling
+  useSecureCookies: process.env.NODE_ENV === 'production',
   // Add events to handle session updates
   events: {
     async session({ session, token }) {

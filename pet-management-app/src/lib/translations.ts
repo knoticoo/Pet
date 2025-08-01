@@ -345,7 +345,8 @@ export const translations = {
     lastYear: 'В прошлом году',
     nextWeek: 'На следующей неделе',
     nextMonth: 'В следующем месяце',
-    nextYear: 'В следующем году'
+    nextYear: 'В следующем году',
+    years: 'лет'
   },
 
   // Error Messages
