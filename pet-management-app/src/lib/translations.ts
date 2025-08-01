@@ -243,6 +243,27 @@ export const translations = {
     pushNotifications: 'Push уведомления'
   },
 
+  // Subscription
+  subscription: {
+    title: 'Подписка и премиум функции',
+    plan: 'План',
+    free: 'Бесплатный',
+    premium: 'Премиум',
+    upgrade: 'Обновить до премиум',
+    upgradeNow: 'Обновить сейчас',
+    upgradeToPremium: 'Обновить до премиум',
+    monthlyPrice: 'в месяц',
+    unlimitedConsultations: 'Неограниченные консультации',
+    photoAnalysis: 'Анализ фотографий',
+    prioritySupport: 'Приоритетная поддержка',
+    advancedReports: 'Расширенные отчеты',
+    consultationLimit: 'Лимит консультаций достигнут',
+    consultationLimitDescription: 'Вы использовали все бесплатные консультации в этом месяце.',
+    upgradeForUnlimited: 'Обновитесь до премиума для неограниченных консультаций.',
+    consultationsLeft: 'Консультаций осталось',
+    unlimited: 'Неограниченно'
+  },
+
   // AI Vet
   aiVet: {
     title: 'ИИ Ветеринар',
@@ -291,7 +312,10 @@ export const translations = {
     emailRequired: 'Email обязателен',
     passwordRequired: 'Пароль обязателен',
     passwordTooShort: 'Пароль должен содержать минимум 6 символов',
-    passwordsMustMatch: 'Пароли должны совпадать'
+    passwordsMustMatch: 'Пароли должны совпадать',
+    welcomeTitle: 'Добро пожаловать в ПетКеа',
+    welcomeDescription: 'Ваша комплексная система управления питомцами. Войдите, чтобы управлять своими питомцами, отслеживать их здоровье и никогда не пропускать важные встречи.',
+    signInToStart: 'Войти, чтобы начать'
   },
 
   // Common

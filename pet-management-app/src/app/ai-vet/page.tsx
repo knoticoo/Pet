@@ -134,7 +134,7 @@ export default function AIVetPage() {
               <div className="flex items-center space-x-3">
                 <Clock className="h-5 w-5 text-green-500" />
                 <div>
-                  <p className="font-medium">Consultations Left</p>
+                  <p className="font-medium">{t('subscription.consultationsLeft')}</p>
                   <p className="text-2xl font-bold text-green-600">
                     {status.remaining === 999 ? '∞' : status.remaining}
                   </p>
@@ -148,7 +148,7 @@ export default function AIVetPage() {
                 <div>
                   <p className="font-medium">Plan</p>
                   <Badge variant={status.remaining === 999 ? "default" : "secondary"}>
-                    {status.remaining === 999 ? 'Premium' : 'Free'}
+                    {status.remaining === 999 ? t('subscription.premium') : t('subscription.free')}
                   </Badge>
                 </div>
               </div>
@@ -195,14 +195,14 @@ export default function AIVetPage() {
                 <div className="text-center py-6 space-y-4">
                   <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto" />
                   <div>
-                    <h3 className="font-medium text-foreground mb-2">Consultation Limit Reached</h3>
+                    <h3 className="font-medium text-foreground mb-2">{t('subscription.consultationLimit')}</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      You've used all {status?.freeLimit} free consultations this month.
+                      {t('subscription.consultationLimitDescription')}
                     </p>
                     <Link href="/subscription/upgrade">
                       <Button>
                         <Crown className="h-4 w-4 mr-2" />
-                        Upgrade to Premium
+                        {t('subscription.upgradeToPremium')}
                       </Button>
                     </Link>
                   </div>
@@ -264,17 +264,17 @@ export default function AIVetPage() {
               {status?.remaining !== 999 && (
                 <div className="border-t pt-4">
                   <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-purple-900 mb-2">Upgrade to Premium</h4>
+                    <h4 className="font-medium text-purple-900 mb-2">{t('subscription.upgradeToPremium')}</h4>
                     <ul className="text-sm text-purple-800 space-y-1 mb-3">
-                      <li>• Unlimited AI consultations</li>
-                      <li>• Photo analysis</li>
-                      <li>• Priority support</li>
-                      <li>• Advanced health reports</li>
+                      <li>• {t('subscription.unlimitedConsultations')}</li>
+                      <li>• {t('subscription.photoAnalysis')}</li>
+                      <li>• {t('subscription.prioritySupport')}</li>
+                      <li>• {t('subscription.advancedReports')}</li>
                     </ul>
                     <Link href="/subscription/upgrade">
                       <Button size="sm" className="w-full">
                         <Crown className="h-4 w-4 mr-2" />
-                        Upgrade for ${status?.premiumPrice}/month
+                        {t('subscription.upgrade')} - ${status?.premiumPrice}/{t('subscription.monthlyPrice')}
                       </Button>
                     </Link>
                   </div>

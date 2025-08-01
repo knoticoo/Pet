@@ -326,7 +326,7 @@ export default function ConsultationPage() {
                       <Link href="/subscription/upgrade">
                         <Button size="sm" variant="outline">
                           <Crown className="h-4 w-4 mr-2" />
-                          Upgrade Now
+                          {t('subscription.upgradeNow')}
                         </Button>
                       </Link>
                     </div>
