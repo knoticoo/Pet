@@ -11,21 +11,25 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { petId, symptoms, duration, photos } = body
+    const { petId, symptoms, duration, photos, language = 'en' } = body
 
     // Validate input
     if (!petId || !symptoms || !duration) {
-      return NextResponse.json({ 
-        error: 'Missing required fields: petId, symptoms, duration' 
-      }, { status: 400 })
+      const errorMessage = language === 'ru' 
+        ? 'Отсутствуют обязательные поля: petId, symptoms, duration'
+        : 'Missing required fields: petId, symptoms, duration'
+      return NextResponse.json({ error: errorMessage }, { status: 400 })
     }
 
     // Check if user can consult
     const { canConsult, remaining, systemStatus } = await aiVetService.canUserConsult(session.user.id)
     
     if (!canConsult) {
+      const errorMessage = language === 'ru'
+        ? 'Достигнут лимит консультаций. Обновитесь до премиума для неограниченных консультаций.'
+        : 'Consultation limit reached. Upgrade to premium for unlimited consultations.'
       return NextResponse.json({ 
-        error: 'Consultation limit reached. Upgrade to premium for unlimited consultations.',
+        error: errorMessage,
         remaining: 0,
         upgradeUrl: '/subscription/upgrade'
       }, { status: 429 })
@@ -41,7 +45,8 @@ export async function POST(request: NextRequest) {
     })
 
     if (!pet) {
-      return NextResponse.json({ error: 'Pet not found' }, { status: 404 })
+      const errorMessage = language === 'ru' ? 'Питомец не найден' : 'Pet not found'
+      return NextResponse.json({ error: errorMessage }, { status: 404 })
     }
 
     // Calculate pet age
@@ -55,12 +60,12 @@ export async function POST(request: NextRequest) {
       duration,
       photos: photos || [],
       petAge,
-      petBreed: pet.breed || 'Mixed',
+      petBreed: pet.breed || (language === 'ru' ? 'Смешанная' : 'Mixed'),
       petSpecies: pet.species
     }
 
-    // Analyze symptoms
-    const analysis = await aiVetService.analyzeSymptoms(consultationInput)
+    // Analyze symptoms with language support
+    const analysis = await aiVetService.analyzeSymptoms(consultationInput, language)
 
     // Save consultation
     await aiVetService.saveConsultation(session.user.id, petId, consultationInput, analysis)
@@ -71,15 +76,15 @@ export async function POST(request: NextRequest) {
       usage: {
         remaining: remaining - 1,
         systemStatus,
-        consultationId: Date.now().toString() // Simple ID for now
+        consultationId: Date.now().toString(),
+        language
       }
     })
 
   } catch (error) {
     console.error('AI consultation error:', error)
-    return NextResponse.json({ 
-      error: 'Failed to analyze symptoms. Please try again.' 
-    }, { status: 500 })
+    const errorMessage = 'Failed to analyze symptoms. Please try again.'
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

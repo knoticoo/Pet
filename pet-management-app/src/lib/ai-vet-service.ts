@@ -80,36 +80,67 @@ export class AIVetService {
     }
   }
 
-  async analyzeSymptoms(input: ConsultationInput): Promise<SymptomAnalysis> {
-    // First check for emergency keywords
-    const isEmergency = this.checkForEmergency(input.symptoms)
+  async analyzeSymptoms(input: ConsultationInput, language: string = 'en'): Promise<SymptomAnalysis> {
+    // First check for emergency keywords (multilingual)
+    const isEmergency = this.checkForEmergency(input.symptoms, language)
     if (isEmergency) {
-      return this.createEmergencyResponse()
+      return this.createEmergencyResponse(language)
     }
 
     // Try AI analysis first (if available)
     let aiAnalysis: SymptomAnalysis | null = null
     try {
-      aiAnalysis = await this.getAIAnalysis(input)
+      aiAnalysis = await this.getAIAnalysis(input, language)
     } catch (error) {
       console.log('AI analysis unavailable, using rule-based fallback')
     }
 
     // Fallback to rule-based analysis
-    const ruleBasedAnalysis = this.getRuleBasedAnalysis(input)
+    const ruleBasedAnalysis = this.getRuleBasedAnalysis(input, language)
 
     // Combine AI and rule-based if both available
     return aiAnalysis || ruleBasedAnalysis
   }
 
-  private checkForEmergency(symptoms: string): boolean {
+  private checkForEmergency(symptoms: string, language: string = 'en'): boolean {
     const lowerSymptoms = symptoms.toLowerCase()
-    return this.emergencyKeywords.some(keyword => 
+    
+    let emergencyKeywords = this.emergencyKeywords
+    
+    if (language === 'ru') {
+      emergencyKeywords = [
+        ...this.emergencyKeywords,
+        'кровотечение', 'кровь', 'судороги', 'без сознания', 'затрудненное дыхание',
+        'удушье', 'отравление', 'токсичный', 'не может ходить', 'парализован',
+        'опухший', 'рвота кровью', 'понос с кровью', 'сбила машина', 'авария', 'травма'
+      ]
+    }
+    
+    return emergencyKeywords.some(keyword => 
       lowerSymptoms.includes(keyword)
     )
   }
 
-  private createEmergencyResponse(): SymptomAnalysis {
+  private createEmergencyResponse(language: string = 'en'): SymptomAnalysis {
+    if (language === 'ru') {
+      return {
+        severity: 'emergency',
+        urgency: 10,
+        shouldSeeVet: true,
+        recommendations: [
+          '🚨 НЕМЕДЛЕННО ОБРАТИТЕСЬ К ВЕТЕРИНАРУ',
+          'Звоните в экстренную ветклинику прямо сейчас',
+          'Не ждите - это может угрожать жизни'
+        ],
+        nextSteps: [
+          'Немедленно свяжитесь с экстренным ветеринаром',
+          'Подготовьтесь к безопасной транспортировке питомца',
+          'Возьмите с собой лекарства или информацию о недавних изменениях в питании'
+        ],
+        estimatedCause: ['Экстренная ситуация, требующая немедленной профессиональной помощи']
+      }
+    }
+
     return {
       severity: 'emergency',
       urgency: 10,
@@ -128,7 +159,27 @@ export class AIVetService {
     }
   }
 
-  private buildVetPrompt(input: ConsultationInput): string {
+  private buildVetPrompt(input: ConsultationInput, language: string = 'en'): string {
+    if (language === 'ru') {
+      return `Ты ветеринарный AI-помощник. Это НЕ заменяет профессиональную ветеринарную помощь.
+
+Питомец: ${input.petSpecies} ${input.petBreed} ${input.petAge} лет
+Симптомы: ${input.symptoms}
+Длительность: ${input.duration}
+
+Проанализируй и ответь в точном формате:
+ТЯЖЕСТЬ: [низкая/средняя/высокая/экстренная]
+СРОЧНОСТЬ: [1-10]
+НУЖЕН_ВРАЧ: [да/нет]
+ПРИЧИНЫ: [причина1], [причина2], [причина3]
+РЕКОМЕНДАЦИИ: [рекомендация1], [рекомендация2], [рекомендация3]
+СЛЕДУЮЩИЕ_ШАГИ: [шаг1], [шаг2], [шаг3]
+
+Будь краток и всегда рекомендуй ветеринарную помощь при серьезных симптомах.
+КОНЕЦ_АНАЛИЗА`
+    }
+
+    // English prompt (default)
     return `Vet AI: Analyze pet symptoms. NOT medical diagnosis.
 
 Pet: ${input.petSpecies} ${input.petBreed} ${input.petAge}yo
@@ -145,7 +196,7 @@ NEXT: [3 steps]
 Brief responses. Recommend vet for serious issues.`
   }
 
-  private async getAIAnalysis(input: ConsultationInput): Promise<SymptomAnalysis | null> {
+  private async getAIAnalysis(input: ConsultationInput, language: string = 'en'): Promise<SymptomAnalysis | null> {
     try {
       const endpoint = await this.findWorkingEndpoint()
       if (!endpoint) {
@@ -153,7 +204,7 @@ Brief responses. Recommend vet for serious issues.`
         return null
       }
 
-      const prompt = this.buildVetPrompt(input)
+      const prompt = this.buildVetPrompt(input, language)
       
       const response = await fetch(`${endpoint}/api/generate`, {
         method: 'POST',
@@ -163,16 +214,15 @@ Brief responses. Recommend vet for serious issues.`
           prompt: prompt,
           stream: false,
           options: {
-            temperature: 0.1, // Very low for consistent medical advice
+            temperature: 0.1,
             top_p: 0.7,
-            num_predict: 200, // Short responses for small model
-            // Optimized for phi3:mini
-            num_ctx: 512, // Small context window
-            num_thread: 1, // Single thread to save memory
+            num_predict: language === 'ru' ? 250 : 200, // More tokens for Russian
+            num_ctx: 512,
+            num_thread: 1,
             repeat_penalty: 1.1,
           }
         }),
-        timeout: 15000 // Shorter timeout
+        timeout: 15000
       } as any)
 
       if (!response.ok) {
@@ -180,7 +230,7 @@ Brief responses. Recommend vet for serious issues.`
       }
 
       const data = await response.json()
-      return this.parseAIResponse(data.response)
+      return this.parseAIResponse(data.response, language)
     } catch (error) {
       console.log('AI analysis failed:', error)
       this.activeEndpoint = null
@@ -188,48 +238,95 @@ Brief responses. Recommend vet for serious issues.`
     }
   }
 
-  private parseAIResponse(response: string): SymptomAnalysis {
-    // Parse the structured AI response
+  private parseAIResponse(response: string, language: string = 'en'): SymptomAnalysis {
     const lines = response.split('\n')
     const analysis: Partial<SymptomAnalysis> = {}
 
     lines.forEach(line => {
       const cleanLine = line.trim()
-      if (cleanLine.startsWith('SEVERITY:')) {
-        analysis.severity = cleanLine.split(':')[1].trim() as any
-      } else if (cleanLine.startsWith('URGENCY:')) {
-        analysis.urgency = parseInt(cleanLine.split(':')[1].trim()) || 5
-      } else if (cleanLine.startsWith('VET_NEEDED:')) {
-        analysis.shouldSeeVet = cleanLine.split(':')[1].trim().toLowerCase() === 'yes'
-      } else if (cleanLine.startsWith('CAUSES:')) {
-        analysis.estimatedCause = cleanLine.split(':')[1].split(',').map(c => c.trim()).filter(c => c)
-      } else if (cleanLine.startsWith('CARE:')) {
-        analysis.recommendations = cleanLine.split(':')[1].split(',').map(r => r.trim()).filter(r => r)
-      } else if (cleanLine.startsWith('NEXT:')) {
-        analysis.nextSteps = cleanLine.split(':')[1].split(',').map(s => s.trim()).filter(s => s)
+      
+      if (language === 'ru') {
+        // Russian parsing
+        if (cleanLine.startsWith('ТЯЖЕСТЬ:')) {
+          const severity = cleanLine.split(':')[1].trim().toLowerCase()
+          analysis.severity = this.mapRussianSeverity(severity)
+        } else if (cleanLine.startsWith('СРОЧНОСТЬ:')) {
+          analysis.urgency = parseInt(cleanLine.split(':')[1].trim()) || 5
+        } else if (cleanLine.startsWith('НУЖЕН_ВРАЧ:')) {
+          analysis.shouldSeeVet = cleanLine.split(':')[1].trim().toLowerCase() === 'да'
+        } else if (cleanLine.startsWith('ПРИЧИНЫ:')) {
+          analysis.estimatedCause = cleanLine.split(':')[1].split(',').map(c => c.trim()).filter(c => c)
+        } else if (cleanLine.startsWith('РЕКОМЕНДАЦИИ:')) {
+          analysis.recommendations = cleanLine.split(':')[1].split(',').map(r => r.trim()).filter(r => r)
+        } else if (cleanLine.startsWith('СЛЕДУЮЩИЕ_ШАГИ:')) {
+          analysis.nextSteps = cleanLine.split(':')[1].split(',').map(s => s.trim()).filter(s => s)
+        }
+      } else {
+        // English parsing (existing code)
+        if (cleanLine.startsWith('SEVERITY:')) {
+          analysis.severity = cleanLine.split(':')[1].trim() as any
+        } else if (cleanLine.startsWith('URGENCY:')) {
+          analysis.urgency = parseInt(cleanLine.split(':')[1].trim()) || 5
+        } else if (cleanLine.startsWith('VET_NEEDED:')) {
+          analysis.shouldSeeVet = cleanLine.split(':')[1].trim().toLowerCase() === 'yes'
+        } else if (cleanLine.startsWith('CAUSES:')) {
+          analysis.estimatedCause = cleanLine.split(':')[1].split(',').map(c => c.trim()).filter(c => c)
+        } else if (cleanLine.startsWith('CARE:')) {
+          analysis.recommendations = cleanLine.split(':')[1].split(',').map(r => r.trim()).filter(r => r)
+        } else if (cleanLine.startsWith('NEXT:')) {
+          analysis.nextSteps = cleanLine.split(':')[1].split(',').map(s => s.trim()).filter(s => s)
+        }
       }
     })
 
-    // Provide defaults if parsing failed
+    // Provide defaults with appropriate language
+    const defaults = this.getDefaultResponses(language)
+    
     return {
       severity: analysis.severity || 'medium',
       urgency: analysis.urgency || 5,
       shouldSeeVet: analysis.shouldSeeVet ?? true,
-      recommendations: analysis.recommendations || ['Monitor symptoms', 'Contact veterinarian'],
-      nextSteps: analysis.nextSteps || ['Schedule vet appointment', 'Keep pet comfortable'],
-      estimatedCause: analysis.estimatedCause || ['Requires professional assessment']
+      recommendations: analysis.recommendations || defaults.recommendations,
+      nextSteps: analysis.nextSteps || defaults.nextSteps,
+      estimatedCause: analysis.estimatedCause || defaults.estimatedCause
     }
   }
 
-  private getRuleBasedAnalysis(input: ConsultationInput): SymptomAnalysis {
+  private mapRussianSeverity(severity: string): 'low' | 'medium' | 'high' | 'emergency' {
+    switch (severity) {
+      case 'низкая': return 'low'
+      case 'средняя': return 'medium'
+      case 'высокая': return 'high'
+      case 'экстренная': return 'emergency'
+      default: return 'medium'
+    }
+  }
+
+  private getDefaultResponses(language: string) {
+    if (language === 'ru') {
+      return {
+        recommendations: ['Наблюдайте за питомцем', 'Обратитесь к ветеринару'],
+        nextSteps: ['Запишитесь к ветеринару', 'Обеспечьте покой питомцу'],
+        estimatedCause: ['Требуется профессиональная оценка']
+      }
+    }
+    
+    return {
+      recommendations: ['Monitor symptoms', 'Contact veterinarian'],
+      nextSteps: ['Schedule vet appointment', 'Keep pet comfortable'],
+      estimatedCause: ['Requires professional assessment']
+    }
+  }
+
+  private getRuleBasedAnalysis(input: ConsultationInput, language: string = 'en'): SymptomAnalysis {
     const symptoms = input.symptoms.toLowerCase()
     let bestMatch: any = null
     let highestScore = 0
 
-    // Find best matching symptom in database
+    // Find best matching symptom in database (works with both languages)
     Object.entries(this.symptomDatabase).forEach(([key, data]) => {
-      if (symptoms.includes(key)) {
-        const score = key.length // Longer matches get higher priority
+      if (symptoms.includes(key) || (language === 'ru' && this.containsRussianSymptom(symptoms, key))) {
+        const score = key.length
         if (score > highestScore) {
           highestScore = score
           bestMatch = data
@@ -239,21 +336,22 @@ Brief responses. Recommend vet for serious issues.`
 
     // Default analysis if no match found
     if (!bestMatch) {
+      const defaults = this.getDefaultResponses(language)
       return {
         severity: 'medium',
         urgency: 5,
         shouldSeeVet: true,
         recommendations: [
-          'Monitor your pet closely',
-          'Note any changes in behavior',
-          'Consider consulting with a veterinarian'
+          language === 'ru' ? 'Внимательно наблюдайте за питомцем' : 'Monitor your pet closely',
+          language === 'ru' ? 'Отмечайте любые изменения в поведении' : 'Note any changes in behavior',
+          language === 'ru' ? 'Рассмотрите консультацию с ветеринаром' : 'Consider consulting with a veterinarian'
         ],
         nextSteps: [
-          'Keep a symptom diary',
-          'Schedule vet appointment if symptoms persist',
-          'Ensure pet is comfortable and hydrated'
+          language === 'ru' ? 'Ведите дневник симптомов' : 'Keep a symptom diary',
+          language === 'ru' ? 'Запишитесь к ветеринару, если симптомы сохраняются' : 'Schedule vet appointment if symptoms persist',
+          language === 'ru' ? 'Обеспечьте комфорт и увлажнение питомца' : 'Ensure pet is comfortable and hydrated'
         ],
-        estimatedCause: ['Unknown - requires professional evaluation']
+        estimatedCause: [language === 'ru' ? 'Неизвестно - требуется профессиональная оценка' : 'Unknown - requires professional evaluation']
       }
     }
 
@@ -263,12 +361,27 @@ Brief responses. Recommend vet for serious issues.`
       shouldSeeVet: bestMatch.vetNeeded,
       recommendations: bestMatch.recommendations,
       nextSteps: [
-        bestMatch.vetNeeded ? 'Schedule veterinary appointment' : 'Continue monitoring',
-        'Keep pet comfortable',
-        'Document any changes'
+        bestMatch.vetNeeded ? 
+          (language === 'ru' ? 'Запишитесь к ветеринару' : 'Schedule veterinary appointment') : 
+          (language === 'ru' ? 'Продолжайте наблюдение' : 'Continue monitoring'),
+        language === 'ru' ? 'Обеспечьте комфорт питомца' : 'Keep pet comfortable',
+        language === 'ru' ? 'Документируйте любые изменения' : 'Document any changes'
       ],
       estimatedCause: bestMatch.causes
     }
+  }
+
+  private containsRussianSymptom(symptoms: string, englishKey: string): boolean {
+    const russianTranslations: Record<string, string[]> = {
+      'limping': ['хромает', 'хромота', 'прихрамывает'],
+      'vomiting': ['рвота', 'тошнота', 'рвет'],
+      'diarrhea': ['понос', 'диарея', 'жидкий стул'],
+      'lethargy': ['вялость', 'апатия', 'слабость'],
+      'scratching': ['чешется', 'зуд', 'расчесывает']
+    }
+
+    const translations = russianTranslations[englishKey] || []
+    return translations.some(translation => symptoms.includes(translation))
   }
 
   async saveConsultation(userId: string, petId: string, input: ConsultationInput, analysis: SymptomAnalysis) {
