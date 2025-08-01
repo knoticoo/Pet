@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { t } from '@/lib/translations'
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: t('errors.unauthorized') }, { status: 401 })
     }
 
     const pets = await prisma.pet.findMany({
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(pets)
   } catch (error) {
     console.error('Error fetching pets:', error)
-    return NextResponse.json({ error: 'Failed to fetch pets' }, { status: 500 })
+    return NextResponse.json({ error: 'Не удалось загрузить питомцев' }, { status: 500 })
   }
 }
 
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: t('errors.unauthorized') }, { status: 401 })
     }
 
     const body = await request.json()
@@ -67,6 +68,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(pet, { status: 201 })
   } catch (error) {
     console.error('Error creating pet:', error)
-    return NextResponse.json({ error: 'Failed to create pet' }, { status: 500 })
+    return NextResponse.json({ error: 'Не удалось создать питомца' }, { status: 500 })
   }
 }

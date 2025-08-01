@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Heart, Home, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { t } from '@/lib/translations'
 
 export default function NotFound() {
   return (
@@ -12,17 +13,17 @@ export default function NotFound() {
         <div className="flex justify-center mb-8">
           <div className="flex items-center space-x-2">
             <Heart className="h-12 w-12 text-primary" />
-            <span className="text-2xl font-bold text-foreground">PetCare</span>
+            <span className="text-2xl font-bold text-foreground">ПетКеа</span>
           </div>
         </div>
 
         {/* 404 Error */}
         <div className="mb-8">
           <h1 className="text-6xl font-bold text-primary mb-4">404</h1>
-          <h2 className="text-2xl font-semibold text-foreground mb-4">Page Not Found</h2>
+          <h2 className="text-2xl font-semibold text-foreground mb-4">Страница не найдена</h2>
           <p className="text-muted-foreground mb-8">
-            Oops! It looks like this page has wandered off like a curious pet. 
-            Don't worry, we'll help you find your way back home.
+            Упс! Похоже, эта страница убежала, как любопытный питомец. 
+            Не волнуйтесь, мы поможем вам найти дорогу домой.
           </p>
         </div>
 
@@ -38,7 +39,7 @@ export default function NotFound() {
           <Link href="/" className="block">
             <Button className="w-full">
               <Home className="h-4 w-4 mr-2" />
-              Go Home
+              На главную
             </Button>
           </Link>
           
@@ -48,33 +49,33 @@ export default function NotFound() {
             onClick={() => window.history.back()}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Go Back
+            Назад
           </Button>
         </div>
 
         {/* Help text */}
         <div className="mt-8 p-4 bg-blue-50 rounded-lg">
           <p className="text-sm text-blue-800">
-            <strong>Need help?</strong> If you think this page should exist, please check the URL or 
-            contact support. Your pets are waiting for you on the dashboard!
+            <strong>Нужна помощь?</strong> Если вы считаете, что эта страница должна существовать, проверьте URL или 
+            обратитесь в поддержку. Ваши питомцы ждут вас на панели управления!
           </p>
         </div>
 
         {/* Quick links */}
         <div className="mt-6">
-          <p className="text-sm text-muted-foreground mb-3">Quick links:</p>
+          <p className="text-sm text-muted-foreground mb-3">Быстрые ссылки:</p>
           <div className="flex flex-wrap justify-center gap-4 text-sm">
             <Link href="/pets" className="text-primary hover:text-primary/80">
-              My Pets
+              {t('navigation.myPets')}
             </Link>
             <Link href="/appointments" className="text-primary hover:text-primary/80">
-              Appointments
+              {t('navigation.appointments')}
             </Link>
             <Link href="/expenses" className="text-primary hover:text-primary/80">
-              Expenses
+              {t('navigation.expenses')}
             </Link>
             <Link href="/reminders" className="text-primary hover:text-primary/80">
-              Reminders
+              {t('navigation.reminders')}
             </Link>
           </div>
         </div>

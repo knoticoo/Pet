@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import { t } from '@/lib/translations'
 
 interface Pet {
   id: string
@@ -59,7 +60,7 @@ export function RecentPets() {
   }
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('ru-RU', {
       month: 'short',
       day: 'numeric'
     }).format(date)
@@ -84,7 +85,7 @@ export function RecentPets() {
     return (
       <div className="text-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-        <p className="text-muted-foreground mt-4">Loading your pets...</p>
+        <p className="text-muted-foreground mt-4">{t('common.loading')}</p>
       </div>
     )
   }
@@ -93,14 +94,14 @@ export function RecentPets() {
     return (
       <div className="text-center py-8">
         <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-foreground mb-2">No pets yet</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-2">{t('pets.noPets')}</h3>
         <p className="text-muted-foreground mb-4">
-          Add your first pet to start tracking their care
+          {t('pets.addFirstPet')}
         </p>
         <Link href="/pets/new">
           <Button>
             <Plus className="h-4 w-4 mr-2" />
-            Add Pet
+            {t('pets.addNew')}
           </Button>
         </Link>
       </div>
@@ -119,13 +120,13 @@ export function RecentPets() {
               <div>
                 <h4 className="font-medium text-foreground">{pet.name}</h4>
                 <p className="text-sm text-muted-foreground">
-                  {pet.breed} • {getAgeInYears(pet.birthDate)} years old
+                  {pet.breed} • {getAgeInYears(pet.birthDate)} лет
                 </p>
               </div>
             </div>
             <div className="text-right">
               <div className="text-sm">
-                <p className="text-muted-foreground">Species</p>
+                <p className="text-muted-foreground">{t('pets.species')}</p>
                 <p className="font-medium text-foreground capitalize">
                   {pet.species}
                 </p>
@@ -139,7 +140,7 @@ export function RecentPets() {
         <div className="text-center pt-4">
           <Link href="/pets">
             <Button variant="outline" size="sm">
-              View All Pets ({pets.length})
+              Посмотреть всех питомцев ({pets.length})
             </Button>
           </Link>
         </div>

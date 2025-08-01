@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import { t } from '@/lib/translations'
 
 interface Reminder {
   id: string
@@ -79,10 +80,10 @@ export function UpcomingReminders() {
   }
 
   const getUrgencyText = (days: number) => {
-    if (days < 0) return 'Overdue'
-    if (days === 0) return 'Due today'
-    if (days === 1) return 'Due tomorrow'
-    return `Due in ${days} days`
+    if (days < 0) return t('reminders.overdue')
+    if (days === 0) return 'Сегодня'
+    if (days === 1) return 'Завтра'
+    return `Через ${days} дней`
   }
 
   const getUrgencyColor = (days: number) => {
@@ -102,7 +103,7 @@ export function UpcomingReminders() {
     return (
       <div className="text-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-        <p className="text-muted-foreground mt-4">Loading reminders...</p>
+        <p className="text-muted-foreground mt-4">{t('common.loading')}</p>
       </div>
     )
   }
@@ -111,12 +112,12 @@ export function UpcomingReminders() {
     return (
       <div className="text-center py-8">
         <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <p className="text-muted-foreground">No upcoming reminders</p>
+        <p className="text-muted-foreground">{t('reminders.noReminders')}</p>
         <Link 
           href="/reminders/new"
           className="text-primary hover:underline text-sm mt-2 inline-block"
         >
-          Create a reminder
+          {t('reminders.createFirst')}
         </Link>
       </div>
     )
