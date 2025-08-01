@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { FileText, Upload, Download, Trash2, Eye, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
@@ -22,8 +22,10 @@ export default function DocumentsPage() {
   const { data: session } = useSession()
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
   const [selectedPet, setSelectedPet] = useState<string>('all')
   const [pets, setPets] = useState<any[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -58,6 +60,45 @@ export default function DocumentsPage() {
     }
   }
 
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
+
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', files[0])
+      if (selectedPet !== 'all') {
+        formData.append('petId', selectedPet)
+      }
+
+      const response = await fetch('/api/documents/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (response.ok) {
+        const newDocument = await response.json()
+        setDocuments(prev => [newDocument, ...prev])
+        alert('Документ успешно загружен!')
+      } else {
+        alert('Ошибка при загрузке документа')
+      }
+    } catch (error) {
+      console.error('Error uploading document:', error)
+      alert('Ошибка при загрузке документа')
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click()
+  }
+
   const filteredDocuments = selectedPet === 'all' 
     ? documents 
     : documents.filter(doc => doc.petId === selectedPet)
@@ -88,7 +129,7 @@ export default function DocumentsPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('ru-RU', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -134,11 +175,24 @@ export default function DocumentsPage() {
               Храните и управляйте документами и записями ваших питомцев.
             </p>
           </div>
-          <Button className="flex items-center space-x-2 w-full md:w-auto">
+          <Button 
+            className="flex items-center space-x-2 w-full md:w-auto"
+            onClick={handleUploadClick}
+            disabled={uploading}
+          >
             <Upload className="h-4 w-4" />
-            <span>{t('documents.upload')}</span>
+            <span>{uploading ? 'Загрузка...' : t('documents.upload')}</span>
           </Button>
         </div>
+
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          onChange={handleUpload}
+          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+          className="hidden"
+        />
 
         {/* Filter */}
         <div className="flex space-x-4">
@@ -182,8 +236,8 @@ export default function DocumentsPage() {
                 </div>
                 
                 <div className="space-y-2 text-sm text-muted-foreground">
-                  <p>Uploaded: {formatDate(document.uploadDate)}</p>
-                  {document.petName && <p>Pet: {document.petName}</p>}
+                  <p>Загружено: {formatDate(document.uploadDate)}</p>
+                  {document.petName && <p>Питомец: {document.petName}</p>}
                 </div>
               </div>
             ))}
@@ -191,13 +245,13 @@ export default function DocumentsPage() {
         ) : (
           <div className="text-center py-12">
             <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">No documents yet</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Документов пока нет</h3>
             <p className="text-muted-foreground mb-6">
-              Upload your first document to start organizing your pet records.
+              Загрузите свой первый документ для организации записей питомцев.
             </p>
-            <Button>
+            <Button onClick={handleUploadClick}>
               <Upload className="h-4 w-4 mr-2" />
-              Upload First Document
+              Загрузить первый документ
             </Button>
           </div>
         )}

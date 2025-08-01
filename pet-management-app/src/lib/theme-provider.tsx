@@ -30,18 +30,22 @@ export function ThemeProvider({
   storageKey = 'petcare-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme)
+  const [theme, setThemeState] = useState<Theme>(defaultTheme)
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light')
+  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    // Load theme from localStorage
+    // Load theme from localStorage on mount
     const storedTheme = localStorage.getItem(storageKey) as Theme
     if (storedTheme) {
-      setTheme(storedTheme)
+      setThemeState(storedTheme)
     }
+    setIsLoaded(true)
   }, [storageKey])
 
   useEffect(() => {
+    if (!isLoaded) return
+
     const root = window.document.documentElement
     
     // Remove all theme classes
@@ -66,14 +70,16 @@ export function ThemeProvider({
     }
     
     setActualTheme(resolvedTheme)
-  }, [theme])
+  }, [theme, isLoaded])
+
+  const setTheme = (newTheme: Theme) => {
+    localStorage.setItem(storageKey, newTheme)
+    setThemeState(newTheme)
+  }
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
-    },
+    setTheme,
     actualTheme,
   }
 
