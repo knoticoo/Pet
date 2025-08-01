@@ -12,9 +12,7 @@ export async function GET(request: NextRequest) {
 
     const expenses = await prisma.expense.findMany({
       where: {
-        pet: {
-          userId: session.user.id
-        }
+        userId: session.user.id
       },
       include: {
         pet: {

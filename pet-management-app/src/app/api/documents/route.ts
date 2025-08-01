@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy: {
-        uploadDate: 'desc'
+        createdAt: 'desc'
       }
     })
 
@@ -34,11 +34,11 @@ export async function GET(request: NextRequest) {
       id: document.id,
       name: document.fileName,
       type: document.fileType,
-      size: document.fileSize ? `${(document.fileSize / 1024 / 1024).toFixed(2)} MB` : 'Unknown',
-      uploadDate: document.uploadDate.toISOString(),
+      size: 'Unknown', // fileSize field doesn't exist in schema
+      uploadDate: document.createdAt.toISOString(),
       petId: document.petId,
       petName: document.pet.name,
-      url: document.filePath
+      url: document.fileUrl // using fileUrl instead of filePath
     }))
 
     return NextResponse.json(transformedDocuments)
