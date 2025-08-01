@@ -128,6 +128,25 @@ export class AIVetService {
     }
   }
 
+  private buildVetPrompt(input: ConsultationInput): string {
+    return `You are a veterinary AI assistant providing preliminary guidance only. This is NOT a substitute for professional veterinary care.
+
+Pet: ${input.petSpecies}, ${input.petBreed}, ${input.petAge} years old
+Symptoms: ${input.symptoms}
+Duration: ${input.duration}
+
+Analyze and respond in this exact format:
+SEVERITY: [low/medium/high/emergency]
+URGENCY: [1-10]
+VET_NEEDED: [yes/no]
+CAUSES: [cause1], [cause2], [cause3]
+RECOMMENDATIONS: [rec1], [rec2], [rec3]
+NEXT_STEPS: [step1], [step2], [step3]
+
+Be concise and always recommend veterinary care for serious symptoms.
+END_ANALYSIS`
+  }
+
   private async getAIAnalysis(input: ConsultationInput): Promise<SymptomAnalysis | null> {
     try {
       const endpoint = await this.findWorkingEndpoint()
@@ -146,13 +165,16 @@ export class AIVetService {
           prompt: prompt,
           stream: false,
           options: {
-            temperature: 0.3,
-            top_p: 0.9,
-            num_predict: 500,
-            stop: ['END_ANALYSIS']
+            temperature: 0.2, // Lower for more consistent medical advice
+            top_p: 0.8,
+            num_predict: 300, // Reduced for smaller model
+            stop: ['END_ANALYSIS'],
+            // Memory optimization for smaller servers
+            num_ctx: 1024, // Reduced context window
+            num_thread: 2, // Limit CPU threads
           }
         }),
-        timeout: 30000
+        timeout: 20000 // Reduced timeout
       } as any)
 
       if (!response.ok) {
@@ -167,30 +189,6 @@ export class AIVetService {
       this.activeEndpoint = null
       return null
     }
-  }
-
-  private buildVetPrompt(input: ConsultationInput): string {
-    return `You are a veterinary AI assistant providing preliminary guidance only. This is NOT a substitute for professional veterinary care.
-
-Pet Information:
-- Species: ${input.petSpecies}
-- Breed: ${input.petBreed}  
-- Age: ${input.petAge} years
-- Symptoms: ${input.symptoms}
-- Duration: ${input.duration}
-
-Analyze the symptoms and provide structured guidance. Be conservative and always recommend professional care when in doubt.
-
-Respond in this exact format:
-SEVERITY: [low/medium/high/emergency]
-URGENCY: [1-10]
-VET_NEEDED: [yes/no]
-CAUSES: [possible cause 1], [possible cause 2], [possible cause 3]
-RECOMMENDATIONS: [care recommendation 1], [care recommendation 2], [care recommendation 3]
-NEXT_STEPS: [next step 1], [next step 2], [next step 3]
-
-Important: Always recommend veterinary consultation for concerning symptoms.
-END_ANALYSIS`
   }
 
   private parseAIResponse(response: string): SymptomAnalysis {
