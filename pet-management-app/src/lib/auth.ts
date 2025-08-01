@@ -50,11 +50,12 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: "jwt",
-    // Default session age: 30 days for remember me, 1 day for regular
+    // Increase session max age and make it more persistent
     maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // Update session every 24 hours
   },
   jwt: {
-    // JWT tokens expire in 30 days by default, will be overridden per user
+    // JWT tokens expire in 30 days by default
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
@@ -69,10 +70,27 @@ export const authOptions: NextAuthOptions = {
           // Remember me: 30 days
           token.exp = now + (30 * 24 * 60 * 60)
         } else {
-          // Regular login: 1 day
-          token.exp = now + (24 * 60 * 60)
+          // Regular login: 7 days (increased from 1 day)
+          token.exp = now + (7 * 24 * 60 * 60)
         }
       }
+      
+      // Refresh token if it's close to expiring (within 1 day)
+      if (token.exp && typeof token.exp === 'number') {
+        const now = Math.floor(Date.now() / 1000)
+        const timeUntilExpiry = token.exp - now
+        const oneDayInSeconds = 24 * 60 * 60
+        
+        if (timeUntilExpiry < oneDayInSeconds) {
+          // Extend token expiry
+          if (token.rememberMe) {
+            token.exp = now + (30 * 24 * 60 * 60)
+          } else {
+            token.exp = now + (7 * 24 * 60 * 60)
+          }
+        }
+      }
+      
       return token
     },
     async session({ session, token }) {
@@ -85,7 +103,7 @@ export const authOptions: NextAuthOptions = {
         if (token.rememberMe) {
           session.expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
         } else {
-          session.expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+          session.expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         }
       }
       return session
@@ -95,7 +113,7 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth/signin",
     signUp: "/auth/signup"
   },
-  // Configure cookies for better persistence
+  // Configure cookies for better persistence and background handling
   cookies: {
     sessionToken: {
       name: `next-auth.session-token`,
@@ -104,9 +122,35 @@ export const authOptions: NextAuthOptions = {
         sameSite: 'lax',
         path: '/',
         secure: process.env.NODE_ENV === 'production',
-        // Will be set dynamically based on remember me
-        maxAge: 30 * 24 * 60 * 60 // 30 days default
+        // Longer cookie expiry for better persistence
+        maxAge: 30 * 24 * 60 * 60 // 30 days
       }
+    },
+    callbackUrl: {
+      name: `next-auth.callback-url`,
+      options: {
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 30 * 24 * 60 * 60
+      }
+    },
+    csrfToken: {
+      name: `next-auth.csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 30 * 24 * 60 * 60
+      }
+    }
+  },
+  // Add events to handle session updates
+  events: {
+    async session({ session, token }) {
+      // Log session access for debugging
+      console.log('Session accessed:', { userId: session.user.id, expires: session.expires })
     }
   }
 }
