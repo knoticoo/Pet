@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Palette, Dog, Cat, Bird, Fish, Rabbit, Hamster, Zap } from 'lucide-react'
+import { Palette, Dog, Cat, Bird, Fish, Rabbit, Zap } from 'lucide-react'
 import { useTheme, themes } from '@/lib/theme-provider'
 
 const themeIcons = {
@@ -11,7 +11,7 @@ const themeIcons = {
   birds: Bird,
   fish: Fish,
   rabbits: Rabbit,
-  hamsters: Hamster,
+  hamsters: Zap, // Using Zap as a replacement for Hamster
   reptiles: Zap,
   default: Palette
 }
