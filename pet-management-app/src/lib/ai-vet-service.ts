@@ -129,22 +129,20 @@ export class AIVetService {
   }
 
   private buildVetPrompt(input: ConsultationInput): string {
-    return `You are a veterinary AI assistant providing preliminary guidance only. This is NOT a substitute for professional veterinary care.
+    return `Vet AI: Analyze pet symptoms. NOT medical diagnosis.
 
-Pet: ${input.petSpecies}, ${input.petBreed}, ${input.petAge} years old
-Symptoms: ${input.symptoms}
-Duration: ${input.duration}
+Pet: ${input.petSpecies} ${input.petBreed} ${input.petAge}yo
+Issue: ${input.symptoms} (${input.duration})
 
-Analyze and respond in this exact format:
+Format:
 SEVERITY: [low/medium/high/emergency]
-URGENCY: [1-10]
+URGENCY: [1-10]  
 VET_NEEDED: [yes/no]
-CAUSES: [cause1], [cause2], [cause3]
-RECOMMENDATIONS: [rec1], [rec2], [rec3]
-NEXT_STEPS: [step1], [step2], [step3]
+CAUSES: [3 causes]
+CARE: [3 tips]
+NEXT: [3 steps]
 
-Be concise and always recommend veterinary care for serious symptoms.
-END_ANALYSIS`
+Brief responses. Recommend vet for serious issues.`
   }
 
   private async getAIAnalysis(input: ConsultationInput): Promise<SymptomAnalysis | null> {
@@ -165,16 +163,16 @@ END_ANALYSIS`
           prompt: prompt,
           stream: false,
           options: {
-            temperature: 0.2, // Lower for more consistent medical advice
-            top_p: 0.8,
-            num_predict: 300, // Reduced for smaller model
-            stop: ['END_ANALYSIS'],
-            // Memory optimization for smaller servers
-            num_ctx: 1024, // Reduced context window
-            num_thread: 2, // Limit CPU threads
+            temperature: 0.1, // Very low for consistent medical advice
+            top_p: 0.7,
+            num_predict: 200, // Short responses for small model
+            // Optimized for phi3:mini
+            num_ctx: 512, // Small context window
+            num_thread: 1, // Single thread to save memory
+            repeat_penalty: 1.1,
           }
         }),
-        timeout: 20000 // Reduced timeout
+        timeout: 15000 // Shorter timeout
       } as any)
 
       if (!response.ok) {
@@ -185,7 +183,6 @@ END_ANALYSIS`
       return this.parseAIResponse(data.response)
     } catch (error) {
       console.log('AI analysis failed:', error)
-      // Reset active endpoint on failure
       this.activeEndpoint = null
       return null
     }
@@ -197,18 +194,19 @@ END_ANALYSIS`
     const analysis: Partial<SymptomAnalysis> = {}
 
     lines.forEach(line => {
-      if (line.startsWith('SEVERITY:')) {
-        analysis.severity = line.split(':')[1].trim() as any
-      } else if (line.startsWith('URGENCY:')) {
-        analysis.urgency = parseInt(line.split(':')[1].trim())
-      } else if (line.startsWith('VET_NEEDED:')) {
-        analysis.shouldSeeVet = line.split(':')[1].trim().toLowerCase() === 'yes'
-      } else if (line.startsWith('CAUSES:')) {
-        analysis.estimatedCause = line.split(':')[1].split(',').map(c => c.trim())
-      } else if (line.startsWith('RECOMMENDATIONS:')) {
-        analysis.recommendations = line.split(':')[1].split(',').map(r => r.trim())
-      } else if (line.startsWith('NEXT_STEPS:')) {
-        analysis.nextSteps = line.split(':')[1].split(',').map(s => s.trim())
+      const cleanLine = line.trim()
+      if (cleanLine.startsWith('SEVERITY:')) {
+        analysis.severity = cleanLine.split(':')[1].trim() as any
+      } else if (cleanLine.startsWith('URGENCY:')) {
+        analysis.urgency = parseInt(cleanLine.split(':')[1].trim()) || 5
+      } else if (cleanLine.startsWith('VET_NEEDED:')) {
+        analysis.shouldSeeVet = cleanLine.split(':')[1].trim().toLowerCase() === 'yes'
+      } else if (cleanLine.startsWith('CAUSES:')) {
+        analysis.estimatedCause = cleanLine.split(':')[1].split(',').map(c => c.trim()).filter(c => c)
+      } else if (cleanLine.startsWith('CARE:')) {
+        analysis.recommendations = cleanLine.split(':')[1].split(',').map(r => r.trim()).filter(r => r)
+      } else if (cleanLine.startsWith('NEXT:')) {
+        analysis.nextSteps = cleanLine.split(':')[1].split(',').map(s => s.trim()).filter(s => s)
       }
     })
 
