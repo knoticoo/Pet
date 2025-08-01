@@ -3,8 +3,8 @@ import { Plugin, PluginConfig } from './plugin-manager'
 export class HealthAnalyticsPlugin implements Plugin {
   config: PluginConfig = {
     id: 'health-analytics',
-    name: 'Health Analytics',
-    description: 'Track weight trends, BMI, activity levels, calculate health scores, and get predictive health alerts with AI-powered insights.',
+    name: 'Аналитика здоровья',
+    description: 'Отслеживайте тренды веса, ИМТ, уровни активности, рассчитывайте оценки здоровья и получайте прогностические оповещения с ИИ-анализом.',
     version: '1.0.0',
     category: 'analytics',
     isEnabled: false,

@@ -3,8 +3,8 @@ import { Plugin, PluginConfig } from './plugin-manager'
 export class PetPhotographyPlugin implements Plugin {
   config: PluginConfig = {
     id: 'pet-photography',
-    name: 'Pet Photography',
-    description: 'Organize pet photos, create growth timelines, book professional sessions, and generate photo books with AI-powered health analysis.',
+    name: 'Фотографии питомцев',
+    description: 'Организуйте фотографии питомцев, создавайте временные шкалы роста и генерируйте фотокниги с ИИ-анализом здоровья.',
     version: '1.0.0',
     category: 'photography',
     isEnabled: false,

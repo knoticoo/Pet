@@ -53,8 +53,8 @@ const categoryColors = {
 const availablePlugins: Plugin[] = [
   {
     id: 'pet-social-network',
-    name: 'Pet Social Network',
-    description: 'Connect with other pet owners, share photos, join breed-specific groups, and participate in pet contests with AI-powered health insights.',
+    name: 'Социальная сеть питомцев',
+    description: 'Общайтесь с другими владельцами питомцев, делитесь фотографиями, присоединяйтесь к группам по породам и участвуйте в конкурсах питомцев с ИИ-анализом здоровья.',
     version: '1.0.0',
     category: 'social',
     isEnabled: false,
@@ -73,28 +73,28 @@ const availablePlugins: Plugin[] = [
   },
   {
     id: 'pet-photography',
-    name: 'Pet Photography',
-    description: 'Organize pet photos, create growth timelines, book professional sessions, and generate photo books with AI-powered health analysis.',
+    name: 'Фотографии питомцев',
+    description: 'Организуйте фотографии питомцев, создавайте временные шкалы роста и генерируйте фотокниги с ИИ-анализом здоровья.',
     version: '1.0.0',
     category: 'photography',
     isEnabled: false,
     isCore: false,
     dependencies: ['ai-vet'],
-          settings: {
-        enableGrowthTimeline: true,
-        enablePhotoBooks: true,
-        enableHealthAnalysis: true,
-        maxStorageGB: 10,
-        autoBackup: true,
-        aiAnalysisEnabled: true,
-        watermarkEnabled: false
-      },
+    settings: {
+      enableGrowthTimeline: true,
+      enablePhotoBooks: true,
+      enableHealthAnalysis: true,
+      maxStorageGB: 10,
+      autoBackup: true,
+      aiAnalysisEnabled: true,
+      watermarkEnabled: false
+    },
     permissions: ['photography:read', 'photography:write', 'photography:manage']
   },
   {
     id: 'health-analytics',
-    name: 'Health Analytics',
-    description: 'Track weight trends, BMI, activity levels, calculate health scores, and get predictive health alerts with AI-powered insights.',
+    name: 'Аналитика здоровья',
+    description: 'Отслеживайте тренды веса, ИМТ, уровни активности, рассчитывайте оценки здоровья и получайте прогностические оповещения с ИИ-анализом.',
     version: '1.0.0',
     category: 'analytics',
     isEnabled: false,
@@ -205,42 +205,42 @@ export function AdminPluginManager() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="p-4 rounded-lg bg-green-50 border border-green-200">
-          <div className="flex items-center space-x-2">
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <span className="font-medium text-green-800">Active</span>
+                  <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <span className="font-medium text-green-800">{t('plugins.active')}</span>
+            </div>
+            <div className="text-2xl font-bold text-green-600">
+              {plugins.filter(p => p.isEnabled).length}
+            </div>
           </div>
-          <div className="text-2xl font-bold text-green-600">
-            {plugins.filter(p => p.isEnabled).length}
+          <div className="p-4 rounded-lg bg-red-50 border border-red-200">
+            <div className="flex items-center space-x-2">
+              <Clock className="h-5 w-5 text-red-600" />
+              <span className="font-medium text-red-800">{t('plugins.inactive')}</span>
+            </div>
+            <div className="text-2xl font-bold text-red-600">
+              {plugins.filter(p => !p.isEnabled).length}
+            </div>
           </div>
-        </div>
-        <div className="p-4 rounded-lg bg-red-50 border border-red-200">
-          <div className="flex items-center space-x-2">
-            <Clock className="h-5 w-5 text-red-600" />
-            <span className="font-medium text-red-800">Disabled</span>
+          <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+            <div className="flex items-center space-x-2">
+              <Brain className="h-5 w-5 text-blue-600" />
+              <span className="font-medium text-blue-800">{t('plugins.aiPowered')}</span>
+            </div>
+            <div className="text-2xl font-bold text-blue-600">
+              {plugins.filter(p => p.dependencies?.includes('ai-vet')).length}
+            </div>
           </div>
-          <div className="text-2xl font-bold text-red-600">
-            {plugins.filter(p => !p.isEnabled).length}
+          <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="h-5 w-5 text-purple-600" />
+              <span className="font-medium text-purple-800">{t('plugins.new')}</span>
+            </div>
+            <div className="text-2xl font-bold text-purple-600">
+              {plugins.length}
+            </div>
           </div>
-        </div>
-        <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-          <div className="flex items-center space-x-2">
-            <Brain className="h-5 w-5 text-blue-600" />
-            <span className="font-medium text-blue-800">AI Powered</span>
-          </div>
-          <div className="text-2xl font-bold text-blue-600">
-            {plugins.filter(p => p.dependencies?.includes('ai-vet')).length}
-          </div>
-        </div>
-        <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
-          <div className="flex items-center space-x-2">
-            <Sparkles className="h-5 w-5 text-purple-600" />
-            <span className="font-medium text-purple-800">New</span>
-          </div>
-          <div className="text-2xl font-bold text-purple-600">
-            {plugins.length}
-          </div>
-        </div>
       </div>
 
       {/* Plugin Categories */}
@@ -257,9 +257,9 @@ export function AdminPluginManager() {
               <div className="flex items-center space-x-3">
                 <CategoryIcon className="h-5 w-5 text-primary" />
                 <span className="font-medium capitalize">{category}</span>
-                <Badge variant="secondary">
-                  {categoryPlugins.length} plugins
-                </Badge>
+                                 <Badge variant="secondary">
+                   {categoryPlugins.length} {t('plugins.title')}
+                 </Badge>
               </div>
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4" />
@@ -301,12 +301,12 @@ export function AdminPluginManager() {
                             {plugin.description}
                           </p>
 
-                          {missingDependencies.length > 0 && (
-                            <div className="flex items-center space-x-2 text-sm text-amber-600 mb-2">
-                              <AlertTriangle className="h-4 w-4" />
-                              <span>Missing dependencies: {missingDependencies.join(', ')}</span>
-                            </div>
-                          )}
+                                                     {missingDependencies.length > 0 && (
+                             <div className="flex items-center space-x-2 text-sm text-amber-600 mb-2">
+                               <AlertTriangle className="h-4 w-4" />
+                               <span>{t('plugins.missingDependencies')}: {missingDependencies.join(', ')}</span>
+                             </div>
+                           )}
                         </div>
                         
                         <div className="flex items-center space-x-2">
@@ -315,16 +315,16 @@ export function AdminPluginManager() {
                             disabled={loading || missingDependencies.length > 0}
                             onCheckedChange={() => togglePlugin(plugin.id)}
                           />
-                          <span className="text-sm text-muted-foreground">
-                            {plugin.isEnabled ? 'Enabled' : 'Disabled'}
-                          </span>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setSelectedPlugin(plugin)}
-                          >
-                            Settings
-                          </Button>
+                                                     <span className="text-sm text-muted-foreground">
+                             {plugin.isEnabled ? t('plugins.enable') : t('plugins.disable')}
+                           </span>
+                                                     <Button
+                             size="sm"
+                             variant="outline"
+                             onClick={() => setSelectedPlugin(plugin)}
+                           >
+                             {t('plugins.settings')}
+                           </Button>
                         </div>
                       </div>
                     </div>
@@ -340,8 +340,8 @@ export function AdminPluginManager() {
       {selectedPlugin && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">{selectedPlugin.name} Settings</h3>
+                         <div className="flex items-center justify-between mb-4">
+               <h3 className="text-lg font-semibold">{selectedPlugin.name} {t('plugins.settings')}</h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -358,9 +358,9 @@ export function AdminPluginManager() {
                     <label className="text-sm font-medium capitalize">
                       {key.replace(/([A-Z])/g, ' $1').trim()}
                     </label>
-                    <p className="text-xs text-muted-foreground">
-                      {typeof value === 'boolean' ? 'Enable/disable this feature' : 'Configure this setting'}
-                    </p>
+                                         <p className="text-xs text-muted-foreground">
+                       {typeof value === 'boolean' ? t('plugins.enable') + '/' + t('plugins.disable') + ' ' + t('plugins.description') : t('plugins.settings')}
+                     </p>
                   </div>
                   {typeof value === 'boolean' ? (
                     <Switch

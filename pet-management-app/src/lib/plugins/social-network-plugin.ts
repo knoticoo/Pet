@@ -3,8 +3,8 @@ import { Plugin, PluginConfig } from './plugin-manager'
 export class PetSocialNetworkPlugin implements Plugin {
   config: PluginConfig = {
     id: 'pet-social-network',
-    name: 'Pet Social Network',
-    description: 'Connect with other pet owners, share photos, join breed-specific groups, and participate in pet contests with AI-powered health insights.',
+    name: 'Социальная сеть питомцев',
+    description: 'Общайтесь с другими владельцами питомцев, делитесь фотографиями, присоединяйтесь к группам по породам и участвуйте в конкурсах питомцев с ИИ-анализом здоровья.',
     version: '1.0.0',
     category: 'social',
     isEnabled: false,
