@@ -5,6 +5,7 @@ import { Navigation } from "@/components/Navigation";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ThemeProvider } from "@/lib/theme-provider";
+import { PageWrapper } from "@/components/PageWrapper";
 
 // Optimize font loading
 const inter = Inter({ 
@@ -51,13 +52,15 @@ export default function RootLayout({
         <meta name="color-scheme" content="light dark" />
       </head>
       <body className={`${inter.className} h-full antialiased`}>
-        <ThemeProvider defaultTheme="system" storageKey="petcare-theme">
+        <ThemeProvider defaultTheme="default" storageKey="petcare-theme">
           <AuthProvider>
             <div className="min-h-screen bg-background flex flex-col">
               <Navigation />
               <main className="flex-1 container mx-auto px-4 py-4 md:py-8 max-w-7xl">
                 <ErrorBoundary>
-                  {children}
+                  <PageWrapper>
+                    {children}
+                  </PageWrapper>
                 </ErrorBoundary>
               </main>
             </div>
