@@ -26,7 +26,10 @@ export const translations = {
     noData: 'Нет данных для отображения',
     recentPets: 'Недавние питомцы',
     viewAllPets: 'Посмотреть всех питомцев',
-    signInToViewPets: 'Войдите, чтобы увидеть своих питомцев'
+    signInToViewPets: 'Войдите, чтобы увидеть своих питомцев',
+    recentReminders: 'Недавние напоминания',
+    viewAllReminders: 'Посмотреть все напоминания',
+    signInToViewReminders: 'Войдите, чтобы увидеть свои напоминания'
   },
 
   // Stats
@@ -185,7 +188,9 @@ export const translations = {
     markCompleted: 'Отметить как выполненное',
     markActive: 'Отметить как активное',
     noReminders: 'У вас нет напоминаний',
-    createFirst: 'Создайте свое первое напоминание!'
+    createFirst: 'Создайте свое первое напоминание!',
+    createReminder: 'Создать напоминание',
+    date: 'Дата'
   },
 
   // Health Records
