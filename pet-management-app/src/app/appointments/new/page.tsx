@@ -1,42 +1,91 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Calendar, ArrowLeft, Clock, MapPin, User } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+
+interface Pet {
+  id: string
+  name: string
+  species: string
+}
 
 export default function NewAppointmentPage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [pets, setPets] = useState<Pet[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchPets()
+    }
+  }, [session])
+
+  const fetchPets = async () => {
+    try {
+      const response = await fetch('/api/pets')
+      if (response.ok) {
+        const data = await response.json()
+        setPets(data)
+      }
+    } catch (error) {
+      console.error('Error fetching pets:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
     
     const formData = new FormData(e.currentTarget)
+    const date = formData.get('date') as string
+    const time = formData.get('time') as string
+    
+    // Combine date and time into a single datetime
+    const appointmentDateTime = new Date(`${date}T${time}`)
+    
     const appointmentData = {
       petId: formData.get('petId'),
       title: formData.get('title'),
-      date: formData.get('date'),
-      time: formData.get('time'),
-      duration: formData.get('duration'),
+      appointmentDate: appointmentDateTime.toISOString(),
+      duration: parseInt(formData.get('duration') as string) || 60,
       appointmentType: formData.get('appointmentType'),
-      vetName: formData.get('vetName'),
+      veterinarian: formData.get('vetName'),
       location: formData.get('location'),
-      description: formData.get('description'),
+      notes: formData.get('description'),
     }
     
-    // TODO: Implement actual appointment creation API call
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    setIsSubmitting(false)
-    
-    // Redirect back to appointments page
-    router.push('/appointments')
+    try {
+      const response = await fetch('/api/appointments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(appointmentData),
+      })
+
+      if (response.ok) {
+        // Successfully created appointment, redirect to appointments page
+        router.push('/appointments')
+      } else {
+        const errorData = await response.json()
+        console.error('Error creating appointment:', errorData)
+        alert('Failed to create appointment. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error creating appointment:', error)
+      alert('Failed to create appointment. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -73,7 +122,11 @@ export default function NewAppointmentPage() {
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="">Choose a pet</option>
-                  {/* TODO: Replace with dynamic pet data */}
+                  {pets.map((pet) => (
+                    <option key={pet.id} value={pet.id}>
+                      {pet.name} ({pet.species})
+                    </option>
+                  ))}
                 </select>
               </div>
 

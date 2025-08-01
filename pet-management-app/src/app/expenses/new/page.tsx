@@ -1,15 +1,45 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DollarSign, ArrowLeft, Receipt, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+
+interface Pet {
+  id: string
+  name: string
+  species: string
+}
 
 export default function NewExpensePage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [pets, setPets] = useState<Pet[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchPets()
+    }
+  }, [session])
+
+  const fetchPets = async () => {
+    try {
+      const response = await fetch('/api/pets')
+      if (response.ok) {
+        const data = await response.json()
+        setPets(data)
+      }
+    } catch (error) {
+      console.error('Error fetching pets:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -21,19 +51,33 @@ export default function NewExpensePage() {
       amount: formData.get('amount'),
       date: formData.get('date'),
       category: formData.get('category'),
-      petId: formData.get('petId'),
+      petId: formData.get('petId') || null,
       description: formData.get('description'),
     }
     
-    // TODO: Implement actual expense creation API call
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    setIsSubmitting(false)
-    
-    // Redirect back to expenses page
-    router.push('/expenses')
+    try {
+      const response = await fetch('/api/expenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(expenseData),
+      })
+
+      if (response.ok) {
+        // Successfully created expense, redirect to expenses page
+        router.push('/expenses')
+      } else {
+        const errorData = await response.json()
+        console.error('Error creating expense:', errorData)
+        alert('Failed to create expense. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error creating expense:', error)
+      alert('Failed to create expense. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleFileSelect = () => {
@@ -145,7 +189,11 @@ export default function NewExpensePage() {
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="">General/Multiple Pets</option>
-                  {/* TODO: Replace with dynamic pet data */}
+                  {pets.map((pet) => (
+                    <option key={pet.id} value={pet.id}>
+                      {pet.name} ({pet.species})
+                    </option>
+                  ))}
                 </select>
               </div>
 

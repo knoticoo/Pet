@@ -27,6 +27,30 @@ export default function PetsPage() {
     }
   }, [session])
 
+  // Also refresh when the page becomes visible (e.g., returning from add pet page)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && session?.user?.id) {
+        fetchPets()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [session])
+
+  // Refresh when window gains focus
+  useEffect(() => {
+    const handleFocus = () => {
+      if (session?.user?.id) {
+        fetchPets()
+      }
+    }
+
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [session])
+
   const fetchPets = async () => {
     try {
       const response = await fetch('/api/pets')

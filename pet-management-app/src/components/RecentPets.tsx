@@ -4,41 +4,58 @@ import { Heart, Calendar, MapPin, Plus } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { useSession } from 'next-auth/react'
+import { useEffect, useState } from 'react'
 
-// Mock data - in a real app, this would come from your database
-const mockPets = [
-  {
-    id: '1',
-    name: 'Pet 1',
-    species: 'dog',
-    breed: 'Golden Retriever',
-    age: 3,
-    lastVisit: new Date('2024-01-15'),
-    nextAppointment: new Date('2024-03-15')
-  },
-  {
-    id: '2',
-    name: 'Pet 2',
-    species: 'cat',
-    breed: 'Persian',
-    age: 2,
-    lastVisit: new Date('2024-01-10'),
-    nextAppointment: new Date('2024-02-20')
-  },
-  {
-    id: '3',
-    name: 'Pet 3',
-    species: 'dog',
-    breed: 'Labrador Mix',
-    age: 1,
-    lastVisit: new Date('2024-01-05'),
-    nextAppointment: new Date('2024-02-25')
-  }
-]
+interface Pet {
+  id: string
+  name: string
+  species: string
+  breed: string
+  birthDate: string
+  description?: string
+}
 
 export function RecentPets() {
-  const getAgeInYears = (pet: any) => {
-    return pet.age
+  const { data: session } = useSession()
+  const [pets, setPets] = useState<Pet[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchPets()
+    } else {
+      setLoading(false)
+    }
+  }, [session])
+
+  const fetchPets = async () => {
+    try {
+      const response = await fetch('/api/pets')
+      if (response.ok) {
+        const data = await response.json()
+        setPets(data)
+      } else {
+        console.error('Failed to fetch pets:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Error fetching pets:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getAgeInYears = (birthDate: string) => {
+    if (!birthDate) return 0
+    const today = new Date()
+    const birth = new Date(birthDate)
+    const age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      return Math.max(0, age - 1)
+    }
+    return age
   }
 
   const formatDate = (date: Date) => {
@@ -48,7 +65,31 @@ export function RecentPets() {
     }).format(date)
   }
 
-  if (mockPets.length === 0) {
+  const getGradientColor = (species: string) => {
+    switch (species.toLowerCase()) {
+      case 'dog':
+        return 'from-blue-400 to-blue-600'
+      case 'cat':
+        return 'from-purple-400 to-purple-600'
+      case 'bird':
+        return 'from-green-400 to-green-600'
+      case 'fish':
+        return 'from-cyan-400 to-cyan-600'
+      default:
+        return 'from-pink-400 to-pink-600'
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+        <p className="text-muted-foreground mt-4">Loading your pets...</p>
+      </div>
+    )
+  }
+
+  if (pets.length === 0) {
     return (
       <div className="text-center py-8">
         <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -68,46 +109,37 @@ export function RecentPets() {
 
   return (
     <div className="space-y-4">
-      {mockPets.slice(0, 3).map((pet) => (
+      {pets.slice(0, 3).map((pet) => (
         <Link key={pet.id} href={`/pets/${pet.id}`}>
           <div className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Heart className="h-6 w-6 text-primary" />
+              <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${getGradientColor(pet.species)} flex items-center justify-center`}>
+                <Heart className="h-6 w-6 text-white" />
               </div>
               <div>
                 <h4 className="font-medium text-foreground">{pet.name}</h4>
                 <p className="text-sm text-muted-foreground">
-                  {pet.breed} • {getAgeInYears(pet)} years old
+                  {pet.breed} • {getAgeInYears(pet.birthDate)} years old
                 </p>
               </div>
             </div>
             <div className="text-right">
-              {pet.nextAppointment ? (
-                <div className="text-sm">
-                  <p className="text-muted-foreground">Next visit</p>
-                  <p className="font-medium text-foreground">
-                    {formatDate(pet.nextAppointment)}
-                  </p>
-                </div>
-              ) : (
-                <div className="text-sm">
-                  <p className="text-muted-foreground">Last visit</p>
-                  <p className="font-medium text-foreground">
-                    {formatDate(pet.lastVisit)}
-                  </p>
-                </div>
-              )}
+              <div className="text-sm">
+                <p className="text-muted-foreground">Species</p>
+                <p className="font-medium text-foreground capitalize">
+                  {pet.species}
+                </p>
+              </div>
             </div>
           </div>
         </Link>
       ))}
       
-      {mockPets.length > 3 && (
+      {pets.length > 3 && (
         <div className="text-center pt-4">
           <Link href="/pets">
             <Button variant="outline" size="sm">
-              View All Pets ({mockPets.length})
+              View All Pets ({pets.length})
             </Button>
           </Link>
         </div>
