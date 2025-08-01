@@ -145,7 +145,7 @@ export const Navigation = memo(() => {
   const handleSignOut = useCallback(async () => {
     try {
       await signOut({ 
-        callbackUrl: `${window.location.origin}/auth/signin`,
+        callbackUrl: '/auth/signin',
         redirect: true 
       })
     } catch (error) {

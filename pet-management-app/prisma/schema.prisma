@@ -70,6 +70,12 @@ model User {
   aiConsultations AiConsultation[]
   payments      Payment[]
   subscriptions Subscription[]
+  
+  // Plugin Relations
+  socialPosts       SocialPost[]
+  socialGroupMembers SocialGroupMember[]
+  petPhotos         PetPhoto[]
+  photoAlbums       PhotoAlbum[]
 
   @@map("users")
 }
@@ -110,6 +116,13 @@ model Pet {
   expenses        Expense[]
   reminders       Reminder[]
   aiConsultations AiConsultation[]
+  
+  // Plugin Relations
+  socialPosts    SocialPost[]
+  petPhotos      PetPhoto[]
+  photoAlbums    PhotoAlbum[]
+  healthMetrics  HealthMetric[]
+  healthAlerts   HealthAlert[]
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -389,9 +402,131 @@ model SystemSetting {
   key         String   @unique
   value       String
   description String
-  category    String   // ai_vet, subscription, limits, etc.
+  category    String   // ai_vet, subscription, limits, plugins, etc.
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@map("system_settings")
+}
+
+// Social Network Plugin Models
+model SocialPost {
+  id          String   @id @default(cuid())
+  userId      String
+  petId       String?
+  groupId     String?
+  content     String
+  photos      String?  // JSON array of photo URLs
+  likes       Int      @default(0)
+  comments    Int      @default(0)
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pet   Pet?         @relation(fields: [petId], references: [id], onDelete: Cascade)
+  group SocialGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("social_posts")
+}
+
+model SocialGroup {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  breed       String?
+  isPublic    Boolean  @default(true)
+  memberCount Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members SocialGroupMember[]
+  posts   SocialPost[]
+
+  @@map("social_groups")
+}
+
+model SocialGroupMember {
+  id        String  @id @default(cuid())
+  userId    String
+  groupId   String
+  role      String  @default("member") // member, moderator, admin
+  joinedAt  DateTime @default(now())
+
+  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group SocialGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@map("social_group_members")
+}
+
+// Photography Plugin Models
+model PetPhoto {
+  id          String   @id @default(cuid())
+  petId       String
+  userId      String
+  albumId     String?
+  photoUrl    String
+  title       String?
+  description String?
+  category    String   // growth, health, daily, special
+  date        DateTime
+  aiAnalysis  String?  // JSON of AI analysis results
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  pet   Pet        @relation(fields: [petId], references: [id], onDelete: Cascade)
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  album PhotoAlbum? @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@map("pet_photos")
+}
+
+model PhotoAlbum {
+  id          String   @id @default(cuid())
+  petId       String
+  userId      String
+  name        String
+  description String?
+  coverPhoto  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  pet    Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  user   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos PetPhoto[]
+
+  @@map("photo_albums")
+}
+
+// Health Analytics Plugin Models
+model HealthMetric {
+  id          String   @id @default(cuid())
+  petId       String
+  metricType  String   // weight, bmi, activity, health_score
+  value       Float
+  unit        String?  // kg, points, etc.
+  date        DateTime
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@map("health_metrics")
+}
+
+model HealthAlert {
+  id          String   @id @default(cuid())
+  petId       String
+  alertType   String   // weight_change, activity_drop, health_score_drop
+  severity    String   // low, medium, high, critical
+  message     String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@map("health_alerts")
 }

@@ -4,95 +4,95 @@
 
 /* Pet Theme Variables */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --card: #ffffff;
-  --card-foreground: #171717;
-  --popover: #ffffff;
-  --popover-foreground: #171717;
-  --primary: #3b82f6;
-  --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #3b82f6;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 84% 5%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 84% 5%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 217 91% 60%;
   --radius: 0.5rem;
 }
 
 /* Dog Theme */
 .theme-dogs {
-  --background: #FFF8DC;
-  --foreground: #2F2F2F;
-  --card: #FAF0E6;
-  --card-foreground: #2F2F2F;
-  --popover: #FAF0E6;
-  --popover-foreground: #2F2F2F;
-  --primary: #8B4513;
-  --primary-foreground: #ffffff;
-  --secondary: #DEB887;
-  --secondary-foreground: #2F2F2F;
-  --muted: #F4A460;
-  --muted-foreground: #8B7355;
-  --accent: #F4A460;
-  --accent-foreground: #2F2F2F;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #DEB887;
-  --input: #DEB887;
-  --ring: #8B4513;
+  --background: 60 100% 97%;
+  --foreground: 0 0% 18%;
+  --card: 60 100% 95%;
+  --card-foreground: 0 0% 18%;
+  --popover: 60 100% 95%;
+  --popover-foreground: 0 0% 18%;
+  --primary: 25 76% 31%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 34 57% 70%;
+  --secondary-foreground: 0 0% 18%;
+  --muted: 27 77% 67%;
+  --muted-foreground: 25 25% 40%;
+  --accent: 27 77% 67%;
+  --accent-foreground: 0 0% 18%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 34 57% 70%;
+  --input: 34 57% 70%;
+  --ring: 25 76% 31%;
 }
 
 /* Cat Theme */
 .theme-cats {
-  --background: #F8F8FF;
-  --foreground: #2F2F2F;
-  --card: #F0F8FF;
-  --card-foreground: #2F2F2F;
-  --popover: #F0F8FF;
-  --popover-foreground: #2F2F2F;
-  --primary: #9370DB;
-  --primary-foreground: #ffffff;
-  --secondary: #DDA0DD;
-  --secondary-foreground: #2F2F2F;
-  --muted: #E6E6FA;
-  --muted-foreground: #8A7C8A;
-  --accent: #E6E6FA;
-  --accent-foreground: #2F2F2F;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #DDA0DD;
-  --input: #DDA0DD;
-  --ring: #9370DB;
+  --background: 240 100% 99%;
+  --foreground: 0 0% 18%;
+  --card: 210 100% 98%;
+  --card-foreground: 0 0% 18%;
+  --popover: 210 100% 98%;
+  --popover-foreground: 0 0% 18%;
+  --primary: 270 50% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 300 47% 75%;
+  --secondary-foreground: 0 0% 18%;
+  --muted: 240 100% 94%;
+  --muted-foreground: 300 10% 50%;
+  --accent: 240 100% 94%;
+  --accent-foreground: 0 0% 18%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 300 47% 75%;
+  --input: 300 47% 75%;
+  --ring: 270 50% 60%;
 }
 
 /* Bird Theme */
 .theme-birds {
-  --background: #F0FFF0;
-  --foreground: #2F2F2F;
-  --card: #F5FFFA;
-  --card-foreground: #2F2F2F;
-  --popover: #F5FFFA;
-  --popover-foreground: #2F2F2F;
-  --primary: #32CD32;
-  --primary-foreground: #ffffff;
-  --secondary: #90EE90;
-  --secondary-foreground: #2F2F2F;
-  --muted: #98FB98;
-  --muted-foreground: #6B8E6B;
-  --accent: #98FB98;
-  --accent-foreground: #2F2F2F;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #90EE90;
-  --input: #90EE90;
-  --ring: #32CD32;
+  --background: 120 100% 97%;
+  --foreground: 0 0% 18%;
+  --card: 120 100% 98%;
+  --card-foreground: 0 0% 18%;
+  --popover: 120 100% 98%;
+  --popover-foreground: 0 0% 18%;
+  --primary: 120 61% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 120 73% 75%;
+  --secondary-foreground: 0 0% 18%;
+  --muted: 120 100% 79%;
+  --muted-foreground: 120 15% 47%;
+  --accent: 120 100% 79%;
+  --accent-foreground: 0 0% 18%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 120 73% 75%;
+  --input: 120 73% 75%;
+  --ring: 120 61% 50%;
 }
 
 /* Fish Theme */
