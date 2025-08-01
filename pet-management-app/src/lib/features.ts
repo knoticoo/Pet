@@ -182,6 +182,227 @@ export const AVAILABLE_FEATURES: FeatureConfig[] = [
     version: '1.0.0',
     routes: ['/lost-pets', '/lost-pets/report'],
     dependencies: ['pets', 'social-profile']
+  },
+  // New innovative plugins
+  {
+    id: 'ai-health-insights',
+    name: 'ai-health-insights',
+    displayName: 'AI Health Insights',
+    description: 'AI-powered health analysis and recommendations based on pet data',
+    category: 'health',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/ai-insights', '/ai-insights/analysis'],
+    dependencies: ['pets', 'health-tracking']
+  },
+  {
+    id: 'photo-timeline',
+    name: 'photo-timeline',
+    displayName: 'Photo Timeline',
+    description: 'Visual timeline of your pet\'s growth and memorable moments',
+    category: 'social',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/photos', '/photos/timeline', '/photos/upload'],
+    dependencies: ['pets']
+  },
+  {
+    id: 'weather-activity-alerts',
+    name: 'weather-activity-alerts',
+    displayName: 'Weather Activity Alerts',
+    description: 'Weather-based activity recommendations and safety alerts',
+    category: 'health',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/weather-alerts', '/weather-alerts/settings'],
+    dependencies: ['pets', 'activities']
+  },
+  {
+    id: 'breed-specific-care',
+    name: 'breed-specific-care',
+    displayName: 'Breed-Specific Care Guide',
+    description: 'Customized care recommendations based on your pet\'s breed',
+    category: 'health',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/breed-care', '/breed-care/recommendations'],
+    dependencies: ['pets']
+  },
+  {
+    id: 'emergency-contacts',
+    name: 'emergency-contacts',
+    displayName: 'Emergency Contacts & Protocols',
+    description: 'Quick access to emergency vets and first-aid protocols',
+    category: 'health',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/emergency', '/emergency/contacts', '/emergency/protocols'],
+    dependencies: ['pets']
+  },
+  {
+    id: 'pet-insurance-tracker',
+    name: 'pet-insurance-tracker',
+    displayName: 'Pet Insurance Tracker',
+    description: 'Track insurance claims, coverage, and reimbursements',
+    category: 'finance',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/insurance', '/insurance/claims', '/insurance/coverage'],
+    dependencies: ['pets', 'expenses']
+  },
+  {
+    id: 'training-progress',
+    name: 'training-progress',
+    displayName: 'Training Progress Tracker',
+    description: 'Track training sessions, commands learned, and behavioral progress',
+    category: 'advanced',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/training', '/training/sessions', '/training/progress'],
+    dependencies: ['pets']
+  },
+  {
+    id: 'multi-pet-comparison',
+    name: 'multi-pet-comparison',
+    displayName: 'Multi-Pet Comparison',
+    description: 'Compare health metrics, expenses, and activities across pets',
+    category: 'advanced',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/comparison', '/comparison/health', '/comparison/expenses'],
+    dependencies: ['pets']
+  },
+  {
+    id: 'vet-telemedicine',
+    name: 'vet-telemedicine',
+    displayName: 'Telemedicine Integration',
+    description: 'Schedule virtual vet consultations and video calls',
+    category: 'health',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/telemedicine', '/telemedicine/appointments'],
+    dependencies: ['pets', 'appointments']
+  },
+  {
+    id: 'microchip-registry',
+    name: 'microchip-registry',
+    displayName: 'Microchip Registry',
+    description: 'Track and manage pet microchip information and registrations',
+    category: 'advanced',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/microchip', '/microchip/register'],
+    dependencies: ['pets', 'documents']
+  },
+  {
+    id: 'grooming-scheduler',
+    name: 'grooming-scheduler',
+    displayName: 'Grooming Scheduler',
+    description: 'Schedule grooming appointments and track grooming history',
+    category: 'health',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/grooming', '/grooming/schedule', '/grooming/history'],
+    dependencies: ['pets', 'appointments']
+  },
+  {
+    id: 'nutrition-calculator',
+    name: 'nutrition-calculator',
+    displayName: 'Nutrition Calculator',
+    description: 'Calculate optimal nutrition and calorie requirements for your pet',
+    category: 'health',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/nutrition', '/nutrition/calculator', '/nutrition/plans'],
+    dependencies: ['pets', 'feeding-schedule']
+  },
+  {
+    id: 'pet-community',
+    name: 'pet-community',
+    displayName: 'Pet Community Forum',
+    description: 'Connect with other pet owners, share experiences, and get advice',
+    category: 'social',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/community', '/community/forums', '/community/groups'],
+    dependencies: ['pets', 'social-profile']
+  },
+  {
+    id: 'gps-tracking',
+    name: 'gps-tracking',
+    displayName: 'GPS Pet Tracking',
+    description: 'Track your pet\'s location and set safe zone alerts',
+    category: 'advanced',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/gps-tracking', '/gps-tracking/map', '/gps-tracking/alerts'],
+    dependencies: ['pets']
+  },
+  {
+    id: 'age-calculator',
+    name: 'age-calculator',
+    displayName: 'Pet Age Calculator',
+    description: 'Calculate your pet\'s age in human years and life stage insights',
+    category: 'health',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/age-calculator'],
+    dependencies: ['pets']
+  },
+  {
+    id: 'seasonal-care-tips',
+    name: 'seasonal-care-tips',
+    displayName: 'Seasonal Care Tips',
+    description: 'Season-specific care recommendations and reminders',
+    category: 'health',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/seasonal-care', '/seasonal-care/tips'],
+    dependencies: ['pets', 'reminders']
+  },
+  {
+    id: 'expense-analytics',
+    name: 'expense-analytics',
+    displayName: 'Advanced Expense Analytics',
+    description: 'Detailed expense analytics, budgeting, and cost predictions',
+    category: 'finance',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/expense-analytics', '/expense-analytics/reports', '/expense-analytics/budgets'],
+    dependencies: ['pets', 'expenses']
+  },
+  {
+    id: 'health-reports',
+    name: 'health-reports',
+    displayName: 'Health Report Generator',
+    description: 'Generate comprehensive health reports for vet visits',
+    category: 'health',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/health-reports', '/health-reports/generate'],
+    dependencies: ['pets', 'health-tracking', 'appointments']
+  },
+  {
+    id: 'smart-reminders',
+    name: 'smart-reminders',
+    displayName: 'Smart Reminders AI',
+    description: 'AI-powered smart reminders based on pet behavior and patterns',
+    category: 'advanced',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/smart-reminders', '/smart-reminders/ai-insights'],
+    dependencies: ['pets', 'reminders', 'ai-health-insights']
+  },
+  {
+    id: 'backup-restore',
+    name: 'backup-restore',
+    displayName: 'Data Backup & Restore',
+    description: 'Backup and restore your pet data with cloud sync',
+    category: 'advanced',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/backup', '/backup/restore', '/backup/settings'],
+    dependencies: ['pets']
   }
 ]
 
