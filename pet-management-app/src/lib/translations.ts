@@ -23,7 +23,10 @@ export const translations = {
     upcomingReminders: 'Предстоящие напоминания',
     viewAll: 'Посмотреть все',
     viewReminders: 'Посмотреть напоминания',
-    noData: 'Нет данных для отображения'
+    noData: 'Нет данных для отображения',
+    recentPets: 'Недавние питомцы',
+    viewAllPets: 'Посмотреть всех питомцев',
+    signInToViewPets: 'Войдите, чтобы увидеть своих питомцев'
   },
 
   // Stats
@@ -68,7 +71,11 @@ export const translations = {
     delete: 'Удалить',
     confirmDelete: 'Вы уверены, что хотите удалить этого питомца?',
     noPets: 'У вас пока нет питомцев',
-    addFirstPet: 'Добавьте своего первого питомца!'
+    addFirstPet: 'Добавьте своего первого питомца!',
+    age: 'Возраст',
+    year: 'год',
+    years: 'лет',
+    addPet: 'Добавить питомца'
   },
 
   // Appointments
@@ -369,7 +376,9 @@ export const translations = {
     passwordsMustMatch: 'Пароли должны совпадать',
     welcomeTitle: 'Добро пожаловать в ПетКеа',
     welcomeDescription: 'Ваша комплексная система управления питомцами. Войдите, чтобы управлять своими питомцами, отслеживать их здоровье и никогда не пропускать важные встречи.',
-    signInToStart: 'Войти, чтобы начать'
+    signInToStart: 'Войти, чтобы начать',
+    signInRequired: 'Требуется вход',
+    signInToViewPets: 'Войдите, чтобы увидеть своих питомцев'
   },
 
   // Common
@@ -424,7 +433,9 @@ export const translations = {
     nextWeek: 'На следующей неделе',
     nextMonth: 'В следующем месяце',
     nextYear: 'В следующем году',
-    years: 'лет'
+    years: 'лет',
+    year: 'год',
+    yearsOld: 'лет'
   },
 
   // Error Messages

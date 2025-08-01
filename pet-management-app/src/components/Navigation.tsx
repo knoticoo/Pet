@@ -9,6 +9,7 @@ import { signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { useState, useCallback, memo, useMemo } from 'react'
 import { t } from '@/lib/translations'
+import { ThemeSelector } from '@/components/ThemeSelector'
 
 // Memoized navigation item component
 const NavigationItem = memo(({ item, pathname, onClick }: {
@@ -179,6 +180,11 @@ export const Navigation = memo(() => {
 
           {/* User Menu & Mobile Toggle */}
           <div className="flex items-center gap-2">
+            {/* Theme Selector */}
+            <div className="hidden md:block">
+              <ThemeSelector />
+            </div>
+            
             {/* Desktop User Menu */}
             <div className="hidden md:flex items-center gap-2">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent/50">

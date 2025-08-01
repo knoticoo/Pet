@@ -2,115 +2,220 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Pet Theme Variables */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222.2 84% 4.9%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222.2 84% 4.9%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
+  --background: #ffffff;
+  --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #3b82f6;
   --radius: 0.5rem;
 }
 
-.dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 84% 4.9%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 240 10% 20%;
-  --ring: 224.3 76.3% 94.1%;
+/* Dog Theme */
+.theme-dogs {
+  --background: #FFF8DC;
+  --foreground: #2F2F2F;
+  --card: #FAF0E6;
+  --card-foreground: #2F2F2F;
+  --popover: #FAF0E6;
+  --popover-foreground: #2F2F2F;
+  --primary: #8B4513;
+  --primary-foreground: #ffffff;
+  --secondary: #DEB887;
+  --secondary-foreground: #2F2F2F;
+  --muted: #F4A460;
+  --muted-foreground: #8B7355;
+  --accent: #F4A460;
+  --accent-foreground: #2F2F2F;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #DEB887;
+  --input: #DEB887;
+  --ring: #8B4513;
 }
 
-/* Blue Theme */
-.theme-blue {
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222.2 84% 4.9%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222.2 84% 4.9%;
+/* Cat Theme */
+.theme-cats {
+  --background: #F8F8FF;
+  --foreground: #2F2F2F;
+  --card: #F0F8FF;
+  --card-foreground: #2F2F2F;
+  --popover: #F0F8FF;
+  --popover-foreground: #2F2F2F;
+  --primary: #9370DB;
+  --primary-foreground: #ffffff;
+  --secondary: #DDA0DD;
+  --secondary-foreground: #2F2F2F;
+  --muted: #E6E6FA;
+  --muted-foreground: #8A7C8A;
+  --accent: #E6E6FA;
+  --accent-foreground: #2F2F2F;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #DDA0DD;
+  --input: #DDA0DD;
+  --ring: #9370DB;
 }
 
-.dark.theme-blue {
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 84% 4.9%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
+/* Bird Theme */
+.theme-birds {
+  --background: #F0FFF0;
+  --foreground: #2F2F2F;
+  --card: #F5FFFA;
+  --card-foreground: #2F2F2F;
+  --popover: #F5FFFA;
+  --popover-foreground: #2F2F2F;
+  --primary: #32CD32;
+  --primary-foreground: #ffffff;
+  --secondary: #90EE90;
+  --secondary-foreground: #2F2F2F;
+  --muted: #98FB98;
+  --muted-foreground: #6B8E6B;
+  --accent: #98FB98;
+  --accent-foreground: #2F2F2F;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #90EE90;
+  --input: #90EE90;
+  --ring: #32CD32;
 }
 
-/* Green Theme */
-.theme-green {
-  --primary: 142.1 76.2% 36.3%;
-  --primary-foreground: 355.7 100% 97.3%;
-  --secondary: 138.5 76.2% 96.7%;
-  --secondary-foreground: 142.1 84.2% 4.9%;
-  --accent: 138.5 76.2% 96.7%;
-  --accent-foreground: 142.1 84.2% 4.9%;
+/* Fish Theme */
+.theme-fish {
+  --background: #F0F8FF;
+  --foreground: #2F2F2F;
+  --card: #F5F5F5;
+  --card-foreground: #2F2F2F;
+  --popover: #F5F5F5;
+  --popover-foreground: #2F2F2F;
+  --primary: #4169E1;
+  --primary-foreground: #ffffff;
+  --secondary: #87CEEB;
+  --secondary-foreground: #2F2F2F;
+  --muted: #B0E0E6;
+  --muted-foreground: #6B7B8B;
+  --accent: #B0E0E6;
+  --accent-foreground: #2F2F2F;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #87CEEB;
+  --input: #87CEEB;
+  --ring: #4169E1;
 }
 
-.dark.theme-green {
-  --primary: 142.1 70.6% 45.3%;
-  --primary-foreground: 144.9 80.4% 10%;
-  --secondary: 144.9 80.4% 10%;
-  --secondary-foreground: 138.5 76.2% 96.7%;
-  --accent: 144.9 80.4% 10%;
-  --accent-foreground: 138.5 76.2% 96.7%;
+/* Rabbit Theme */
+.theme-rabbits {
+  --background: #FFF0F5;
+  --foreground: #2F2F2F;
+  --card: #FFF5EE;
+  --card-foreground: #2F2F2F;
+  --popover: #FFF5EE;
+  --popover-foreground: #2F2F2F;
+  --primary: #FFB6C1;
+  --primary-foreground: #2F2F2F;
+  --secondary: #FFC0CB;
+  --secondary-foreground: #2F2F2F;
+  --muted: #FFE4E1;
+  --muted-foreground: #B8868B;
+  --accent: #FFE4E1;
+  --accent-foreground: #2F2F2F;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #FFC0CB;
+  --input: #FFC0CB;
+  --ring: #FFB6C1;
 }
 
-/* Purple Theme */
-.theme-purple {
-  --primary: 262.1 83.3% 57.8%;
-  --primary-foreground: 210 20% 98%;
-  --secondary: 270 3.18% 17.9%;
-  --secondary-foreground: 210 20% 98%;
-  --accent: 270 3.18% 17.9%;
-  --accent-foreground: 210 20% 98%;
+/* Hamster Theme */
+.theme-hamsters {
+  --background: #FFF8DC;
+  --foreground: #2F2F2F;
+  --card: #FAF0E6;
+  --card-foreground: #2F2F2F;
+  --popover: #FAF0E6;
+  --popover-foreground: #2F2F2F;
+  --primary: #D2691E;
+  --primary-foreground: #ffffff;
+  --secondary: #F4A460;
+  --secondary-foreground: #2F2F2F;
+  --muted: #DEB887;
+  --muted-foreground: #A0522D;
+  --accent: #DEB887;
+  --accent-foreground: #2F2F2F;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #F4A460;
+  --input: #F4A460;
+  --ring: #D2691E;
 }
 
-.dark.theme-purple {
-  --primary: 263.4 70% 50.4%;
-  --primary-foreground: 256 100% 6%;
-  --secondary: 256 100% 6%;
-  --secondary-foreground: 210 20% 98%;
-  --accent: 256 100% 6%;
-  --accent-foreground: 210 20% 98%;
+/* Reptile Theme */
+.theme-reptiles {
+  --background: #F0FFF0;
+  --foreground: #2F2F2F;
+  --card: #F5FFFA;
+  --card-foreground: #2F2F2F;
+  --popover: #F5FFFA;
+  --popover-foreground: #2F2F2F;
+  --primary: #228B22;
+  --primary-foreground: #ffffff;
+  --secondary: #90EE90;
+  --secondary-foreground: #2F2F2F;
+  --muted: #98FB98;
+  --muted-foreground: #556B55;
+  --accent: #98FB98;
+  --accent-foreground: #2F2F2F;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #90EE90;
+  --input: #90EE90;
+  --ring: #228B22;
 }
 
-@layer base {
-  * {
-    @apply border-gray-200 dark:border-gray-800;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+/* Default Theme */
+.theme-default {
+  --background: #ffffff;
+  --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #3b82f6;
+}
+
+* {
+  @apply border-border;
+}
+
+body {
+  @apply bg-background text-foreground;
 }
 
 @layer components {
@@ -154,54 +259,95 @@
     @apply transition-colors duration-200;
   }
   
-  /* Dark mode specific fixes for inputs */
-  .dark input[type="text"],
-  .dark input[type="email"],
-  .dark input[type="password"],
-  .dark input[type="tel"],
-  .dark input[type="url"],
-  .dark input[type="number"],
-  .dark input[type="date"],
-  .dark input[type="datetime-local"],
-  .dark input[type="search"],
-  .dark textarea,
-  .dark select {
-    @apply bg-input border-border text-foreground;
-    color-scheme: dark;
-  }
-  
-  /* Light mode specific styling */
-  .light input[type="text"],
-  .light input[type="email"],
-  .light input[type="password"],
-  .light input[type="tel"],
-  .light input[type="url"],
-  .light input[type="number"],
-  .light input[type="date"],
-  .light input[type="datetime-local"],
-  .light input[type="search"],
-  .light textarea,
-  .light select {
-    @apply bg-white border-gray-300 text-gray-900;
-    color-scheme: light;
-  }
-  
   /* Theme-specific input styling */
-  .theme-blue input,
-  .theme-blue textarea,
-  .theme-blue select {
-    @apply focus:ring-blue-500;
+  .theme-dogs input,
+  .theme-dogs textarea,
+  .theme-dogs select {
+    @apply focus:ring-amber-600;
   }
   
-  .theme-green input,
-  .theme-green textarea,
-  .theme-green select {
+  .theme-cats input,
+  .theme-cats textarea,
+  .theme-cats select {
+    @apply focus:ring-purple-500;
+  }
+  
+  .theme-birds input,
+  .theme-birds textarea,
+  .theme-birds select {
     @apply focus:ring-green-500;
   }
   
-  .theme-purple input,
-  .theme-purple textarea,
-  .theme-purple select {
-    @apply focus:ring-purple-500;
+  .theme-fish input,
+  .theme-fish textarea,
+  .theme-fish select {
+    @apply focus:ring-blue-500;
   }
+  
+  .theme-rabbits input,
+  .theme-rabbits textarea,
+  .theme-rabbits select {
+    @apply focus:ring-pink-500;
+  }
+  
+  .theme-hamsters input,
+  .theme-hamsters textarea,
+  .theme-hamsters select {
+    @apply focus:ring-orange-500;
+  }
+  
+  .theme-reptiles input,
+  .theme-reptiles textarea,
+  .theme-reptiles select {
+    @apply focus:ring-green-600;
+  }
+  
+  .theme-default input,
+  .theme-default textarea,
+  .theme-default select {
+    @apply focus:ring-blue-500;
+  }
+}
+
+/* Pet Theme Background Patterns */
+.theme-dogs {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(244, 164, 96, 0.1) 0%, transparent 50%);
+}
+
+.theme-cats {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(147, 112, 219, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(230, 230, 250, 0.1) 0%, transparent 50%);
+}
+
+.theme-birds {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(50, 205, 50, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(152, 251, 152, 0.1) 0%, transparent 50%);
+}
+
+.theme-fish {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(65, 105, 225, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(176, 224, 230, 0.1) 0%, transparent 50%);
+}
+
+.theme-rabbits {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 182, 193, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 228, 225, 0.1) 0%, transparent 50%);
+}
+
+.theme-hamsters {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(210, 105, 30, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(244, 164, 96, 0.1) 0%, transparent 50%);
+}
+
+.theme-reptiles {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(34, 139, 34, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(152, 251, 152, 0.1) 0%, transparent 50%);
 }

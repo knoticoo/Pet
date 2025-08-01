@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { t } from '@/lib/translations'
 import { useTheme, themes } from '@/lib/theme-provider'
-import { ThemePreview } from '@/components/ThemePreview'
+import { ThemeSelector } from '@/components/ThemeSelector'
 
 export default function SettingsPage() {
   const { data: session } = useSession()
@@ -329,20 +329,9 @@ export default function SettingsPage() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="font-medium text-foreground mb-3">{t('settings.theme')}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">Выберите цветовую схему приложения</p>
+                    <p className="text-sm text-muted-foreground mb-4">Выберите тему для ваших любимых питомцев</p>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {Object.entries(themes).map(([themeKey, themeConfig]) => (
-                        <ThemePreview
-                          key={themeKey}
-                          theme={themeKey}
-                          isSelected={theme === themeKey}
-                          onClick={() => setTheme(themeKey as any)}
-                          name={themeConfig.name}
-                          description={themeConfig.description}
-                        />
-                      ))}
-                    </div>
+                    <ThemeSelector />
                   </div>
 
                   <div className="flex items-center justify-between">
