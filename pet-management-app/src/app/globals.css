@@ -166,7 +166,7 @@
   .dark input[type="search"],
   .dark textarea,
   .dark select {
-    @apply bg-input border-border text-foreground;
+    @apply bg-gray-800 border-gray-600 text-white placeholder:text-gray-400;
     color-scheme: dark;
   }
   
@@ -182,7 +182,7 @@
   .light input[type="search"],
   .light textarea,
   .light select {
-    @apply bg-white border-gray-300 text-gray-900;
+    @apply bg-white border-gray-300 text-gray-900 placeholder:text-gray-500;
     color-scheme: light;
   }
   
