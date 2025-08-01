@@ -18,6 +18,7 @@ import {
   Zap
 } from 'lucide-react'
 import Link from 'next/link'
+import { t } from '@/lib/translations'
 
 interface ConsultationStatus {
   canConsult: boolean
@@ -104,13 +105,13 @@ export default function AIVetPage() {
               <Brain className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              AI Vet Consultation
+              {t('aiVet.title')}
             </h1>
             <Sparkles className="h-6 w-6 text-purple-500" />
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Get instant AI-powered preliminary health assessments for your pets. 
-            <span className="font-semibold text-red-600"> Not a substitute for professional veterinary care.</span>
+            {t('aiVet.subtitle')}
+            <span className="font-semibold text-red-600"> Не является заменой профессиональной ветеринарной помощи.</span>
           </p>
         </div>
 

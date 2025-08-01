@@ -6,14 +6,17 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 import { useRouter } from 'next/navigation'
+import { t } from '@/lib/translations'
 
 export default function NewPetPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setError('')
     
     const formData = new FormData(e.currentTarget)
     const petData = {
@@ -41,11 +44,11 @@ export default function NewPetPage() {
       } else {
         const errorData = await response.json()
         console.error('Error creating pet:', errorData)
-        alert('Failed to create pet. Please try again.')
+        setError(errorData.error || 'Failed to create pet. Please try again.')
       }
     } catch (error) {
       console.error('Error creating pet:', error)
-      alert('Failed to create pet. Please try again.')
+      setError('Failed to create pet. Please check your connection and try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -59,24 +62,29 @@ export default function NewPetPage() {
           <Link href="/pets">
             <Button variant="outline" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Pets
+              {t('common.back')} к питомцам
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Add New Pet</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('pets.addNew')}</h1>
             <p className="text-muted-foreground mt-1 text-sm md:text-base">
-              Enter your pet's information to start tracking their care.
+              Введите информацию о вашем питомце, чтобы начать отслеживать уход за ним.
             </p>
           </div>
         </div>
 
         {/* Form */}
         <div className="card p-6">
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-                  Pet Name *
+                  {t('pets.name')} *
                 </label>
                 <input
                   type="text"
@@ -84,13 +92,13 @@ export default function NewPetPage() {
                   name="name"
                   required
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Enter pet's name"
+                  placeholder="Введите имя питомца"
                 />
               </div>
 
               <div>
                 <label htmlFor="species" className="block text-sm font-medium text-foreground mb-2">
-                  Species *
+                  {t('pets.species')} *
                 </label>
                 <select
                   id="species"
@@ -98,34 +106,34 @@ export default function NewPetPage() {
                   required
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 >
-                  <option value="">Select species</option>
-                  <option value="dog">Dog</option>
-                  <option value="cat">Cat</option>
-                  <option value="bird">Bird</option>
-                  <option value="rabbit">Rabbit</option>
-                  <option value="hamster">Hamster</option>
-                  <option value="fish">Fish</option>
-                  <option value="reptile">Reptile</option>
-                  <option value="other">Other</option>
+                  <option value="">Выберите вид</option>
+                  <option value="dog">{t('pets.dog')}</option>
+                  <option value="cat">{t('pets.cat')}</option>
+                  <option value="bird">{t('pets.bird')}</option>
+                  <option value="rabbit">{t('pets.rabbit')}</option>
+                  <option value="hamster">{t('pets.hamster')}</option>
+                  <option value="fish">{t('pets.fish')}</option>
+                  <option value="reptile">{t('pets.reptile')}</option>
+                  <option value="other">{t('pets.other')}</option>
                 </select>
               </div>
 
               <div>
                 <label htmlFor="breed" className="block text-sm font-medium text-foreground mb-2">
-                  Breed
+                  {t('pets.breed')}
                 </label>
                 <input
                   type="text"
                   id="breed"
                   name="breed"
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Enter breed (optional)"
+                  placeholder="Введите породу (необязательно)"
                 />
               </div>
 
               <div>
                 <label htmlFor="age" className="block text-sm font-medium text-foreground mb-2">
-                  Age
+                  Возраст
                 </label>
                 <input
                   type="number"
@@ -133,13 +141,13 @@ export default function NewPetPage() {
                   name="age"
                   min="0"
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Age in years"
+                  placeholder="Возраст в годах"
                 />
               </div>
 
               <div>
                 <label htmlFor="weight" className="block text-sm font-medium text-foreground mb-2">
-                  Weight
+                  Вес
                 </label>
                 <input
                   type="number"
@@ -148,45 +156,45 @@ export default function NewPetPage() {
                   step="0.1"
                   min="0"
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Weight in lbs/kg"
+                  placeholder="Вес в кг"
                 />
               </div>
 
               <div>
                 <label htmlFor="color" className="block text-sm font-medium text-foreground mb-2">
-                  Color/Markings
+                  Окрас/Отметины
                 </label>
                 <input
                   type="text"
                   id="color"
                   name="color"
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="Color and markings"
+                  placeholder="Окрас и отметины"
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="notes" className="block text-sm font-medium text-foreground mb-2">
-                Additional Notes
+                Дополнительные заметки
               </label>
               <textarea
                 id="notes"
                 name="notes"
                 rows={4}
                 className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder="Any additional information about your pet..."
+                placeholder="Любая дополнительная информация о вашем питомце..."
               />
             </div>
 
             <div className="flex space-x-4 pt-6">
               <Button type="submit" className="flex-1" disabled={isSubmitting}>
                 <Heart className="h-4 w-4 mr-2" />
-                {isSubmitting ? 'Adding...' : 'Add Pet'}
+                {isSubmitting ? 'Добавляем...' : t('pets.addNew')}
               </Button>
               <Link href="/pets" className="flex-1">
                 <Button type="button" variant="outline" className="w-full">
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </Link>
             </div>

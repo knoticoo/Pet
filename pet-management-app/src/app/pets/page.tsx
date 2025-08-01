@@ -101,7 +101,7 @@ export default function PetsPage() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('pets.title')}</h1>
             <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
-              Управляйте и отслеживайте всех ваших любимых питомцев.
+              {t('pets.description') || 'Управляйте и отслеживайте всех ваших любимых питомцев.'}
             </p>
           </div>
           <Link href="/pets/new">
@@ -133,7 +133,7 @@ export default function PetsPage() {
                     <div>
                       <h3 className="text-lg font-semibold text-foreground">{pet.name}</h3>
                       <p className="text-muted-foreground text-sm">
-                        {pet.breed} • {calculateAge(pet.birthDate)} лет
+                        {pet.breed} • {calculateAge(pet.birthDate)} {t('common.years') || 'лет'}
                       </p>
                     </div>
                   </div>
@@ -158,7 +158,7 @@ export default function PetsPage() {
             <Link href="/pets/new">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Добавить первого питомца
+                {t('pets.addFirstPet')}
               </Button>
             </Link>
           </div>

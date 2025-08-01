@@ -46,6 +46,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, species, breed, birthDate, age, weight, color, notes } = body
 
+    // Validate required fields
+    if (!name || !species) {
+      return NextResponse.json({ 
+        error: 'Name and species are required' 
+      }, { status: 400 })
+    }
+
     // Calculate birth date from age if birthDate not provided
     let calculatedBirthDate = birthDate
     if (!calculatedBirthDate && age) {
@@ -53,12 +60,21 @@ export async function POST(request: NextRequest) {
       calculatedBirthDate = new Date(currentYear - parseInt(age), 0, 1)
     }
 
+    // Create description from notes and additional info
+    let description = notes || ''
+    if (weight) {
+      description += description ? `\nWeight: ${weight}` : `Weight: ${weight}`
+    }
+    if (color) {
+      description += description ? `\nColor: ${color}` : `Color: ${color}`
+    }
+
     const pet = await prisma.pet.create({
       data: {
-        name,
-        species,
-        breed,
-        description: notes,
+        name: name.toString(),
+        species: species.toString(),
+        breed: breed?.toString() || null,
+        description: description || null,
         birthDate: calculatedBirthDate ? new Date(calculatedBirthDate) : null,
         userId: session.user.id,
         isActive: true
@@ -68,6 +84,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(pet, { status: 201 })
   } catch (error) {
     console.error('Error creating pet:', error)
-    return NextResponse.json({ error: 'Не удалось создать питомца' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Failed to create pet', 
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }

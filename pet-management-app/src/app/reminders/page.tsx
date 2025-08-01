@@ -5,6 +5,7 @@ import { Bell, Plus, Calendar, Clock, CheckCircle, AlertCircle, Trash2, Edit } f
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
+import { t } from '@/lib/translations'
 
 interface Reminder {
   id: string
@@ -63,16 +64,16 @@ export default function RemindersPage() {
             reminder.id === id ? updatedReminder : reminder
           )
         )
-      } else {
-        setError('Failed to update reminder')
+              } else {
+          setError('Не удалось обновить напоминание')
+        }
+      } catch (error) {
+        setError('Произошла ошибка при обновлении напоминания')
       }
-    } catch (error) {
-      setError('An error occurred while updating reminder')
-    }
   }
 
   const deleteReminder = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this reminder?')) {
+    if (!confirm('Вы уверены, что хотите удалить это напоминание?')) {
       return
     }
 
@@ -83,12 +84,12 @@ export default function RemindersPage() {
 
       if (response.ok) {
         setReminders(prev => prev.filter(reminder => reminder.id !== id))
-      } else {
-        setError('Failed to delete reminder')
+              } else {
+          setError('Не удалось удалить напоминание')
+        }
+      } catch (error) {
+        setError('Произошла ошибка при удалении напоминания')
       }
-    } catch (error) {
-      setError('An error occurred while deleting reminder')
-    }
   }
 
   const activeReminders = reminders.filter(r => !r.isCompleted)
@@ -149,7 +150,7 @@ export default function RemindersPage() {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <Bell className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-            <p className="text-muted-foreground">Loading reminders...</p>
+            <p className="text-muted-foreground">Загружаем напоминания...</p>
           </div>
         </div>
       </AuthGuard>
@@ -162,15 +163,15 @@ export default function RemindersPage() {
         {/* Header */}
         <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Reminders</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('reminders.title')}</h1>
             <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
-              Stay on top of your pets' care with automated reminders.
+              Следите за уходом за питомцами с помощью автоматических напоминаний.
             </p>
           </div>
           <Link href="/reminders/new">
             <Button className="flex items-center space-x-2 w-full md:w-auto">
               <Plus className="h-4 w-4" />
-              <span>Add Reminder</span>
+              <span>{t('reminders.addNew')}</span>
             </Button>
           </Link>
         </div>
@@ -184,7 +185,7 @@ export default function RemindersPage() {
         {/* Active Reminders */}
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold text-foreground mb-4">Active Reminders</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">{t('reminders.active')}</h2>
             {activeReminders.length > 0 ? (
               <div className="space-y-4">
                 {activeReminders.map((reminder) => (
@@ -207,13 +208,13 @@ export default function RemindersPage() {
                             {isOverdue(reminder.dueDate) && (
                               <span className="flex items-center space-x-1 text-red-600 text-sm font-medium">
                                 <AlertCircle className="h-4 w-4" />
-                                <span>Overdue</span>
+                                <span>Просрочено</span>
                               </span>
                             )}
                             {isUpcoming(reminder.dueDate) && (
                               <span className="flex items-center space-x-1 text-yellow-600 text-sm font-medium">
                                 <Clock className="h-4 w-4" />
-                                <span>Due Soon</span>
+                                <span>Скоро</span>
                               </span>
                             )}
                           </div>
@@ -231,7 +232,7 @@ export default function RemindersPage() {
                               <Clock className="h-4 w-4" />
                               <span>{formatTime(reminder.dueDate)}</span>
                             </div>
-                            <span className="text-muted-foreground">for {reminder.pet.name}</span>
+                            <span className="text-muted-foreground">для {reminder.pet.name}</span>
                           </div>
                         </div>
                       </div>
@@ -246,7 +247,7 @@ export default function RemindersPage() {
                           onClick={() => toggleReminderComplete(reminder.id, reminder.isCompleted)}
                         >
                           <CheckCircle className="h-4 w-4 mr-1" />
-                          Mark Done
+                          Выполнено
                         </Button>
                         <Button 
                           size="sm" 
