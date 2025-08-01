@@ -10,6 +10,7 @@ import { t } from '@/lib/translations'
 import { useTheme, themes } from '@/lib/theme-provider'
 import { RecentPets } from '@/components/RecentPets'
 import { RecentReminders } from '@/components/RecentReminders'
+import { DebugSession } from '@/components/DebugSession'
 
 interface Stats {
   totalPets: number
@@ -187,6 +188,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Debug Session */}
+        <DebugSession />
+        
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <RecentPets />
