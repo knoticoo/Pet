@@ -74,25 +74,25 @@
 
 /* Bird Theme */
 .theme-birds {
-  --background: #F0FFF0;
-  --foreground: #2F2F2F;
-  --card: #F5FFFA;
-  --card-foreground: #2F2F2F;
-  --popover: #F5FFFA;
-  --popover-foreground: #2F2F2F;
-  --primary: #32CD32;
-  --primary-foreground: #ffffff;
-  --secondary: #90EE90;
-  --secondary-foreground: #2F2F2F;
-  --muted: #98FB98;
-  --muted-foreground: #6B8E6B;
-  --accent: #98FB98;
-  --accent-foreground: #2F2F2F;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #90EE90;
-  --input: #90EE90;
-  --ring: #32CD32;
+  --background: 120 100% 97%;
+  --foreground: 0 0% 18%;
+  --card: 120 100% 98%;
+  --card-foreground: 0 0% 18%;
+  --popover: 120 100% 98%;
+  --popover-foreground: 0 0% 18%;
+  --primary: 120 61% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 120 73% 75%;
+  --secondary-foreground: 0 0% 18%;
+  --muted: 120 100% 79%;
+  --muted-foreground: 120 15% 47%;
+  --accent: 120 100% 79%;
+  --accent-foreground: 0 0% 18%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 120 73% 75%;
+  --input: 120 73% 75%;
+  --ring: 120 61% 50%;
 }
 
 /* Fish Theme */
