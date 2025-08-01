@@ -403,6 +403,17 @@ export const AVAILABLE_FEATURES: FeatureConfig[] = [
     version: '1.0.0',
     routes: ['/backup', '/backup/restore', '/backup/settings'],
     dependencies: ['pets']
+  },
+  {
+    id: 'ai-vet',
+    name: 'ai-vet',
+    displayName: 'AI Veterinarian',
+    description: 'AI-powered veterinary consultations and health advice',
+    category: 'health',
+    isCore: false,
+    version: '1.0.0',
+    routes: ['/ai-vet', '/ai-vet/consultation', '/ai-vet/history'],
+    dependencies: ['pets']
   }
 ]
 
