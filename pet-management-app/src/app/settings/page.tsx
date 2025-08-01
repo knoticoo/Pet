@@ -6,9 +6,12 @@ import { AuthGuard } from '@/components/AuthGuard'
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { t } from '@/lib/translations'
+import { useTheme, themes } from '@/lib/theme-provider'
+import { ThemePreview } from '@/components/ThemePreview'
 
 export default function SettingsPage() {
   const { data: session } = useSession()
+  const { theme, setTheme } = useTheme()
   const [activeSection, setActiveSection] = useState('profile')
   const [saving, setSaving] = useState(false)
   const [userSubscription, setUserSubscription] = useState<{
@@ -17,7 +20,6 @@ export default function SettingsPage() {
     isAdmin: boolean
   } | null>(null)
   const [settings, setSettings] = useState({
-    theme: 'light',
     language: 'ru',
     name: '',
     email: '',
@@ -82,21 +84,6 @@ export default function SettingsPage() {
     try {
       // Save to localStorage
       localStorage.setItem('petcare-settings', JSON.stringify(settings))
-      
-      // Apply theme immediately
-      if (settings.theme === 'dark') {
-        document.documentElement.classList.add('dark')
-      } else if (settings.theme === 'light') {
-        document.documentElement.classList.remove('dark')
-      } else {
-        // System theme
-        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        if (isDark) {
-          document.documentElement.classList.add('dark')
-        } else {
-          document.documentElement.classList.remove('dark')
-        }
-      }
       
       // Here you could also save to your API if needed
       // await fetch('/api/settings', { method: 'POST', body: JSON.stringify(settings) })
@@ -339,21 +326,23 @@ export default function SettingsPage() {
                   <h2 className="text-xl font-semibold text-foreground">{t('settings.appearance')}</h2>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium text-foreground">{t('settings.theme')}</h3>
-                      <p className="text-sm text-muted-foreground">Выберите светлую или темную тему</p>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="font-medium text-foreground mb-3">{t('settings.theme')}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">Выберите цветовую схему приложения</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {Object.entries(themes).map(([themeKey, themeConfig]) => (
+                        <ThemePreview
+                          key={themeKey}
+                          theme={themeKey}
+                          isSelected={theme === themeKey}
+                          onClick={() => setTheme(themeKey as any)}
+                          name={themeConfig.name}
+                          description={themeConfig.description}
+                        />
+                      ))}
                     </div>
-                    <select 
-                      value={settings.theme}
-                      onChange={(e) => handleSettingChange('theme', e.target.value)}
-                      className="px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <option value="light">Светлая</option>
-                      <option value="dark">Темная</option>
-                      <option value="system">Системная</option>
-                    </select>
                   </div>
 
                   <div className="flex items-center justify-between">
