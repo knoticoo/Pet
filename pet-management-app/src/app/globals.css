@@ -4,49 +4,49 @@
 
 /* Pet Theme Variables */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --card: #ffffff;
-  --card-foreground: #171717;
-  --popover: #ffffff;
-  --popover-foreground: #171717;
-  --primary: #3b82f6;
-  --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #3b82f6;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 84% 5%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 84% 5%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 217 91% 60%;
   --radius: 0.5rem;
 }
 
 /* Dog Theme */
 .theme-dogs {
-  --background: #FFF8DC;
-  --foreground: #2F2F2F;
-  --card: #FAF0E6;
-  --card-foreground: #2F2F2F;
-  --popover: #FAF0E6;
-  --popover-foreground: #2F2F2F;
-  --primary: #8B4513;
-  --primary-foreground: #ffffff;
-  --secondary: #DEB887;
-  --secondary-foreground: #2F2F2F;
-  --muted: #F4A460;
-  --muted-foreground: #8B7355;
-  --accent: #F4A460;
-  --accent-foreground: #2F2F2F;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #DEB887;
-  --input: #DEB887;
-  --ring: #8B4513;
+  --background: 60 100% 97%;
+  --foreground: 0 0% 18%;
+  --card: 60 100% 95%;
+  --card-foreground: 0 0% 18%;
+  --popover: 60 100% 95%;
+  --popover-foreground: 0 0% 18%;
+  --primary: 25 76% 31%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 34 57% 70%;
+  --secondary-foreground: 0 0% 18%;
+  --muted: 27 77% 67%;
+  --muted-foreground: 25 25% 40%;
+  --accent: 27 77% 67%;
+  --accent-foreground: 0 0% 18%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 34 57% 70%;
+  --input: 34 57% 70%;
+  --ring: 25 76% 31%;
 }
 
 /* Cat Theme */

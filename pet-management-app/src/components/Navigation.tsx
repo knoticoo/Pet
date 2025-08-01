@@ -144,8 +144,11 @@ export const Navigation = memo(() => {
 
   const handleSignOut = useCallback(async () => {
     try {
+      // Use a more robust approach for the callback URL
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                     (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')
       await signOut({ 
-        callbackUrl: `${window.location.origin}/auth/signin`,
+        callbackUrl: `${baseUrl}/auth/signin`,
         redirect: true 
       })
     } catch (error) {
