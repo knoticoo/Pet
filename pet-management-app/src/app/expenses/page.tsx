@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
+import { t } from '@/lib/translations'
 
 interface Expense {
   id: string
@@ -105,7 +106,7 @@ export default function ExpensesPage() {
         <div className="space-y-8">
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground mt-4">Loading expenses...</p>
+            <p className="text-muted-foreground mt-4">{t('common.loading')}</p>
           </div>
         </div>
       </AuthGuard>
@@ -118,15 +119,15 @@ export default function ExpensesPage() {
         {/* Header */}
         <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Expenses</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('expenses.title')}</h1>
             <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
-              Track and manage your pet-related expenses.
+              Отслеживайте и управляйте расходами на ваших питомцев.
             </p>
           </div>
           <Link href="/expenses/new">
             <Button className="flex items-center space-x-2 w-full md:w-auto">
               <Plus className="h-4 w-4" />
-              <span>Add Expense</span>
+              <span>{t('expenses.addNew')}</span>
             </Button>
           </Link>
         </div>

@@ -6,17 +6,48 @@ import { AuthGuard } from '@/components/AuthGuard'
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { t } from '@/lib/translations'
+import { useTheme, themes } from '@/lib/theme-provider'
+import { ThemePreview } from '@/components/ThemePreview'
 
 export default function SettingsPage() {
   const { data: session } = useSession()
+  const { theme, setTheme } = useTheme()
   const [activeSection, setActiveSection] = useState('profile')
+  const [saving, setSaving] = useState(false)
   const [userSubscription, setUserSubscription] = useState<{
     tier: string
     status: string
     isAdmin: boolean
   } | null>(null)
+  const [settings, setSettings] = useState({
+    language: 'ru',
+    name: '',
+    email: '',
+    phone: '',
+    timezone: 'Europe/Moscow',
+    emailNotifications: true,
+    appointmentReminders: true,
+    medicationReminders: true,
+    weeklyReports: false
+  })
 
   useEffect(() => {
+    // Initialize settings from session
+    if (session?.user) {
+      setSettings(prev => ({
+        ...prev,
+        name: session.user.name || '',
+        email: session.user.email || ''
+      }))
+    }
+    
+    // Load saved settings from localStorage
+    const savedSettings = localStorage.getItem('petcare-settings')
+    if (savedSettings) {
+      const parsed = JSON.parse(savedSettings)
+      setSettings(prev => ({ ...prev, ...parsed }))
+    }
+    
     // Fetch user subscription info
     const fetchUserInfo = async () => {
       try {
@@ -43,6 +74,28 @@ export default function SettingsPage() {
       fetchUserInfo()
     }
   }, [session])
+
+  const handleSettingChange = (key: string, value: string | boolean) => {
+    setSettings(prev => ({ ...prev, [key]: value }))
+  }
+
+  const saveSettings = async () => {
+    setSaving(true)
+    try {
+      // Save to localStorage
+      localStorage.setItem('petcare-settings', JSON.stringify(settings))
+      
+      // Here you could also save to your API if needed
+      // await fetch('/api/settings', { method: 'POST', body: JSON.stringify(settings) })
+      
+      alert('Настройки сохранены успешно!')
+    } catch (error) {
+      console.error('Failed to save settings:', error)
+      alert('Ошибка при сохранении настроек')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const sections = [
     { id: 'profile', name: t('settings.profile'), icon: User },
@@ -145,7 +198,8 @@ export default function SettingsPage() {
                         type="text"
                         id="name"
                         name="name"
-                        defaultValue={session?.user?.name || ""}
+                        value={settings.name}
+                        onChange={(e) => handleSettingChange('name', e.target.value)}
                         className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
@@ -158,7 +212,8 @@ export default function SettingsPage() {
                         type="email"
                         id="email"
                         name="email"
-                        defaultValue={session?.user?.email || ""}
+                        value={settings.email}
+                        onChange={(e) => handleSettingChange('email', e.target.value)}
                         className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
@@ -171,6 +226,8 @@ export default function SettingsPage() {
                         type="tel"
                         id="phone"
                         name="phone"
+                        value={settings.phone}
+                        onChange={(e) => handleSettingChange('phone', e.target.value)}
                         placeholder="+7 (999) 123-4567"
                         className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                       />
@@ -183,6 +240,8 @@ export default function SettingsPage() {
                       <select
                         id="timezone"
                         name="timezone"
+                        value={settings.timezone}
+                        onChange={(e) => handleSettingChange('timezone', e.target.value)}
                         className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                       >
                         <option value="Europe/Moscow">Московское время (MSK)</option>
@@ -195,7 +254,9 @@ export default function SettingsPage() {
 
                   <div className="flex justify-end space-x-3">
                     <Button variant="outline">{t('settings.cancel')}</Button>
-                    <Button>{t('settings.saveChanges')}</Button>
+                    <Button onClick={saveSettings} disabled={saving}>
+                      {saving ? 'Сохраняем...' : t('settings.saveChanges')}
+                    </Button>
                   </div>
                 </form>
               </div>
@@ -265,17 +326,23 @@ export default function SettingsPage() {
                   <h2 className="text-xl font-semibold text-foreground">{t('settings.appearance')}</h2>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium text-foreground">{t('settings.theme')}</h3>
-                      <p className="text-sm text-muted-foreground">Выберите светлую или темную тему</p>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="font-medium text-foreground mb-3">{t('settings.theme')}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">Выберите цветовую схему приложения</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {Object.entries(themes).map(([themeKey, themeConfig]) => (
+                        <ThemePreview
+                          key={themeKey}
+                          theme={themeKey}
+                          isSelected={theme === themeKey}
+                          onClick={() => setTheme(themeKey as any)}
+                          name={themeConfig.name}
+                          description={themeConfig.description}
+                        />
+                      ))}
                     </div>
-                    <select className="px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring">
-                      <option value="light">Светлая</option>
-                      <option value="dark">Темная</option>
-                      <option value="system">Системная</option>
-                    </select>
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -283,11 +350,21 @@ export default function SettingsPage() {
                       <h3 className="font-medium text-foreground">{t('settings.language')}</h3>
                       <p className="text-sm text-muted-foreground">Выберите язык интерфейса</p>
                     </div>
-                    <select className="px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring">
+                    <select 
+                      value={settings.language}
+                      onChange={(e) => handleSettingChange('language', e.target.value)}
+                      className="px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
                       <option value="ru">Русский</option>
                       <option value="en">English</option>
                     </select>
                   </div>
+                </div>
+                  
+                <div className="flex justify-end mt-6">
+                  <Button onClick={saveSettings} disabled={saving}>
+                    {saving ? 'Сохраняем...' : t('settings.saveChanges')}
+                  </Button>
                 </div>
               </div>
             )}

@@ -5,6 +5,7 @@ import { FileText, Upload, Download, Trash2, Eye, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 import { useSession } from 'next-auth/react'
+import { t } from '@/lib/translations'
 
 interface Document {
   id: string
@@ -95,7 +96,7 @@ export default function DocumentsPage() {
   }
 
   const handleDelete = async (documentId: string) => {
-    if (confirm('Are you sure you want to delete this document?')) {
+    if (confirm('Вы уверены, что хотите удалить этот документ?')) {
       try {
         const response = await fetch(`/api/documents/${documentId}`, {
           method: 'DELETE'
@@ -115,7 +116,7 @@ export default function DocumentsPage() {
         <div className="space-y-8">
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground mt-4">Loading documents...</p>
+            <p className="text-muted-foreground mt-4">{t('common.loading')}</p>
           </div>
         </div>
       </AuthGuard>
@@ -128,14 +129,14 @@ export default function DocumentsPage() {
         {/* Header */}
         <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Documents</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('documents.title')}</h1>
             <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
-              Store and manage your pet documents and records.
+              Храните и управляйте документами и записями ваших питомцев.
             </p>
           </div>
           <Button className="flex items-center space-x-2 w-full md:w-auto">
             <Upload className="h-4 w-4" />
-            <span>Upload Document</span>
+            <span>{t('documents.upload')}</span>
           </Button>
         </div>
 
@@ -146,7 +147,7 @@ export default function DocumentsPage() {
             onChange={(e) => setSelectedPet(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="all">All Pets</option>
+            <option value="all">Все питомцы</option>
             {pets.map((pet) => (
               <option key={pet.id} value={pet.id}>
                 {pet.name}
