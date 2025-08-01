@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy: {
-        appointmentDate: 'asc'
+        date: 'asc'
       }
     })
 
@@ -33,13 +33,13 @@ export async function GET(request: NextRequest) {
     const transformedAppointments = appointments.map(appointment => ({
       id: appointment.id,
       title: appointment.title || `${appointment.appointmentType} for ${appointment.pet.name}`,
-      date: appointment.appointmentDate.toISOString(),
+      date: appointment.date.toISOString(),
       duration: appointment.duration || 60,
       location: appointment.location,
-      vetName: appointment.veterinarian,
+      vetName: appointment.vetName,
       appointmentType: appointment.appointmentType,
       status: appointment.status,
-      notes: appointment.notes,
+      notes: appointment.description,
       petId: appointment.petId,
       pet: appointment.pet
     }))
@@ -63,36 +63,52 @@ export async function POST(request: NextRequest) {
       title, 
       petId, 
       appointmentDate, 
+      date,
       appointmentType, 
       duration, 
       location, 
-      veterinarian, 
-      notes 
+      veterinarian,
+      vetName, 
+      notes,
+      description 
     } = body
+
+    // Use either appointmentDate or date field
+    const finalDate = appointmentDate || date
+    const finalVetName = veterinarian || vetName
+    const finalNotes = notes || description
+
+    // Validate required fields
+    if (!petId || !finalDate || !appointmentType) {
+      return NextResponse.json({ 
+        error: 'Pet, date, and appointment type are required' 
+      }, { status: 400 })
+    }
 
     // Verify the pet belongs to the user
     const pet = await prisma.pet.findFirst({
       where: {
-        id: petId,
+        id: petId.toString(),
         userId: session.user.id
       }
     })
 
     if (!pet) {
-      return NextResponse.json({ error: 'Pet not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Pet not found or access denied' }, { status: 404 })
     }
 
     const appointment = await prisma.appointment.create({
       data: {
-        title,
-        petId,
-        appointmentDate: new Date(appointmentDate),
-        appointmentType,
-        duration: duration || 60,
-        location,
-        veterinarian,
-        notes,
-        status: 'scheduled'
+        title: title?.toString() || `${appointmentType} for ${pet.name}`,
+        description: finalNotes?.toString() || null,
+        date: new Date(finalDate),
+        duration: parseInt(duration) || 60,
+        location: location?.toString() || null,
+        vetName: finalVetName?.toString() || null,
+        appointmentType: appointmentType.toString(),
+        status: 'scheduled',
+        petId: petId.toString(),
+        userId: session.user.id
       },
       include: {
         pet: {
@@ -107,14 +123,14 @@ export async function POST(request: NextRequest) {
     // Transform the response
     const transformedAppointment = {
       id: appointment.id,
-      title: appointment.title || `${appointment.appointmentType} for ${appointment.pet.name}`,
-      date: appointment.appointmentDate.toISOString(),
+      title: appointment.title,
+      date: appointment.date.toISOString(),
       duration: appointment.duration || 60,
       location: appointment.location,
-      vetName: appointment.veterinarian,
+      vetName: appointment.vetName,
       appointmentType: appointment.appointmentType,
       status: appointment.status,
-      notes: appointment.notes,
+      notes: appointment.description,
       petId: appointment.petId,
       pet: appointment.pet
     }
@@ -122,6 +138,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(transformedAppointment, { status: 201 })
   } catch (error) {
     console.error('Error creating appointment:', error)
-    return NextResponse.json({ error: 'Failed to create appointment' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Failed to create appointment',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }

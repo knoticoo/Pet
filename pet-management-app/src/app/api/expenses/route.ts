@@ -58,34 +58,52 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { title, amount, category, date, description, petId } = body
 
-    // Verify the pet belongs to the user
-    const pet = await prisma.pet.findFirst({
-      where: {
-        id: petId,
-        userId: session.user.id
-      }
-    })
+    // Validate required fields
+    if (!title || !amount || !category || !date) {
+      return NextResponse.json({ 
+        error: 'Title, amount, category, and date are required' 
+      }, { status: 400 })
+    }
 
-    if (!pet) {
-      return NextResponse.json({ error: 'Pet not found' }, { status: 404 })
+    // Validate amount is a valid number
+    const numericAmount = parseFloat(amount)
+    if (isNaN(numericAmount) || numericAmount < 0) {
+      return NextResponse.json({ 
+        error: 'Amount must be a valid positive number' 
+      }, { status: 400 })
+    }
+
+    // If petId is provided, verify the pet belongs to the user
+    if (petId) {
+      const pet = await prisma.pet.findFirst({
+        where: {
+          id: petId.toString(),
+          userId: session.user.id
+        }
+      })
+
+      if (!pet) {
+        return NextResponse.json({ error: 'Pet not found or access denied' }, { status: 404 })
+      }
     }
 
     const expense = await prisma.expense.create({
       data: {
-        title,
-        amount: parseFloat(amount),
-        category,
+        title: title.toString(),
+        amount: numericAmount,
+        category: category.toString(),
         date: new Date(date),
-        description,
-        petId
+        description: description?.toString() || null,
+        petId: petId?.toString() || null,
+        userId: session.user.id
       },
       include: {
-        pet: {
+        pet: petId ? {
           select: {
             name: true,
             species: true
           }
-        }
+        } : undefined
       }
     })
 
@@ -104,6 +122,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(transformedExpense, { status: 201 })
   } catch (error) {
     console.error('Error creating expense:', error)
-    return NextResponse.json({ error: 'Failed to create expense' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Failed to create expense',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }

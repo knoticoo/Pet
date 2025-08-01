@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Heart, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
+import { t } from '@/lib/translations'
 
 export default function SignUp() {
   const [name, setName] = useState('')
@@ -25,19 +26,19 @@ export default function SignUp() {
 
     // Client-side validation
     if (!name.trim()) {
-      setError('Name is required')
+      setError('Имя обязательно для заполнения')
       setLoading(false)
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      setError(t('auth.passwordsMustMatch'))
       setLoading(false)
       return
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long')
+      setError(t('auth.passwordTooShort'))
       setLoading(false)
       return
     }
@@ -58,16 +59,16 @@ export default function SignUp() {
       const data = await response.json()
 
       if (!response.ok) {
-        setError(data.error || 'An error occurred during signup')
+        setError(data.error || 'Произошла ошибка при регистрации')
       } else {
         setSuccess(true)
         // Redirect to signin page after a short delay
         setTimeout(() => {
-          router.push('/auth/signin?message=Account created successfully. Please sign in.')
+          router.push('/auth/signin?message=' + encodeURIComponent(t('auth.accountCreated')))
         }, 2000)
       }
          } catch {
-       setError('An error occurred. Please try again.')
+       setError(t('errors.generic'))
      } finally {
       setLoading(false)
     }
@@ -82,10 +83,10 @@ export default function SignUp() {
               <Heart className="h-12 w-12 text-green-500" />
             </div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Account Created!
+              Аккаунт создан!
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
-              Your account has been created successfully. Redirecting to sign in...
+              Ваш аккаунт успешно создан. Перенаправляем на страницу входа...
             </p>
           </div>
         </div>
@@ -101,10 +102,10 @@ export default function SignUp() {
             <Heart className="h-12 w-12 text-primary" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your PetCare account
+            {t('auth.createYourAccount')}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Join thousands of pet owners who trust PetCare
+            Присоединяйтесь к тысячам владельцев питомцев, которые доверяют ПетКеа
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

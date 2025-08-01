@@ -56,29 +56,37 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { fileName, fileType, fileSize, filePath, petId, documentType } = body
+    const { title, description, fileName, fileUrl, fileType, category, petId } = body
+
+    // Validate required fields
+    if (!title || !fileName || !fileUrl || !petId) {
+      return NextResponse.json({ 
+        error: 'Title, file name, file URL, and pet are required' 
+      }, { status: 400 })
+    }
 
     // Verify the pet belongs to the user
     const pet = await prisma.pet.findFirst({
       where: {
-        id: petId,
+        id: petId.toString(),
         userId: session.user.id
       }
     })
 
     if (!pet) {
-      return NextResponse.json({ error: 'Pet not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Pet not found or access denied' }, { status: 404 })
     }
 
     const document = await prisma.document.create({
       data: {
-        fileName,
-        fileType,
-        fileSize: parseInt(fileSize),
-        filePath,
-        documentType: documentType || 'other',
-        petId,
-        uploadDate: new Date()
+        title: title.toString(),
+        description: description?.toString() || null,
+        fileName: fileName.toString(),
+        fileUrl: fileUrl.toString(),
+        fileType: fileType?.toString() || 'unknown',
+        category: category?.toString() || 'other',
+        petId: petId.toString(),
+        userId: session.user.id
       },
       include: {
         pet: {
@@ -93,18 +101,23 @@ export async function POST(request: NextRequest) {
     // Transform the response
     const transformedDocument = {
       id: document.id,
-      name: document.fileName,
-      type: document.fileType,
-      size: document.fileSize ? `${(document.fileSize / 1024 / 1024).toFixed(2)} MB` : 'Unknown',
-      uploadDate: document.uploadDate.toISOString(),
+      title: document.title,
+      description: document.description,
+      fileName: document.fileName,
+      fileType: document.fileType,
+      category: document.category,
+      fileUrl: document.fileUrl,
+      createdAt: document.createdAt.toISOString(),
       petId: document.petId,
-      petName: document.pet.name,
-      url: document.filePath
+      pet: document.pet
     }
 
     return NextResponse.json(transformedDocument, { status: 201 })
   } catch (error) {
     console.error('Error creating document:', error)
-    return NextResponse.json({ error: 'Failed to create document' }, { status: 500 })
+    return NextResponse.json({ 
+      error: 'Failed to create document',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
