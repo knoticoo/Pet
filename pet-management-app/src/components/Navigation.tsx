@@ -111,7 +111,10 @@ export function Navigation() {
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="hidden md:flex items-center space-x-2 text-sm text-muted-foreground">
+            <Link 
+              href="/settings"
+              className="hidden md:flex items-center space-x-2 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
               <User className="h-4 w-4" />
               <span>{user?.name || user?.email}</span>
               {isAdmin && (
@@ -119,7 +122,7 @@ export function Navigation() {
                   {t('navigation.admin')}
                 </span>
               )}
-            </div>
+            </Link>
             <Button
               variant="ghost"
               size="sm"
@@ -174,7 +177,11 @@ export function Navigation() {
                 })}
                 
                 <div className="pt-4 mt-4 border-t">
-                  <div className="flex items-center space-x-3 px-4 py-2 text-sm text-muted-foreground">
+                  <Link
+                    href="/settings"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center space-x-3 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
                     <User className="h-4 w-4" />
                     <span>{user?.name || user?.email}</span>
                     {isAdmin && (
@@ -182,7 +189,7 @@ export function Navigation() {
                         {t('navigation.admin')}
                       </span>
                     )}
-                  </div>
+                  </Link>
                   <Button
                     variant="ghost"
                     onClick={() => {
