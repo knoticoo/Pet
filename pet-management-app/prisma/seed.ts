@@ -4,162 +4,74 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log('🌱 Starting database seeding...')
-
-  // Create admin user
-  const hashedPassword = await bcrypt.hash('admin123', 10)
+  // Create test user
+  const hashedPassword = await bcrypt.hash('password123', 12)
   
-  const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@petcare.com' },
+  const user = await prisma.user.upsert({
+    where: { email: 'test@example.com' },
     update: {},
     create: {
-      email: 'admin@petcare.com',
-      name: 'Admin User',
+      email: 'test@example.com',
+      name: 'Test User',
       password: hashedPassword,
-      isAdmin: true,
-    },
+      isAdmin: false,
+      subscriptionTier: 'free',
+      subscriptionStatus: 'active'
+    }
   })
 
-  console.log('👤 Created admin user:', adminUser.email)
+  console.log('Created user:', user)
 
   // Create core features
-  const coreFeatures = [
-    {
-      name: 'dashboard',
-      displayName: 'Dashboard',
-      description: 'Main dashboard with overview and quick actions',
-      category: 'core',
-      isCore: true,
-      isEnabled: true,
-      version: '1.0.0'
-    },
-    {
-      name: 'pets',
-      displayName: 'Pet Management',
-      description: 'Add, edit, and manage pet profiles',
-      category: 'core',
-      isCore: true,
-      isEnabled: true,
-      version: '1.0.0'
-    },
-    {
-      name: 'settings',
-      displayName: 'Settings',
-      description: 'User preferences and account settings',
-      category: 'core',
-      isCore: true,
-      isEnabled: true,
-      version: '1.0.0'
-    },
-    {
-      name: 'admin',
-      displayName: 'Admin Panel',
-      description: 'Administrative controls and system management',
-      category: 'core',
-      isCore: true,
-      isEnabled: true,
-      version: '1.0.0'
-    }
+  const features = [
+    { name: 'dashboard', displayName: 'Dashboard', category: 'core', isCore: true },
+    { name: 'pets', displayName: 'Pet Management', category: 'core', isCore: true },
+    { name: 'reminders', displayName: 'Reminders', category: 'health', isCore: false },
+    { name: 'appointments', displayName: 'Appointments', category: 'health', isCore: false },
+    { name: 'expenses', displayName: 'Expense Tracking', category: 'finance', isCore: false },
+    { name: 'documents', displayName: 'Document Storage', category: 'core', isCore: false },
+    { name: 'ai-vet', displayName: 'AI Veterinary', category: 'health', isCore: false },
+    { name: 'settings', displayName: 'Settings', category: 'core', isCore: true },
+    { name: 'admin', displayName: 'Admin Panel', category: 'admin', isCore: false }
   ]
 
-  // Create optional features
-  const optionalFeatures = [
-    {
-      name: 'appointments',
-      displayName: 'Appointments',
-      description: 'Schedule and manage veterinary appointments',
-      category: 'health',
-      isCore: false,
-      isEnabled: true,
-      version: '1.0.0'
-    },
-    {
-      name: 'reminders',
-      displayName: 'Reminders',
-      description: 'Set up automated reminders for pet care tasks',
-      category: 'health',
-      isCore: false,
-      isEnabled: true,
-      version: '1.0.0'
-    },
-    {
-      name: 'expenses',
-      displayName: 'Expense Tracking',
-      description: 'Track and categorize pet-related expenses',
-      category: 'finance',
-      isCore: false,
-      isEnabled: true,
-      version: '1.0.0'
-    },
-    {
-      name: 'documents',
-      displayName: 'Document Storage',
-      description: 'Store and organize pet documents and records',
-      category: 'advanced',
-      isCore: false,
-      isEnabled: true,
-      version: '1.0.0'
-    },
-    {
-      name: 'health-tracking',
-      displayName: 'Health Tracking',
-      description: 'Monitor pet health metrics and medical history',
-      category: 'health',
-      isCore: false,
-      isEnabled: false,
-      version: '1.0.0'
-    },
-    {
-      name: 'social-sharing',
-      displayName: 'Social Sharing',
-      description: 'Share pet photos and updates with friends',
-      category: 'social',
-      isCore: false,
-      isEnabled: false,
-      version: '1.0.0'
-    },
-    {
-      name: 'insurance-tracking',
-      displayName: 'Insurance Tracking',
-      description: 'Manage pet insurance policies and claims',
-      category: 'finance',
-      isCore: false,
-      isEnabled: false,
-      version: '1.0.0'
-    },
-    {
-      name: 'breeding-records',
-      displayName: 'Breeding Records',
-      description: 'Track breeding history and lineage',
-      category: 'advanced',
-      isCore: false,
-      isEnabled: false,
-      version: '1.0.0'
-    }
-  ]
-
-  const allFeatures = [...coreFeatures, ...optionalFeatures]
-
-  for (const feature of allFeatures) {
+  for (const feature of features) {
     await prisma.feature.upsert({
       where: { name: feature.name },
       update: {},
-      create: feature,
+      create: feature
     })
   }
 
-  console.log(`✨ Created ${allFeatures.length} features`)
+  console.log('Created features')
 
-  // Removed demo user and demo pets - clean database!
-  console.log('✅ Database seeding completed! (No demo data created)')
+  // Enable all features for the test user
+  const allFeatures = await prisma.feature.findMany()
+  for (const feature of allFeatures) {
+    await prisma.userFeature.upsert({
+      where: {
+        userId_featureId: {
+          userId: user.id,
+          featureId: feature.id
+        }
+      },
+      update: {},
+      create: {
+        userId: user.id,
+        featureId: feature.id,
+        isEnabled: true
+      }
+    })
+  }
+
+  console.log('Enabled features for user')
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect()
-  })
-  .catch(async (e) => {
+  .catch((e) => {
     console.error(e)
-    await prisma.$disconnect()
     process.exit(1)
+  })
+  .finally(async () => {
+    await prisma.$disconnect()
   })

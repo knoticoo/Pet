@@ -10,10 +10,12 @@ import { useRouter } from 'next/navigation'
 export default function NewPetPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setError('')
     
     const formData = new FormData(e.currentTarget)
     const petData = {
@@ -41,11 +43,11 @@ export default function NewPetPage() {
       } else {
         const errorData = await response.json()
         console.error('Error creating pet:', errorData)
-        alert('Failed to create pet. Please try again.')
+        setError(errorData.error || 'Failed to create pet. Please try again.')
       }
     } catch (error) {
       console.error('Error creating pet:', error)
-      alert('Failed to create pet. Please try again.')
+      setError('Failed to create pet. Please check your connection and try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -72,6 +74,11 @@ export default function NewPetPage() {
 
         {/* Form */}
         <div className="card p-6">
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
