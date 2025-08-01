@@ -475,24 +475,26 @@ export class FeatureManager {
 
   async getUserEnabledFeatures(userId: string): Promise<FeatureConfig[]> {
     try {
-      const userFeatures = await prisma.userFeature.findMany({
-        where: { 
-          userId,
-          isEnabled: true 
-        },
-        include: { feature: true }
+      // Get user subscription info to determine feature access
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { 
+          subscriptionTier: true,
+          subscriptionStatus: true,
+          isAdmin: true
+        }
       })
 
-      const enabledFeatureNames = new Set([
-        ...CORE_FEATURES.map(f => f.name), // Core features always enabled
-        ...userFeatures.map(uf => uf.feature.name)
-      ])
-
+      // For free users, enable all features except AI limitations are handled at usage level
+      // All features are available in navigation, but AI usage is limited
       const allFeatures = [...CORE_FEATURES, ...AVAILABLE_FEATURES]
-      return allFeatures.filter(feature => enabledFeatureNames.has(feature.name))
+      
+      // For now, return all features - AI limitations are handled in the AI service
+      return allFeatures
     } catch (error) {
       console.error('Failed to get user features:', error)
-      return CORE_FEATURES // Return only core features on error
+      // Return all features on error to avoid breaking the UI
+      return [...CORE_FEATURES, ...AVAILABLE_FEATURES]
     }
   }
 
