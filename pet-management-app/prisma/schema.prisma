@@ -48,14 +48,28 @@ model User {
   image         String?
   password      String?   // For credential-based auth
   isAdmin       Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  
+  // Subscription fields
+  subscriptionTier String? @default("free") // "free", "premium"
+  subscriptionId   String? // Stripe subscription ID
+  subscriptionStatus String? @default("inactive") // "active", "inactive", "cancelled"
+  subscriptionEndsAt DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  accounts     Account[]
-  sessions     Session[]
-  pets         Pet[]
-  expenses     Expense[]
-  userFeatures UserFeature[]
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  pets          Pet[]
+  expenses      Expense[]
+  appointments  Appointment[]
+  reminders     Reminder[]
+  documents     Document[]
+  userFeatures  UserFeature[]
+  aiConsultations AiConsultation[]
+  payments      Payment[]
+  subscriptions Subscription[]
 
   @@map("users")
 }
@@ -95,6 +109,7 @@ model Pet {
   documents       Document[]
   expenses        Expense[]
   reminders       Reminder[]
+  aiConsultations AiConsultation[]
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -291,18 +306,69 @@ model Feature {
 }
 
 model UserFeature {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   userId    String
   featureId String
-  isEnabled Boolean  @default(true)
-  config    String?  // User-specific configuration
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  feature   Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  isEnabled Boolean @default(true)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feature Feature @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
   @@unique([userId, featureId])
   @@map("user_features")
+}
+
+// AI Vet Consultation System
+model AiConsultation {
+  id        String   @id @default(cuid())
+  userId    String
+  petId     String
+  symptoms  String
+  duration  String
+  photos    String?  // JSON array of photo URLs
+  analysis  String   // JSON of the AI analysis result
+  severity  String   // "low", "medium", "high", "emergency"
+  urgency   Int      // 1-10 scale
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pet  Pet  @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@map("ai_consultations")
+}
+
+// Subscription Management
+model Subscription {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  stripeCustomerId  String?   @unique
+  stripeSubscriptionId String? @unique
+  stripePriceId     String?
+  status            String    // "active", "inactive", "cancelled", "past_due"
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+// Payment History
+model Payment {
+  id               String   @id @default(cuid())
+  userId           String
+  stripePaymentId  String   @unique
+  amount           Decimal  @db.Decimal(10, 2)
+  currency         String   @default("usd")
+  status           String   // "succeeded", "pending", "failed"
+  description      String?
+  createdAt        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
 }
