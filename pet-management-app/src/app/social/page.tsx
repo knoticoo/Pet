@@ -138,7 +138,7 @@ export default function SocialGalleryPage() {
               <h1 className="text-2xl md:text-3xl font-bold text-foreground">Pet Social Gallery</h1>
             </div>
             <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
-              Share your pet's moments with AI-powered insights
+                              Share your pet&apos;s moments with AI-powered insights
             </p>
           </div>
           <div className="flex items-center space-x-4">
@@ -320,7 +320,7 @@ export default function SocialGalleryPage() {
               <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
               <div>
                 <p className="font-medium text-purple-800">Mood Detection</p>
-                <p className="text-purple-700">AI analyzes your pet's facial expressions and body language</p>
+                <p className="text-purple-700">AI analyzes your pet&apos;s facial expressions and body language</p>
               </div>
             </div>
             <div className="flex items-start space-x-2">

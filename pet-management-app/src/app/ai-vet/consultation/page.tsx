@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+
 import { AuthGuard } from '@/components/AuthGuard'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { 
   ArrowLeft,
   Brain, 
@@ -14,10 +13,8 @@ import {
   Clock,
   Stethoscope,
   Heart,
-  Upload,
   Loader2,
   Crown,
-  Sparkles,
   Zap,
   Target
 } from 'lucide-react'
@@ -42,7 +39,7 @@ interface AnalysisResult {
 
 export default function ConsultationPage() {
   const { data: session } = useSession()
-  const router = useRouter()
+
   const [pets, setPets] = useState<Pet[]>([])
   const [selectedPet, setSelectedPet] = useState('')
   const [symptoms, setSymptoms] = useState('')
@@ -199,22 +196,7 @@ export default function ConsultationPage() {
     }
   }
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'low': return 'text-green-600 bg-green-100'
-      case 'medium': return 'text-yellow-600 bg-yellow-100'
-      case 'high': return 'text-orange-600 bg-orange-100'
-      case 'emergency': return 'text-red-600 bg-red-100'
-      default: return 'text-gray-600 bg-gray-100'
-    }
-  }
 
-  const getUrgencyColor = (urgency: number) => {
-    if (urgency >= 8) return 'text-red-600'
-    if (urgency >= 6) return 'text-orange-600'
-    if (urgency >= 4) return 'text-yellow-600'
-    return 'text-green-600'
-  }
 
   const selectedPetData = pets.find(p => p.id === selectedPet)
 
@@ -370,7 +352,7 @@ export default function ConsultationPage() {
                 <Loader2 className="h-12 w-12 animate-spin text-blue-500 mx-auto mb-4" />
                 <h3 className="font-medium text-foreground mb-2">Analyzing Symptoms</h3>
                 <p className="text-sm text-muted-foreground">
-                  Our AI is processing your pet's symptoms...
+                  Our AI is processing your pet&apos;s symptoms...
                 </p>
               </div>
             )}
@@ -438,7 +420,7 @@ export default function ConsultationPage() {
                     <div className="bg-white rounded-lg p-4 mb-4">
                       <h4 className="font-semibold text-gray-900 mb-3">Possible Conditions</h4>
                       <div className="space-y-2">
-                        {analysis.possibleConditions.map((condition: any, index: number) => (
+                        {analysis.possibleConditions.map((condition: string, index: number) => (
                           <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                             <div>
                               <span className="font-medium text-gray-900">{condition.name}</span>
@@ -462,7 +444,7 @@ export default function ConsultationPage() {
                     <div className="bg-white rounded-lg p-4 mb-4">
                       <h4 className="font-semibold text-gray-900 mb-3">AI Recommendations</h4>
                       <div className="space-y-3">
-                        {analysis.recommendations.map((rec: any, index: number) => (
+                        {analysis.recommendations.map((rec: string, index: number) => (
                           <div key={index} className="flex items-start gap-3 p-3 bg-blue-50 rounded-md">
                             <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                             <div>

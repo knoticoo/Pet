@@ -19,7 +19,7 @@ export default function NewAppointmentPage() {
   const { data: session } = useSession()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [pets, setPets] = useState<Pet[]>([])
-  const [loading, setLoading] = useState(true)
+
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -36,8 +36,6 @@ export default function NewAppointmentPage() {
       }
     } catch (error) {
       console.error('Error fetching pets:', error)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -284,7 +282,7 @@ export default function NewAppointmentPage() {
             </li>
             <li className="flex items-start space-x-2">
               <User className="h-4 w-4 mt-0.5 flex-shrink-0" />
-              <span>Bring your pet's medical history and current medications</span>
+                              <span>Bring your pet&apos;s medical history and current medications</span>
             </li>
           </ul>
         </div>

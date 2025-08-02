@@ -228,7 +228,7 @@ export default function UploadPage() {
                 <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
                 <div>
                   <p className="font-medium text-purple-800">Mood Detection</p>
-                  <p className="text-purple-700">AI will analyze your pet's mood from the photo</p>
+                  <p className="text-purple-700">AI will analyze your pet&apos;s mood from the photo</p>
                 </div>
               </div>
               <div className="flex items-start space-x-2">

@@ -1,5 +1,42 @@
 import { Plugin, PluginConfig } from './plugin-manager'
 
+// Define proper types for health analytics
+interface HealthScore {
+  score: number
+  factors: string[]
+  recommendations: string[]
+  timestamp: string
+}
+
+interface PredictiveAlert {
+  type: 'weight' | 'activity' | 'health'
+  severity: 'low' | 'medium' | 'high'
+  message: string
+  predictedDate: string
+  confidence: number
+}
+
+interface WeightTrend {
+  period: string
+  change: number
+  trend: 'increasing' | 'decreasing' | 'stable'
+  data: Array<{ date: string; weight: number }>
+}
+
+interface ActivityAnalysis {
+  averageDailyActivity: number
+  weeklyTrend: 'increasing' | 'decreasing' | 'stable'
+  recommendations: string[]
+  data: Array<{ date: string; duration: number; type: string }>
+}
+
+interface HealthReport {
+  type: string
+  summary: string
+  details: Record<string, unknown>
+  generatedAt: string
+}
+
 export class HealthAnalyticsPlugin implements Plugin {
   config: PluginConfig = {
     id: 'health-analytics',
@@ -42,17 +79,17 @@ export class HealthAnalyticsPlugin implements Plugin {
     // Disable analytics features, cleanup, etc.
   }
 
-  getSettings(): Record<string, any> {
+  getSettings(): Record<string, unknown> {
     return this.config.settings || {}
   }
 
-  async updateSettings(settings: Record<string, any>): Promise<void> {
+  async updateSettings(settings: Record<string, unknown>): Promise<void> {
     this.config.settings = { ...this.config.settings, ...settings }
     // Save settings to database
   }
 
   // AI Vet Integration Methods
-  async calculateHealthScore(petId: string): Promise<any> {
+  async calculateHealthScore(petId: string): Promise<HealthScore | null> {
     try {
       const response = await fetch(`/api/ai-vet/health-score/${petId}`)
       return await response.json()
@@ -62,7 +99,7 @@ export class HealthAnalyticsPlugin implements Plugin {
     }
   }
 
-  async getPredictiveAlerts(petId: string): Promise<any> {
+  async getPredictiveAlerts(petId: string): Promise<PredictiveAlert[] | null> {
     try {
       const response = await fetch(`/api/ai-vet/predictive-alerts/${petId}`)
       return await response.json()
@@ -72,7 +109,7 @@ export class HealthAnalyticsPlugin implements Plugin {
     }
   }
 
-  async analyzeWeightTrends(petId: string, timeframe: string): Promise<any> {
+  async analyzeWeightTrends(petId: string, timeframe: string): Promise<WeightTrend | null> {
     try {
       const response = await fetch(`/api/analytics/weight-trends/${petId}`, {
         method: 'POST',
@@ -86,7 +123,7 @@ export class HealthAnalyticsPlugin implements Plugin {
     }
   }
 
-  async getActivityAnalysis(petId: string): Promise<any> {
+  async getActivityAnalysis(petId: string): Promise<ActivityAnalysis | null> {
     try {
       const response = await fetch(`/api/analytics/activity-analysis/${petId}`)
       return await response.json()
@@ -96,7 +133,7 @@ export class HealthAnalyticsPlugin implements Plugin {
     }
   }
 
-  async generateHealthReport(petId: string, reportType: string): Promise<any> {
+  async generateHealthReport(petId: string, reportType: string): Promise<HealthReport | null> {
     try {
       const response = await fetch('/api/analytics/health-report', {
         method: 'POST',

@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
 
-    const where: any = {}
+    const where: Record<string, unknown> = {}
     if (petId) {
       // Verify pet belongs to user
       const pet = await prisma.pet.findFirst({

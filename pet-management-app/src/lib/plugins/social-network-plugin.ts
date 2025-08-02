@@ -1,5 +1,22 @@
 import { Plugin, PluginConfig } from './plugin-manager'
 
+// Define proper types for social network plugin
+interface PhotoAnalysis {
+  healthIndicators: string[]
+  breedConfidence: number
+  estimatedAge: number
+  mood: 'happy' | 'calm' | 'excited' | 'concerned'
+  recommendations: string[]
+}
+
+interface HealthInsight {
+  category: 'nutrition' | 'exercise' | 'behavior' | 'health'
+  insight: string
+  confidence: number
+  actionable: boolean
+  priority: 'low' | 'medium' | 'high'
+}
+
 export class PetSocialNetworkPlugin implements Plugin {
   config: PluginConfig = {
     id: 'pet-social-network',
@@ -37,17 +54,17 @@ export class PetSocialNetworkPlugin implements Plugin {
     // Disable social features, cleanup, etc.
   }
 
-  getSettings(): Record<string, any> {
+  getSettings(): Record<string, unknown> {
     return this.config.settings || {}
   }
 
-  async updateSettings(settings: Record<string, any>): Promise<void> {
+  async updateSettings(settings: Record<string, unknown>): Promise<void> {
     this.config.settings = { ...this.config.settings, ...settings }
     // Save settings to database
   }
 
   // AI Vet Integration Methods
-  async analyzePetPhoto(photoUrl: string, petId: string): Promise<any> {
+  async analyzePetPhoto(photoUrl: string, petId: string): Promise<PhotoAnalysis | null> {
     try {
       const response = await fetch('/api/ai-vet/analyze-photo', {
         method: 'POST',
@@ -61,7 +78,7 @@ export class PetSocialNetworkPlugin implements Plugin {
     }
   }
 
-  async getHealthInsights(petId: string): Promise<any> {
+  async getHealthInsights(petId: string): Promise<HealthInsight[] | null> {
     try {
       const response = await fetch(`/api/ai-vet/health-insights/${petId}`)
       return await response.json()

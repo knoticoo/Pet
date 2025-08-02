@@ -1,13 +1,12 @@
 'use client'
 
-import { Heart, Plus, Calendar, DollarSign, FileText, Bell, TrendingUp, Users, Activity } from 'lucide-react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { Heart, Calendar, DollarSign, Bell } from 'lucide-react'
+
 import { AuthGuard } from '@/components/AuthGuard'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { t } from '@/lib/translations'
-import { useTheme, themes } from '@/lib/theme-provider'
+
 import { RecentPets } from '@/components/RecentPets'
 import { RecentReminders } from '@/components/RecentReminders'
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
@@ -22,7 +21,7 @@ interface Stats {
 
 export default function DashboardPage() {
   const { data: session } = useSession()
-  const { theme } = useTheme()
+
   const [stats, setStats] = useState<Stats>({
     totalPets: 0,
     upcomingAppointments: 0,
@@ -54,7 +53,7 @@ export default function DashboardPage() {
       // Calculate upcoming appointments (next 7 days)
       const now = new Date()
       const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-      const upcomingAppointments = appointments.filter((appointment: any) => {
+      const upcomingAppointments = appointments.filter((appointment: { date: string }) => {
         const appointmentDate = new Date(appointment.date)
         return appointmentDate >= now && appointmentDate <= nextWeek
       }).length
@@ -62,11 +61,11 @@ export default function DashboardPage() {
       // Calculate monthly expenses
       const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
       const monthlyExpenses = expenses
-        .filter((expense: any) => new Date(expense.date) >= thisMonth)
-        .reduce((sum: number, expense: any) => sum + expense.amount, 0)
+        .filter((expense: { date: string; amount: number }) => new Date(expense.date) >= thisMonth)
+        .reduce((sum: number, expense: { amount: number }) => sum + expense.amount, 0)
 
       // Calculate active reminders
-      const activeReminders = reminders.filter((reminder: any) => !reminder.isCompleted).length
+      const activeReminders = reminders.filter((reminder: { isCompleted: boolean }) => !reminder.isCompleted).length
 
       setStats({
         totalPets: pets.length,
@@ -81,32 +80,7 @@ export default function DashboardPage() {
     }
   }
 
-  const getThemeIcon = () => {
-    const themeConfig = themes[theme]
-    switch (theme) {
-      case 'dogs':
-        return '🐕'
-      case 'cats':
-        return '🐱'
-      case 'birds':
-        return '🐦'
-      case 'fish':
-        return '🐠'
-      case 'rabbits':
-        return '🐰'
-      case 'hamsters':
-        return '🐹'
-      case 'reptiles':
-        return '🦎'
-      default:
-        return '🐾'
-    }
-  }
 
-  const getThemeColor = () => {
-    const themeConfig = themes[theme]
-    return themeConfig.colors.primary
-  }
 
   if (loading) {
     return (

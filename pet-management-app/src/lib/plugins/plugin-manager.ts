@@ -7,7 +7,7 @@ export interface PluginConfig {
   isEnabled: boolean
   isCore: boolean
   dependencies?: string[]
-  settings?: Record<string, any>
+  settings?: Record<string, unknown>
   permissions?: string[]
 }
 
@@ -16,8 +16,8 @@ export interface Plugin {
   initialize: () => Promise<void>
   enable: () => Promise<void>
   disable: () => Promise<void>
-  getSettings: () => Record<string, any>
-  updateSettings: (settings: Record<string, any>) => Promise<void>
+  getSettings: () => Record<string, unknown>
+  updateSettings: (settings: Record<string, unknown>) => Promise<void>
 }
 
 class PluginManager {

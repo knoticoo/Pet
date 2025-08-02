@@ -111,7 +111,7 @@ export default function NewReminderPage() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">Create Reminder</h1>
             <p className="text-muted-foreground mt-1 text-sm md:text-base">
-              Set up an automated reminder for your pet's care.
+                              Set up an automated reminder for your pet&apos;s care.
             </p>
           </div>
         </div>

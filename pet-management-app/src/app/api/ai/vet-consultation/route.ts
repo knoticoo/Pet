@@ -3,6 +3,23 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
+interface Pet {
+  id: string
+  name: string
+  species: string
+  breed?: string
+  birthDate?: string
+  gender?: string
+  healthRecords?: Array<{
+    title: string
+    date: string
+  }>
+  vaccinations?: Array<{
+    vaccineName: string
+    dateGiven: string
+  }>
+}
+
 interface VetConsultationRequest {
   petId: string
   symptoms: string
@@ -38,7 +55,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { petId, symptoms, urgency, duration, additionalInfo, enhancedAnalysis }: VetConsultationRequest = await request.json()
+    const { petId, symptoms, duration, additionalInfo, enhancedAnalysis }: VetConsultationRequest = await request.json()
 
     if (!petId || !symptoms) {
       return NextResponse.json({ error: 'Pet ID and symptoms are required' }, { status: 400 })
@@ -78,7 +95,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function analyzeWithOllama(pet: any, symptoms: string, duration?: string, additionalInfo?: string): Promise<VetConsultationResponse | null> {
+async function analyzeWithOllama(pet: Pet, symptoms: string, duration?: string, additionalInfo?: string): Promise<VetConsultationResponse | null> {
   try {
     const ollamaEndpoint = process.env.OLLAMA_ENDPOINT || 'http://localhost:11434'
     const ollamaModel = process.env.OLLAMA_MODEL || 'llama3.1:8b'
@@ -114,7 +131,7 @@ async function analyzeWithOllama(pet: any, symptoms: string, duration?: string, 
   }
 }
 
-function buildVetConsultationPrompt(pet: any, symptoms: string, duration?: string, additionalInfo?: string): string {
+function buildVetConsultationPrompt(pet: Pet, symptoms: string, duration?: string, additionalInfo?: string): string {
   const age = pet.birthDate ? Math.floor((Date.now() - new Date(pet.birthDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : 'unknown'
   
   return `You are an experienced veterinary AI assistant. Analyze the following pet health case and provide a comprehensive assessment.
@@ -131,10 +148,10 @@ ${duration ? `Duration: ${duration}` : ''}
 ${additionalInfo ? `Additional Information: ${additionalInfo}` : ''}
 
 Recent Health History:
-${pet.healthRecords?.length > 0 ? pet.healthRecords.map((record: any) => `- ${record.title} (${new Date(record.date).toLocaleDateString()})`).join('\n') : 'No recent health records'}
+${pet.healthRecords?.length > 0 ? pet.healthRecords.map((record) => `- ${record.title} (${new Date(record.date).toLocaleDateString()})`).join('\n') : 'No recent health records'}
 
 Recent Vaccinations:
-${pet.vaccinations?.length > 0 ? pet.vaccinations.map((vacc: any) => `- ${vacc.vaccineName} (${new Date(vacc.dateGiven).toLocaleDateString()})`).join('\n') : 'No recent vaccinations'}
+${pet.vaccinations?.length > 0 ? pet.vaccinations.map((vacc) => `- ${vacc.vaccineName} (${new Date(vacc.dateGiven).toLocaleDateString()})`).join('\n') : 'No recent vaccinations'}
 
 Please provide a detailed analysis in EXACTLY this JSON format:
 {
@@ -194,14 +211,14 @@ function parseOllamaVetResponse(response: string): VetConsultationResponse | nul
         : 'moderate',
       urgencyExplanation: parsed.urgencyExplanation || 'Standard monitoring recommended',
       possibleConditions: Array.isArray(parsed.possibleConditions) 
-        ? parsed.possibleConditions.map((condition: any) => ({
+        ? parsed.possibleConditions.map((condition) => ({
             name: condition.name || 'Unknown condition',
             description: condition.description || '',
             likelihood: Math.max(0, Math.min(1, condition.likelihood || 0.5))
           }))
         : [],
       recommendations: Array.isArray(parsed.recommendations)
-        ? parsed.recommendations.map((rec: any) => ({
+        ? parsed.recommendations.map((rec) => ({
             title: rec.title || rec,
             description: rec.description || '',
             priority: ['low', 'medium', 'high'].includes(rec.priority) ? rec.priority : 'medium'
@@ -217,7 +234,7 @@ function parseOllamaVetResponse(response: string): VetConsultationResponse | nul
   }
 }
 
-function analyzeWithRules(pet: any, symptoms: string, duration?: string, additionalInfo?: string): VetConsultationResponse {
+function analyzeWithRules(pet: Pet, symptoms: string): VetConsultationResponse {
   const symptomsLower = symptoms.toLowerCase()
   
   // Emergency keywords
@@ -268,7 +285,7 @@ function analyzeWithRules(pet: any, symptoms: string, duration?: string, additio
   }
 }
 
-function getSpeciesRecommendations(species: string, symptoms: string) {
+function getSpeciesRecommendations() {
   const speciesLower = species.toLowerCase()
   
   const recommendations = []
@@ -296,7 +313,7 @@ function getSpeciesRecommendations(species: string, symptoms: string) {
   return recommendations
 }
 
-function getPossibleConditions(symptoms: string, species: string) {
+function getPossibleConditions() {
   const conditions = []
   
   if (symptoms.includes('vomiting') || symptoms.includes('diarrhea')) {

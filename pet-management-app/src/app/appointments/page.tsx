@@ -183,7 +183,7 @@ export default function AppointmentsPage() {
                 <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-foreground mb-2">No upcoming appointments</h3>
                 <p className="text-muted-foreground mb-6">
-                  Schedule your pet's next veterinary visit to keep them healthy.
+                  Schedule your pet&apos;s next veterinary visit to keep them healthy.
                 </p>
                 <Link href="/appointments/new">
                   <Button>

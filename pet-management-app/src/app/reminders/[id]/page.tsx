@@ -7,7 +7,7 @@ import { AuthGuard } from '@/components/AuthGuard'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Edit, Bell, Calendar, Clock, Trash2, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
-import { t } from '@/lib/translations'
+
 
 interface Reminder {
   id: string
@@ -171,7 +171,7 @@ export default function ReminderDetailPage() {
             <Bell className="h-16 w-16 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">{error || 'Reminder not found'}</h3>
             <p className="text-muted-foreground mb-6">
-              The reminder you're looking for doesn't exist or you don't have permission to view it.
+              The reminder you&apos;re looking for doesn&apos;t exist or you don&apos;t have permission to view it.
             </p>
             <Link href="/reminders">
               <Button>

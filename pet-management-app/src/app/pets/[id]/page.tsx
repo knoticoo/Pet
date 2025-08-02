@@ -5,9 +5,9 @@ import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { AuthGuard } from '@/components/AuthGuard'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Edit, Calendar, Heart, MapPin, Phone, Mail, Trash2, Sparkles, Camera, Activity, TrendingUp, Bell, Share2, Star, Brain, Zap, Target, Users, Award, Clock, AlertCircle, CheckCircle, Info, Upload, X } from 'lucide-react'
+import { ArrowLeft, Edit, Calendar, Heart, Trash2, Camera, Activity, TrendingUp, Bell, Share2, Star, Brain, Target, CheckCircle, Info, Upload, X } from 'lucide-react'
 import Link from 'next/link'
-import { t } from '@/lib/translations'
+
 import { VirtualPet } from '@/components/pets/VirtualPet'
 import { PetPhotoGallery } from '@/components/pets/PetPhotoGallery'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -83,7 +83,7 @@ interface PetInsights {
     recommendations: string[]
   }
   careRecommendations: string[]
-  upcomingEvents: any[]
+  upcomingEvents: Array<{ id: string; title: string; date: string; type: string }>
   funFacts: string[]
 }
 
@@ -350,7 +350,7 @@ export default function PetDetailPage() {
             <Heart className="h-16 w-16 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">{error || 'Pet not found'}</h3>
             <p className="text-muted-foreground mb-6">
-              The pet you're looking for doesn't exist or you don't have permission to view it.
+              The pet you&apos;re looking for doesn&apos;t exist or you don&apos;t have permission to view it.
             </p>
             <Link href="/pets">
               <Button>

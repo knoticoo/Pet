@@ -1,8 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { aiVetService } from '@/lib/ai-vet-service'
+
+interface Pet {
+  id: string
+  name: string
+  species: string
+  breed?: string
+  birthDate: Date
+}
+
+interface Appointment {
+  id: string
+  title: string
+  appointmentType?: string
+  date: Date
+}
+
+interface Expense {
+  id: string
+  title: string
+  amount: number
+  category: string
+  date: Date
+}
+
+interface Consultation {
+  id: string
+  symptoms: string
+  date: Date
+}
+
+interface HealthAnalysis {
+  healthScore: number
+  riskLevel: 'low' | 'medium' | 'high'
+  trends: string[]
+  predictions: string[]
+  recommendations: string[]
+  alerts: string[]
+  prevention: string[]
+  lastUpdated: string
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -85,7 +125,7 @@ function calculateAge(birthDate: Date): number {
   return Math.floor((Date.now() - birthDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000))
 }
 
-async function analyzeHealthTrendsWithAI(pet: any, appointments: any[], expenses: any[], consultations: any[]) {
+async function analyzeHealthTrendsWithAI(pet: Pet, appointments: Appointment[], expenses: Expense[], consultations: Consultation[]): Promise<HealthAnalysis> {
   try {
     const endpoint = await aiVetService.findWorkingEndpoint()
     if (!endpoint) {
@@ -133,7 +173,7 @@ Focus on preventive care, early detection, and breed-specific health considerati
         }
       }),
       timeout: 20000
-    } as any)
+    })
 
     if (!response.ok) {
       throw new Error(`AI API error: ${response.status}`)
@@ -147,9 +187,9 @@ Focus on preventive care, early detection, and breed-specific health considerati
   }
 }
 
-function parseHealthAnalysis(response: string) {
+function parseHealthAnalysis(response: string): HealthAnalysis {
   const lines = response.split('\n')
-  const analysis: any = {}
+  const analysis: Record<string, unknown> = {}
 
   lines.forEach(line => {
     const cleanLine = line.trim()
@@ -183,7 +223,7 @@ function parseHealthAnalysis(response: string) {
   }
 }
 
-function getFallbackHealthAnalysis(pet: any, appointments: any[], expenses: any[], consultations: any[]) {
+function getFallbackHealthAnalysis(pet: Pet, appointments: Appointment[], expenses: Expense[], consultations: Consultation[]): HealthAnalysis {
   const petAge = calculateAge(pet.birthDate)
   const hasRecentConsultations = consultations.length > 0
   const hasRecentVetVisits = appointments.length > 0
