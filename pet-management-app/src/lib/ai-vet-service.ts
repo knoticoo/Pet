@@ -336,7 +336,6 @@ Brief responses. Recommend vet for serious issues.`
 
     // Default analysis if no match found
     if (!bestMatch) {
-      const defaults = this.getDefaultResponses(language)
       return {
         severity: 'medium',
         urgency: 5,
@@ -433,14 +432,14 @@ Brief responses. Recommend vet for serious issues.`
         const response = await fetch(`${endpoint}/api/tags`, {
           method: 'GET',
           timeout: 3000
-        } as any)
+        } as RequestInit & { timeout: number })
         
         if (response.ok) {
           this.activeEndpoint = endpoint
           console.log(`Found working Ollama at: ${endpoint}`)
           return endpoint
         }
-      } catch (error) {
+      } catch {
         console.log(`Ollama not available at ${endpoint}`)
       }
     }
@@ -457,15 +456,15 @@ Brief responses. Recommend vet for serious issues.`
       const response = await fetch(`${endpoint}/api/tags`, {
         method: 'GET',
         timeout: 5000
-      } as any)
+      } as RequestInit & { timeout: number })
       
       if (response.ok) {
         const data = await response.json()
-        return data.models?.some((model: any) => model.name.includes(this.ollamaModel.split(':')[0]))
+        return data.models?.some((model: { name: string }) => model.name.includes(this.ollamaModel.split(':')[0]))
       }
       return false
-    } catch (error) {
-      console.log('Ollama not available:', error)
+    } catch {
+      console.log('Ollama not available')
       return false
     }
   }
@@ -500,7 +499,7 @@ Brief responses. Recommend vet for serious issues.`
           options: { num_predict: 5 }
         }),
         timeout: 10000
-      } as any)
+      } as RequestInit & { timeout: number })
 
       const modelLoaded = testResponse.ok
       
@@ -510,7 +509,7 @@ Brief responses. Recommend vet for serious issues.`
         systemHealth: modelLoaded ? 'good' : 'degraded',
         activeEndpoint: endpoint
       }
-    } catch (error) {
+    } catch {
       return {
         ollamaAvailable: false,
         modelLoaded: false,

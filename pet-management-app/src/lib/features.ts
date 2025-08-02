@@ -8,11 +8,11 @@ export interface FeatureConfig {
   category: 'core' | 'health' | 'finance' | 'social' | 'advanced'
   isCore: boolean
   version: string
-  component?: React.ComponentType<any>
+  component?: React.ComponentType<Record<string, unknown>>
   routes?: string[]
   permissions?: string[]
   dependencies?: string[]
-  config?: Record<string, any>
+  config?: Record<string, unknown>
 }
 
 export interface PluginManifest {
@@ -34,7 +34,7 @@ export interface PluginManifest {
     icon: string
     permissions?: string[]
   }>
-  config?: Record<string, any>
+  config?: Record<string, unknown>
 }
 
 // Core features that are always available
@@ -473,20 +473,17 @@ export class FeatureManager {
     )
   }
 
-  async getUserEnabledFeatures(_userId: string): Promise<FeatureConfig[]> {
-    try {
-      // Get user subscription info to determine feature access
-      // Note: User subscription info is used for AI service limitations, not feature access
-      // All features are available in navigation, but AI usage is limited
-      const allFeatures = [...CORE_FEATURES, ...AVAILABLE_FEATURES]
-      
-      // For now, return all features - AI limitations are handled in the AI service
-      return allFeatures
-    } catch (error) {
-      console.error('Failed to get user features:', error)
-      // Return all features on error to avoid breaking the UI
-      return [...CORE_FEATURES, ...AVAILABLE_FEATURES]
+  async getUserEnabledFeatures(): Promise<FeatureConfig[]> {
+    const enabledFeatures: FeatureConfig[] = []
+    
+    for (const featureName of this.enabledFeatures) {
+      const feature = AVAILABLE_FEATURES.find(f => f.id === featureName)
+      if (feature) {
+        enabledFeatures.push(feature)
+      }
     }
+    
+    return enabledFeatures
   }
 
   async enableFeature(featureName: string, userId?: string): Promise<boolean> {
