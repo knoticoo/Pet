@@ -173,7 +173,7 @@ Focus on preventive care, early detection, and breed-specific health considerati
         }
       }),
       timeout: 20000
-    } as any)
+    })
 
     if (!response.ok) {
       throw new Error(`AI API error: ${response.status}`)

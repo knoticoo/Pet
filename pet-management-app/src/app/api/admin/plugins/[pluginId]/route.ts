@@ -17,7 +17,7 @@ export async function PATCH(
     const { pluginId } = params
 
     // Update plugin status in database
-    const _plugin = await prisma.systemSetting.upsert({
+    await prisma.systemSetting.upsert({
       where: { key: `plugin.${pluginId}.enabled` },
       update: { value: isEnabled.toString() },
       create: {

@@ -17,7 +17,7 @@ export async function PUT(
     const { pluginId } = params
 
     // Update plugin settings in database
-    const _pluginSettings = await prisma.systemSetting.upsert({
+    await prisma.systemSetting.upsert({
       where: { key: `plugin.${pluginId}.settings` },
       update: { value: JSON.stringify(settings) },
       create: {

@@ -6,7 +6,7 @@ import { AuthGuard } from '@/components/AuthGuard'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { t } from '@/lib/translations'
-import { useTheme, themes } from '@/lib/theme-provider'
+
 import { RecentPets } from '@/components/RecentPets'
 import { RecentReminders } from '@/components/RecentReminders'
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
@@ -21,7 +21,7 @@ interface Stats {
 
 export default function DashboardPage() {
   const { data: session } = useSession()
-  const { theme } = useTheme()
+
   const [stats, setStats] = useState<Stats>({
     totalPets: 0,
     upcomingAppointments: 0,

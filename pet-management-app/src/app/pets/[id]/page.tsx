@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { AuthGuard } from '@/components/AuthGuard'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Edit, Calendar, Heart, Trash2, Camera, Activity, TrendingUp, Bell, Share2, Star, Brain, Zap, Target, CheckCircle, Info, Upload, X } from 'lucide-react'
+import { ArrowLeft, Edit, Calendar, Heart, Trash2, Camera, Activity, TrendingUp, Bell, Share2, Star, Brain, Target, CheckCircle, Info, Upload, X } from 'lucide-react'
 import Link from 'next/link'
 
 import { VirtualPet } from '@/components/pets/VirtualPet'
@@ -83,7 +83,7 @@ interface PetInsights {
     recommendations: string[]
   }
   careRecommendations: string[]
-  upcomingEvents: unknown[]
+  upcomingEvents: Array<{ id: string; title: string; date: string; type: string }>
   funFacts: string[]
 }
 
