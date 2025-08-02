@@ -5,8 +5,9 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     
@@ -16,7 +17,7 @@ export async function GET(
 
     const reminder = await prisma.reminder.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       },
       include: {
@@ -46,8 +47,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     
@@ -69,7 +71,7 @@ export async function PUT(
     // Verify the reminder belongs to the user
     const existingReminder = await prisma.reminder.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
@@ -79,7 +81,7 @@ export async function PUT(
     }
 
     const updatedReminder = await prisma.reminder.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         title,
         description,
@@ -113,8 +115,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     
@@ -125,7 +128,7 @@ export async function DELETE(
     // Verify the reminder belongs to the user
     const existingReminder = await prisma.reminder.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
@@ -135,7 +138,7 @@ export async function DELETE(
     }
 
     await prisma.reminder.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ message: 'Reminder deleted successfully' })
@@ -151,8 +154,9 @@ export async function DELETE(
 // PATCH route for marking reminders as complete/incomplete
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -165,7 +169,7 @@ export async function PATCH(
     // Verify the reminder belongs to the user
     const existingReminder = await prisma.reminder.findFirst({
       where: {
-        id: params.id,
+        id,
         pet: {
           userId: session.user.id
         }
@@ -177,7 +181,7 @@ export async function PATCH(
     }
 
     const reminder = await prisma.reminder.update({
-      where: { id: params.id },
+      where: { id },
       data: { isCompleted },
       include: {
         pet: {

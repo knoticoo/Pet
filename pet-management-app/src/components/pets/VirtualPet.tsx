@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Heart, Play, Utensils, Scissors, Zap, Sparkles, Star, Gift } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -61,102 +61,104 @@ export function VirtualPet({ pet, onInteraction }: VirtualPetProps) {
   const animationRef = useRef<NodeJS.Timeout>()
   const particleRef = useRef<number>(0)
 
-  const speciesEmojis = {
-    dog: '🐕',
-    cat: '🐱',
-    bird: '🐦',
-    rabbit: '🐰',
-    fish: '🐠',
-    hamster: '🐹',
-    reptile: '🦎'
-  }
-
-  const getSpeciesEmoji = (species: string) => {
-    return speciesEmojis[species.toLowerCase() as keyof typeof speciesEmojis] || '🐾'
-  }
-
-  const animations: Record<string, PetAnimation> = {
-    idle: { 
-      type: 'idle', 
-      duration: 2000, 
-      emoji: getSpeciesEmoji(pet.species), 
-      color: 'text-gray-600',
-      scale: 1,
-      rotation: 0,
-      bounce: false,
-      glow: false
-    },
-    happy: { 
-      type: 'happy', 
-      duration: 1500, 
-      emoji: '😊', 
-      color: 'text-yellow-500',
-      scale: 1.1,
-      rotation: 5,
-      bounce: true,
-      glow: true
-    },
-    excited: { 
-      type: 'excited', 
-      duration: 1000, 
-      emoji: '🤩', 
-      color: 'text-orange-500',
-      scale: 1.2,
-      rotation: 10,
-      bounce: true,
-      glow: true
-    },
-    sleepy: { 
-      type: 'sleepy', 
-      duration: 3000, 
-      emoji: '😴', 
-      color: 'text-blue-500',
-      scale: 0.9,
-      rotation: -5,
-      bounce: false,
-      glow: false
-    },
-    curious: { 
-      type: 'curious', 
-      duration: 2000, 
-      emoji: '🤔', 
-      color: 'text-purple-500',
-      scale: 1.05,
-      rotation: 15,
-      bounce: false,
-      glow: false
-    },
-    playful: { 
-      type: 'playful', 
-      duration: 1200, 
-      emoji: '🎾', 
-      color: 'text-green-500',
-      scale: 1.15,
-      rotation: 20,
-      bounce: true,
-      glow: true
-    },
-    eating: {
-      type: 'eating',
-      duration: 2000,
-      emoji: '😋',
-      color: 'text-amber-500',
-      scale: 1.1,
-      rotation: 0,
-      bounce: false,
-      glow: true
-    },
-    grooming: {
-      type: 'grooming',
-      duration: 2500,
-      emoji: '✨',
-      color: 'text-pink-500',
-      scale: 1.05,
-      rotation: 0,
-      bounce: false,
-      glow: true
+  const animations: Record<string, PetAnimation> = useMemo(() => {
+    const speciesEmojis = {
+      dog: '🐕',
+      cat: '🐱',
+      bird: '🐦',
+      rabbit: '🐰',
+      fish: '🐠',
+      hamster: '🐹',
+      reptile: '🦎'
     }
-  }
+    
+    const getSpeciesEmoji = (species: string) => {
+      return speciesEmojis[species.toLowerCase() as keyof typeof speciesEmojis] || '🐾'
+    }
+    
+    return {
+      idle: { 
+        type: 'idle', 
+        duration: 2000, 
+        emoji: getSpeciesEmoji(pet.species), 
+        color: 'text-gray-600',
+        scale: 1,
+        rotation: 0,
+        bounce: false,
+        glow: false
+      },
+      happy: { 
+        type: 'happy', 
+        duration: 1500, 
+        emoji: '😊', 
+        color: 'text-yellow-500',
+        scale: 1.1,
+        rotation: 5,
+        bounce: true,
+        glow: true
+      },
+      excited: { 
+        type: 'excited', 
+        duration: 1000, 
+        emoji: '🤩', 
+        color: 'text-orange-500',
+        scale: 1.2,
+        rotation: 10,
+        bounce: true,
+        glow: true
+      },
+      sleepy: { 
+        type: 'sleepy', 
+        duration: 3000, 
+        emoji: '😴', 
+        color: 'text-blue-500',
+        scale: 0.9,
+        rotation: -5,
+        bounce: false,
+        glow: false
+      },
+      curious: { 
+        type: 'curious', 
+        duration: 2000, 
+        emoji: '🤔', 
+        color: 'text-purple-500',
+        scale: 1.05,
+        rotation: 15,
+        bounce: false,
+        glow: false
+      },
+      playful: { 
+        type: 'playful', 
+        duration: 1200, 
+        emoji: '🎾', 
+        color: 'text-green-500',
+        scale: 1.15,
+        rotation: 20,
+        bounce: true,
+        glow: true
+      },
+      eating: {
+        type: 'eating',
+        duration: 2000,
+        emoji: '😋',
+        color: 'text-amber-500',
+        scale: 1.1,
+        rotation: 0,
+        bounce: false,
+        glow: true
+      },
+      grooming: {
+        type: 'grooming',
+        duration: 2500,
+        emoji: '✨',
+        color: 'text-pink-500',
+        scale: 1.05,
+        rotation: 0,
+        bounce: false,
+        glow: true
+      }
+    }
+  }, [pet.species])
 
   // Create floating particles
   const createParticles = (type: string, count: number = 5) => {
@@ -206,7 +208,7 @@ export function VirtualPet({ pet, onInteraction }: VirtualPetProps) {
 
   // Auto mood changes based on stats
   useEffect(() => {
-    if (hunger > 80) {
+    if (energy < 30) {
       setMood('sleepy')
       setCurrentAnimation(animations.sleepy)
     } else if (happiness > 90) {
@@ -216,7 +218,7 @@ export function VirtualPet({ pet, onInteraction }: VirtualPetProps) {
     } else if (happiness > 70) {
       setMood('happy')
     }
-  }, [energy, happiness, hunger])
+  }, [energy, happiness, hunger, animations.sleepy])
 
   // Level up system
   useEffect(() => {
@@ -226,7 +228,7 @@ export function VirtualPet({ pet, onInteraction }: VirtualPetProps) {
       createParticles('excited', 8)
       setCurrentAnimation(animations.excited)
     }
-  }, [experience, petLevel])
+  }, [experience, petLevel, animations.excited])
 
   const handleInteraction = async (type: string) => {
     if (isInteracting) return

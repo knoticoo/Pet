@@ -5,8 +5,9 @@ import { prisma } from '@/lib/prisma'
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { pluginId: string } }
+  { params }: { params: Promise<{ pluginId: string }> }
 ) {
+  const { pluginId } = await params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.isAdmin) {
@@ -14,7 +15,6 @@ export async function PUT(
     }
 
     const { settings } = await request.json()
-    const { pluginId } = params
 
     // Update plugin settings in database
     await prisma.systemSetting.upsert({
@@ -44,15 +44,14 @@ export async function PUT(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { pluginId: string } }
+  { params }: { params: Promise<{ pluginId: string }> }
 ) {
+  const { pluginId } = await params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const { pluginId } = params
 
     // Get plugin settings from database
     const pluginSettings = await prisma.systemSetting.findUnique({

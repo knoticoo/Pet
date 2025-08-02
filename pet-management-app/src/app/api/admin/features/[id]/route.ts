@@ -5,8 +5,9 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.isAdmin) {
@@ -14,7 +15,7 @@ export async function GET(
     }
 
     const feature = await prisma.feature.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!feature) {
@@ -30,8 +31,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.isAdmin) {
@@ -42,7 +44,7 @@ export async function PUT(
     const { displayName, description, category, isEnabled } = body
 
     const existingFeature = await prisma.feature.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!existingFeature) {
@@ -55,7 +57,7 @@ export async function PUT(
     }
 
     const feature = await prisma.feature.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         displayName,
         description,
@@ -73,8 +75,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.isAdmin) {
@@ -82,7 +85,7 @@ export async function DELETE(
     }
 
     const existingFeature = await prisma.feature.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!existingFeature) {
@@ -95,7 +98,7 @@ export async function DELETE(
     }
 
     await prisma.feature.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ message: 'Feature deleted successfully' })
@@ -108,8 +111,9 @@ export async function DELETE(
 // PATCH route for toggling feature status
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.isAdmin) {
@@ -120,7 +124,7 @@ export async function PATCH(
     const { isEnabled } = body
 
     const existingFeature = await prisma.feature.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!existingFeature) {
@@ -133,7 +137,7 @@ export async function PATCH(
     }
 
     const feature = await prisma.feature.update({
-      where: { id: params.id },
+      where: { id },
       data: { isEnabled }
     })
 

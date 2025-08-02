@@ -35,6 +35,10 @@ interface AnalysisResult {
   urgency: number
   shouldSeeVet: boolean
   estimatedCause: string[]
+  confidence?: number
+  assessment?: string
+  urgencyLevel?: string
+  urgencyExplanation?: string
 }
 
 export default function ConsultationPage() {
@@ -138,7 +142,7 @@ export default function ConsultationPage() {
   }
 
   useEffect(() => {
-    if (session?.user?.id) {
+    if (session?.user) {
       loadPets()
     }
   }, [session])
@@ -306,7 +310,7 @@ export default function ConsultationPage() {
                       <Link href="/subscription/upgrade">
                         <Button size="sm" variant="outline">
                           <Crown className="h-4 w-4 mr-2" />
-                          {t('subscription.upgradeNow')}
+                          Upgrade Now
                         </Button>
                       </Link>
                     </div>

@@ -5,8 +5,9 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     
@@ -16,7 +17,7 @@ export async function GET(
 
     const pet = await prisma.pet.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
         isActive: true
       },
@@ -54,8 +55,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     
@@ -69,7 +71,7 @@ export async function PUT(
     // Verify the pet belongs to the user
     const existingPet = await prisma.pet.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
@@ -79,7 +81,7 @@ export async function PUT(
     }
 
     const updatedPet = await prisma.pet.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
         species,
@@ -105,8 +107,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     
@@ -117,7 +120,7 @@ export async function DELETE(
     // Verify the pet belongs to the user
     const existingPet = await prisma.pet.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id
       }
     })
@@ -128,7 +131,7 @@ export async function DELETE(
 
     // Soft delete by setting isActive to false
     await prisma.pet.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         isActive: false,
         updatedAt: new Date()
