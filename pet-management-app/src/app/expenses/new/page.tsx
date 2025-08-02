@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { Sparkles, Brain } from 'lucide-react'
 
 interface Pet {
@@ -16,7 +16,7 @@ interface Pet {
 }
 
 export default function NewExpensePage() {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const router = useRouter()
   const [pets, setPets] = useState<Pet[]>([])
   const [submitting, setSubmitting] = useState(false)

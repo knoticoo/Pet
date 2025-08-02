@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Calendar, Clock, CheckCircle, Trash2, Edit, ArrowLeft, Bell } from 'lucide-react'
@@ -28,7 +28,7 @@ interface Reminder {
 export default function ReminderDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const [reminder, setReminder] = useState<Reminder | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')

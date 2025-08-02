@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedSession } from "@/lib/session-types"
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -29,9 +28,9 @@ export async function GET(request: NextRequest) {
     }
     if (metricType) where.metricType = metricType
     if (startDate || endDate) {
-      where.date = {}
-      if (startDate) where.date.gte = new Date(startDate)
-      if (endDate) where.date.lte = new Date(endDate)
+      where.date = {} as { gte?: Date; lte?: Date }
+      if (startDate) (where.date as { gte?: Date }).gte = new Date(startDate)
+      if (endDate) (where.date as { lte?: Date }).lte = new Date(endDate)
     }
 
     const metrics = await prisma.healthMetric.findMany({
@@ -61,7 +60,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

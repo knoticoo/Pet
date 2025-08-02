@@ -354,19 +354,27 @@ Brief responses. Recommend vet for serious issues.`
       }
     }
 
+    const match = bestMatch as {
+      severity: string;
+      urgency: number;
+      vetNeeded: boolean;
+      recommendations: string[];
+      causes: string[];
+    }
+    
     return {
-      severity: bestMatch.severity,
-      urgency: bestMatch.urgency,
-      shouldSeeVet: bestMatch.vetNeeded,
-      recommendations: bestMatch.recommendations,
+      severity: match.severity,
+      urgency: match.urgency,
+      shouldSeeVet: match.vetNeeded,
+      recommendations: match.recommendations,
       nextSteps: [
-        bestMatch.vetNeeded ? 
+        match.vetNeeded ? 
           (language === 'ru' ? 'Запишитесь к ветеринару' : 'Schedule veterinary appointment') : 
           (language === 'ru' ? 'Продолжайте наблюдение' : 'Continue monitoring'),
         language === 'ru' ? 'Обеспечьте комфорт питомца' : 'Keep pet comfortable',
         language === 'ru' ? 'Документируйте любые изменения' : 'Document any changes'
       ],
-      estimatedCause: bestMatch.causes
+      estimatedCause: match.causes
     }
   }
 

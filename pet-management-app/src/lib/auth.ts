@@ -1,11 +1,11 @@
-import { NextAuthOptions } from "next-auth"
+import type { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as PrismaAdapter,
+  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -59,8 +59,9 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: Record<string, unknown>; user: Record<string, unknown> }) {
       if (user) {
+        token.sub = user.id
         token.isAdmin = (user as { isAdmin: boolean }).isAdmin
         token.rememberMe = (user as { rememberMe: boolean }).rememberMe
         
@@ -93,11 +94,11 @@ export const authOptions: NextAuthOptions = {
       
       return token
     },
-    async session({ session }) {
-      if (session.user) {
-        session.user.id = session.user.id!
-        session.user.isAdmin = session.user.isAdmin as boolean
-        session.user.rememberMe = session.user.rememberMe as boolean
+    async session({ session, token }: { session: Record<string, unknown>; token: Record<string, unknown> }) {
+      if (session.user && token) {
+        session.user.id = token.sub as string
+        session.user.isAdmin = token.isAdmin as boolean
+        session.user.rememberMe = token.rememberMe as boolean
         
         // Set session expiry based on remember me
         if (session.user.rememberMe) {
@@ -150,7 +151,7 @@ export const authOptions: NextAuthOptions = {
   useSecureCookies: process.env.NODE_ENV === 'production',
   // Add events to handle session updates
   events: {
-    async session({ session }) {
+    async session({ session }: { session: Record<string, unknown> }) {
       // Log session access for debugging
       console.log('Session accessed:', { userId: session.user.id, expires: session.expires })
     }

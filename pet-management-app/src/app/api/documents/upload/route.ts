@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedSession } from "@/lib/session-types"
 import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -38,17 +37,21 @@ export async function POST(request: NextRequest) {
 
     // For now, we'll store the file info in the database
     // In a real app, you'd upload to cloud storage (AWS S3, etc.)
+    const baseDocumentData = {
+      title: file.name,
+      description: `Uploaded document: ${file.name}`,
+      fileName: fileName,
+      fileUrl: `/uploads/${fileName}`, // This would be the actual URL in production
+      fileType: fileExtension || 'unknown',
+      category: 'other',
+      userId: session.user.id,
+    }
+
     const document = await prisma.document.create({
       data: {
-        title: file.name,
-        description: `Uploaded document: ${file.name}`,
-        fileName: fileName,
-        fileUrl: `/uploads/${fileName}`, // This would be the actual URL in production
-        fileType: fileExtension || 'unknown',
-        category: 'other',
-        userId: session.user.id,
+        ...baseDocumentData,
         petId: petId || null,
-      },
+      } as never,
       include: {
         pet: true
       }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { AuthGuard } from '@/components/AuthGuard'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -41,7 +41,7 @@ interface Pet {
 }
 
 export default function AIVetPage() {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const [status, setStatus] = useState<ConsultationStatus | null>(null)
   const [pets, setPets] = useState<Pet[]>([])
   const [loading, setLoading] = useState(true)

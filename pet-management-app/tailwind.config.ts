@@ -127,13 +127,6 @@ const config: Config = {
     objectPosition: true,
     overflow: true,
     overscrollBehavior: true,
-    position: true,
-    top: true,
-    right: true,
-    bottom: true,
-    left: true,
-    visibility: true,
-    zIndex: true,
   },
   
   // Experimental features for better performance

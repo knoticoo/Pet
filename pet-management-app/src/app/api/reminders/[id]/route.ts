@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedSession } from "@/lib/session-types"
 import { prisma } from '@/lib/prisma'
 
 export async function GET(
@@ -9,7 +8,7 @@ export async function GET(
 ) {
   const { id } = await params
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -51,7 +50,7 @@ export async function PUT(
 ) {
   const { id } = await params
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -63,9 +62,7 @@ export async function PUT(
       description, 
       dueDate, 
       reminderType, 
-      isCompleted, 
-      isRecurring, 
-      recurringInterval 
+      isCompleted 
     } = body
 
     // Verify the reminder belongs to the user
@@ -88,8 +85,6 @@ export async function PUT(
         dueDate: dueDate ? new Date(dueDate) : undefined,
         reminderType,
         isCompleted,
-        isRecurring,
-        recurringInterval,
         updatedAt: new Date()
       },
       include: {
@@ -119,7 +114,7 @@ export async function DELETE(
 ) {
   const { id } = await params
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -158,7 +153,7 @@ export async function PATCH(
 ) {
   const { id } = await params
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

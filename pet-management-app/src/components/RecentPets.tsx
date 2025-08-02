@@ -3,7 +3,7 @@
 import { Heart, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { useEffect, useState, useCallback, memo } from 'react'
 import { t } from '@/lib/translations'
 
@@ -58,7 +58,7 @@ const PetCard = memo(({ pet }: { pet: Pet }) => {
 PetCard.displayName = 'PetCard'
 
 export const RecentPets = memo(() => {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const [pets, setPets] = useState<Pet[]>([])
   const [loading, setLoading] = useState(true)
 

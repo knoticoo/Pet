@@ -1,7 +1,7 @@
 'use client'
 
 import { Heart, Calendar, DollarSign, Bell } from 'lucide-react'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { useEffect, useState } from 'react'
 import { t } from '@/lib/translations'
 
@@ -13,7 +13,7 @@ interface Stats {
 }
 
 export function DashboardStats() {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const [stats, setStats] = useState<Stats>({
     totalPets: 0,
     upcomingAppointments: 0,

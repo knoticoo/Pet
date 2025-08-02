@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -108,7 +108,7 @@ interface PetInsights {
 export default function PetDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const [pet, setPet] = useState<Pet | null>(null)
   const [healthRecords, setHealthRecords] = useState<HealthRecord[]>([])
   const [vaccinations, setVaccinations] = useState<Vaccination[]>([])
@@ -551,7 +551,7 @@ export default function PetDetailPage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as 'overview' | 'health' | 'appointments' | 'photos' | 'social')}
+                  onClick={() => setActiveTab(tab.id as 'overview' | 'photos' | 'health' | 'activities')}
                   className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                     activeTab === tab.id
                       ? 'border-primary text-primary'

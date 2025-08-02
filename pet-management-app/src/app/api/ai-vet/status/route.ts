@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedSession } from "@/lib/session-types"
 import { prisma } from '@/lib/prisma'
 
 async function getSystemSetting(key: string, defaultValue: string): Promise<string> {
@@ -17,7 +16,7 @@ async function getSystemSetting(key: string, defaultValue: string): Promise<stri
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Camera, Upload, X, Sparkles, Loader2 } from 'lucide-react'
 import Image from 'next/image'
@@ -16,7 +17,7 @@ interface Pet {
 }
 
 export default function UploadPage() {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const router = useRouter()
   const [pets, setPets] = useState<Pet[]>([])
   const [selectedPet, setSelectedPet] = useState<string>('')

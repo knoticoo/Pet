@@ -66,11 +66,17 @@ export class AIPetCompanion {
       }
 
       // Generate AI response
-      const aiResponse = await this.generateAIResponse(pet, interactionType)
+      const aiResponse = await this.generateAIResponse({
+        ...pet,
+        breed: pet.breed || 'Mixed'
+      }, interactionType)
       
       // Fallback to rule-based response if AI fails
       if (!aiResponse) {
-        return this.getRuleBasedResponse(pet, interactionType)
+        return this.getRuleBasedResponse({
+          ...pet,
+          breed: pet.breed || 'Mixed'
+        }, interactionType)
       }
 
       return aiResponse
@@ -133,16 +139,16 @@ export class AIPetCompanion {
     const species = pet.species.toLowerCase()
     const behaviors = this.speciesBehaviors[species as keyof typeof this.speciesBehaviors] || this.speciesBehaviors.dog
     
-    return `You are ${pet.name}, a ${pet.age || 'young'} ${pet.breed || species} ${species}. 
+          return `You are ${pet.name}, a ${this.calculateAge(pet.birthDate) || 'young'} ${pet.breed || species} ${species}. 
     
 Pet details:
 - Name: ${pet.name}
 - Breed: ${pet.breed || 'Unknown'}
-- Age: ${this.calculateAge(pet.birthDate)} years
-- Personality: ${pet.personality || 'friendly'}
-- Temperament: ${pet.temperament || 'calm'}
-- Favorite food: ${pet.favoriteFood || 'treats'}
-- Favorite toy: ${pet.favoriteToy || 'any toy'}
+- Age: ${this.calculateAge(pet.birthDate || null)} years
+- Personality: ${(pet as { personality?: string }).personality || 'friendly'}
+- Temperament: ${(pet as { temperament?: string }).temperament || 'calm'}
+- Favorite food: ${(pet as { favoriteFood?: string }).favoriteFood || 'treats'}
+- Favorite toy: ${(pet as { favoriteToy?: string }).favoriteToy || 'any toy'}
 
 Interaction type: ${interactionType}
 
@@ -215,7 +221,7 @@ Keep it short, friendly, and in character. Format as JSON:
         message = `${greeting} Ready for ${activity}!`
         break
       case 'feed':
-        message = `${greeting} ${pet.favoriteFood ? `I love ${pet.favoriteFood}!` : 'Yummy!'}`
+        message = `${greeting} ${(pet as { favoriteFood?: string }).favoriteFood ? `I love ${(pet as { favoriteFood: string }).favoriteFood}!` : 'Yummy!'}`
         healthTip = 'Remember to provide fresh water daily'
         break
       case 'walk':
@@ -299,14 +305,22 @@ Keep it short, friendly, and in character. Format as JSON:
         }
       })
 
-      if (!pet) return null
+      if (!pet) {
+        return {
+          healthStatus: { status: 'unknown', lastCheckup: null, vaccinations: 0, recommendations: [] },
+          activityLevel: { level: 'unknown', weeklyDuration: 0, recommendations: [] },
+          careRecommendations: [],
+          upcomingEvents: [],
+          funFacts: []
+        }
+      }
 
       const insights = {
-        healthStatus: this.analyzeHealthStatus(pet),
-        activityLevel: this.analyzeActivityLevel(pet),
-        careRecommendations: this.generateCareRecommendations(pet),
-        upcomingEvents: this.getUpcomingEvents(pet),
-        funFacts: this.generateFunFacts(pet)
+        healthStatus: this.analyzeHealthStatus({...pet, breed: pet.breed || 'Mixed'}),
+        activityLevel: this.analyzeActivityLevel({...pet, breed: pet.breed || 'Mixed'}),
+        careRecommendations: this.generateCareRecommendations({...pet, breed: pet.breed || 'Mixed'}),
+        upcomingEvents: this.getUpcomingEvents({...pet, breed: pet.breed || 'Mixed'}),
+        funFacts: this.generateFunFacts({...pet, breed: pet.breed || 'Mixed'})
       }
 
       return insights
@@ -342,7 +356,7 @@ Keep it short, friendly, and in character. Format as JSON:
     
     return {
       status: recentHealthRecords.length === 0 ? 'healthy' : 'monitoring',
-      lastCheckup: recentHealthRecords[0]?.date || null,
+      lastCheckup: recentHealthRecords[0]?.date.toISOString() || null,
       vaccinations: recentVaccinations.length,
       recommendations: this.getHealthRecommendations(pet)
     }
@@ -362,7 +376,7 @@ Keep it short, friendly, and in character. Format as JSON:
     weeklyDuration: number;
     recommendations: string[];
   } {
-    const recentActivities = pet.activities?.slice(0, 7) || []
+    const recentActivities = (pet as { activities?: Array<{ duration?: number }> }).activities?.slice(0, 7) || []
     const totalDuration = recentActivities.reduce((sum: number, activity: { duration?: number }) => sum + (activity.duration || 0), 0)
     
     return {
@@ -383,7 +397,7 @@ Keep it short, friendly, and in character. Format as JSON:
     appointments: Array<{ date: Date; title: string; status: string }>;
   }): string[] {
     const recommendations = []
-    const age = this.calculateAge(pet.birthDate)
+    const age = this.calculateAge(pet.birthDate || null)
     
     if (age > 7) {
       recommendations.push('Consider senior pet care and more frequent vet checkups')
@@ -408,15 +422,15 @@ Keep it short, friendly, and in character. Format as JSON:
     vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
     appointments: Array<{ date: Date; title: string; status: string }>;
   }): Array<{ id: string; title: string; date: string; type: string }> {
-    const events = []
+    const events: Array<{ id: string; title: string; date: string; type: string }> = []
     
-    pet.appointments.forEach((appointment: { id: string; date: Date; title: string; status: string }) => {
-      events.push({
-        id: appointment.id,
-        title: appointment.title,
-        date: appointment.date.toISOString(),
-        type: 'appointment'
-      })
+    pet.appointments.forEach((appointment) => {
+              events.push({
+          id: (appointment as { id?: string }).id || Math.random().toString(),
+          title: appointment.title,
+          date: appointment.date.toISOString(),
+          type: 'appointment'
+        })
     })
     
     return events
@@ -457,7 +471,7 @@ Keep it short, friendly, and in character. Format as JSON:
     appointments: Array<{ date: Date; title: string; status: string }>;
   }): string[] {
     const recommendations = []
-    const age = this.calculateAge(pet.birthDate)
+    const age = this.calculateAge(pet.birthDate || null)
     
     if (age > 7) {
       recommendations.push('Schedule senior wellness exam')

@@ -584,7 +584,7 @@ export class FeatureManager {
 
   getAvailableRoutes(userId?: string): Promise<string[]> {
     const enabledFeatures = userId 
-      ? this.getUserEnabledFeatures(userId)
+      ? this.getUserEnabledFeatures()
       : this.getEnabledFeatures()
 
     return enabledFeatures.then(features => 
