@@ -165,7 +165,7 @@ export const AVAILABLE_FEATURES: FeatureConfig[] = [
     displayName: 'Social Profiles',
     description: 'Share pet profiles and connect with other pet owners',
     category: 'social',
-    isCore: false,
+    isCore: true,
     version: '1.0.0',
     routes: ['/social', '/social/profile', '/social/connect'],
     dependencies: ['pets']
