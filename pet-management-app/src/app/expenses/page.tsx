@@ -213,7 +213,7 @@ export default function ExpensesPage() {
                       <div>
                         <h3 className="font-medium text-foreground">{expense.title}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {expense.pet && expense.pet.name ? expense.pet.name : 'General'} • {formatDate(expense.date)}
+                          {expense.pet?.name || 'General'} • {formatDate(expense.date)}
                         </p>
                         {expense.description && (
                           <p className="text-sm text-muted-foreground">{expense.description}</p>
