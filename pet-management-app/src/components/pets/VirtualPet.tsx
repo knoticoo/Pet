@@ -269,14 +269,17 @@ export function VirtualPet({ pet, onInteraction }: VirtualPetProps) {
     try {
       const response = await onInteraction(type)
       setLastResponse(response)
-      setMood((response.data as { mood?: string })?.mood || 'happy')
+      const responseMood = (response.data as { mood?: string })?.mood
+      setMood((responseMood && ['happy', 'calm', 'curious', 'excited', 'playful', 'sleepy'].includes(responseMood) ? responseMood : 'happy') as 'happy' | 'calm' | 'curious' | 'excited' | 'playful' | 'sleepy')
       
       // Set animation based on response
               const animation = animations[(response.data as { mood?: string })?.mood || 'happy'] || animations.happy
       setCurrentAnimation(animation)
       
       // Reset to idle after animation
-      clearTimeout(animationRef.current)
+      if (animationRef.current) {
+        clearTimeout(animationRef.current)
+      }
       animationRef.current = setTimeout(() => {
         setCurrentAnimation(animations.idle)
       }, animation.duration)
@@ -459,12 +462,12 @@ export function VirtualPet({ pet, onInteraction }: VirtualPetProps) {
             <p className="text-sm text-foreground mb-2">{lastResponse.message}</p>
             {(lastResponse as { healthTip?: string }).healthTip && (
               <div className="bg-blue-50 rounded p-2 mb-2">
-                <p className="text-xs text-blue-700">💡 {(lastResponse as { healthTip: string }).healthTip}</p>
+                <p className="text-xs text-blue-700">💡 {(lastResponse as { healthTip?: string }).healthTip}</p>
               </div>
             )}
             {(lastResponse as { activitySuggestion?: string }).activitySuggestion && (
               <div className="bg-green-50 rounded p-2">
-                <p className="text-xs text-green-700">🎯 {(lastResponse as { activitySuggestion: string }).activitySuggestion}</p>
+                <p className="text-xs text-green-700">🎯 {(lastResponse as { activitySuggestion?: string }).activitySuggestion}</p>
               </div>
             )}
           </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -29,7 +29,7 @@ interface SocialPost {
 }
 
 export function SocialFeed() {
-  const { session } = useAuthenticatedSession()
+  const { data: session } = useSession()
   const [posts, setPosts] = useState<SocialPost[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')

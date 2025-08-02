@@ -62,9 +62,7 @@ export async function PUT(
       description, 
       dueDate, 
       reminderType, 
-      isCompleted, 
-      isRecurring, 
-      recurringInterval 
+      isCompleted 
     } = body
 
     // Verify the reminder belongs to the user
@@ -87,8 +85,6 @@ export async function PUT(
         dueDate: dueDate ? new Date(dueDate) : undefined,
         reminderType,
         isCompleted,
-        isRecurring,
-        recurringInterval,
         updatedAt: new Date()
       },
       include: {

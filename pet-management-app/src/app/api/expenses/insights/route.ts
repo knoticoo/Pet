@@ -61,7 +61,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Use AI to analyze expenses
-    const insights = await analyzeExpensesWithAI(expenses, months)
+    const insights = await analyzeExpensesWithAI(
+      expenses.map(exp => ({
+        ...exp,
+        pet: exp.pet ? {
+          ...exp.pet,
+          breed: exp.pet.breed || 'Mixed'
+        } : null
+      })),
+      months
+    )
 
     return NextResponse.json({
       insights,

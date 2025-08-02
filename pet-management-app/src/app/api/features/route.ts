@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     let features
     if (userId && session?.user?.id === userId) {
       // Get user-specific features
-      features = await featureManager.getUserEnabledFeatures(userId)
+      features = await featureManager.getUserEnabledFeatures()
     } else {
       // Get globally enabled features
       features = await featureManager.getEnabledFeatures()
