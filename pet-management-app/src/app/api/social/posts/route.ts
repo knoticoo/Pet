@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
+import { aiVetService } from '@/lib/ai-vet-service'
 
 export async function GET(request: NextRequest) {
   try {
@@ -87,19 +88,38 @@ export async function POST(request: NextRequest) {
 
     const { petId, caption, imageUrl } = await request.json()
 
-    // Mock AI analysis
-    const aiAnalysis = {
-      mood: 'happy',
-      activity: 'posing',
-      healthNotes: 'Pet appears alert and healthy',
-      tags: ['photo', 'social', 'memory']
+    // Get pet information for AI analysis
+    const pet = await prisma.pet.findFirst({
+      where: {
+        id: petId,
+        userId: session.user.id
+      }
+    })
+
+    if (!pet) {
+      return NextResponse.json({ error: 'Pet not found' }, { status: 404 })
+    }
+
+    // Use hosted AI for image analysis
+    let aiAnalysis
+    try {
+      aiAnalysis = await analyzePhotoWithAI(imageUrl, caption, pet)
+    } catch (error) {
+      console.log('AI analysis failed, using fallback:', error)
+      // Fallback analysis
+      aiAnalysis = {
+        mood: 'happy',
+        activity: 'posing',
+        healthNotes: 'Photo analysis unavailable - pet appears alert',
+        tags: ['photo', 'social', 'memory']
+      }
     }
 
     const newPost = {
       id: Date.now().toString(),
       petId,
-      petName: 'Pet Name', // Would fetch from database
-      petSpecies: 'dog', // Would fetch from database
+      petName: pet.name,
+      petSpecies: pet.species,
       imageUrl,
       caption,
       aiAnalysis,
@@ -114,5 +134,82 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating social post:', error)
     return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
+  }
+}
+
+// Use your hosted AI for photo analysis
+async function analyzePhotoWithAI(imageUrl: string, caption: string, pet: any) {
+  try {
+    const endpoint = await aiVetService.findWorkingEndpoint()
+    if (!endpoint) {
+      throw new Error('AI service unavailable')
+    }
+
+    const prompt = `Analyze this pet photo and caption for a social media post.
+
+Pet: ${pet.species} ${pet.breed} ${pet.name}
+Caption: ${caption}
+
+Analyze and respond in exact format:
+MOOD: [happy/calm/excited/sleepy/playful/curious]
+ACTIVITY: [playing/sleeping/eating/sitting/running/posing]
+HEALTH: [brief health observation based on visible appearance]
+TAGS: [tag1], [tag2], [tag3]
+
+Keep responses brief and positive. Focus on visible behavior and mood.`
+
+    const response = await fetch(`${endpoint}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: process.env.OLLAMA_MODEL || 'llama3.1:8b',
+        prompt: prompt,
+        stream: false,
+        options: {
+          temperature: 0.3,
+          top_p: 0.8,
+          num_predict: 150,
+          num_ctx: 512
+        }
+      }),
+      timeout: 10000
+    } as any)
+
+    if (!response.ok) {
+      throw new Error(`AI API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return parsePhotoAnalysis(data.response)
+  } catch (error) {
+    console.error('AI photo analysis failed:', error)
+    throw error
+  }
+}
+
+function parsePhotoAnalysis(response: string) {
+  const lines = response.split('\n')
+  const analysis: any = {}
+
+  lines.forEach(line => {
+    const cleanLine = line.trim()
+    
+    if (cleanLine.startsWith('MOOD:')) {
+      analysis.mood = cleanLine.split(':')[1].trim().toLowerCase()
+    } else if (cleanLine.startsWith('ACTIVITY:')) {
+      analysis.activity = cleanLine.split(':')[1].trim().toLowerCase()
+    } else if (cleanLine.startsWith('HEALTH:')) {
+      analysis.healthNotes = cleanLine.split(':')[1].trim()
+    } else if (cleanLine.startsWith('TAGS:')) {
+      analysis.tags = cleanLine.split(':')[1].split(',').map(t => t.trim()).filter(t => t)
+    }
+  })
+
+  // Provide defaults if parsing failed
+  return {
+    mood: analysis.mood || 'happy',
+    activity: analysis.activity || 'posing',
+    healthNotes: analysis.healthNotes || 'Pet appears alert and healthy',
+    tags: analysis.tags || ['photo', 'social']
   }
 }
