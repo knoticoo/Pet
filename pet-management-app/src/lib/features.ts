@@ -476,16 +476,7 @@ export class FeatureManager {
   async getUserEnabledFeatures(userId: string): Promise<FeatureConfig[]> {
     try {
       // Get user subscription info to determine feature access
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { 
-          subscriptionTier: true,
-          subscriptionStatus: true,
-          isAdmin: true
-        }
-      })
-
-      // For free users, enable all features except AI limitations are handled at usage level
+      // Note: User subscription info is used for AI service limitations, not feature access
       // All features are available in navigation, but AI usage is limited
       const allFeatures = [...CORE_FEATURES, ...AVAILABLE_FEATURES]
       
@@ -594,14 +585,14 @@ export class FeatureManager {
     return this.enabledFeatures.has(featureName)
   }
 
-  getAvailableRoutes(userId?: string): string[] {
+  getAvailableRoutes(userId?: string): Promise<string[]> {
     const enabledFeatures = userId 
       ? this.getUserEnabledFeatures(userId)
       : this.getEnabledFeatures()
 
     return enabledFeatures.then(features => 
       features.flatMap(feature => feature.routes || [])
-    ) as any
+    )
   }
 
   validateDependencies(featureName: string): boolean {
