@@ -97,117 +97,117 @@
 
 /* Fish Theme */
 .theme-fish {
-  --background: #F0F8FF;
-  --foreground: #2F2F2F;
-  --card: #F5F5F5;
-  --card-foreground: #2F2F2F;
-  --popover: #F5F5F5;
-  --popover-foreground: #2F2F2F;
-  --primary: #4169E1;
-  --primary-foreground: #ffffff;
-  --secondary: #87CEEB;
-  --secondary-foreground: #2F2F2F;
-  --muted: #B0E0E6;
-  --muted-foreground: #6B7B8B;
-  --accent: #B0E0E6;
-  --accent-foreground: #2F2F2F;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #87CEEB;
-  --input: #87CEEB;
-  --ring: #4169E1;
+  --background: 210 100% 97%;
+  --foreground: 0 0% 18%;
+  --card: 0 0% 96%;
+  --card-foreground: 0 0% 18%;
+  --popover: 0 0% 96%;
+  --popover-foreground: 0 0% 18%;
+  --primary: 225 73% 57%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 199 64% 73%;
+  --secondary-foreground: 0 0% 18%;
+  --muted: 199 64% 73%;
+  --muted-foreground: 220 15% 47%;
+  --accent: 199 64% 73%;
+  --accent-foreground: 0 0% 18%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 199 64% 73%;
+  --input: 199 64% 73%;
+  --ring: 225 73% 57%;
 }
 
 /* Rabbit Theme */
 .theme-rabbits {
-  --background: #FFF0F5;
-  --foreground: #2F2F2F;
-  --card: #FFF5EE;
-  --card-foreground: #2F2F2F;
-  --popover: #FFF5EE;
-  --popover-foreground: #2F2F2F;
-  --primary: #FFB6C1;
-  --primary-foreground: #2F2F2F;
-  --secondary: #FFC0CB;
-  --secondary-foreground: #2F2F2F;
-  --muted: #FFE4E1;
-  --muted-foreground: #B8868B;
-  --accent: #FFE4E1;
-  --accent-foreground: #2F2F2F;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #FFC0CB;
-  --input: #FFC0CB;
-  --ring: #FFB6C1;
+  --background: 330 100% 98%;
+  --foreground: 0 0% 18%;
+  --card: 25 100% 97%;
+  --card-foreground: 0 0% 18%;
+  --popover: 25 100% 97%;
+  --popover-foreground: 0 0% 18%;
+  --primary: 350 100% 88%;
+  --primary-foreground: 0 0% 18%;
+  --secondary: 350 100% 88%;
+  --secondary-foreground: 0 0% 18%;
+  --muted: 350 100% 94%;
+  --muted-foreground: 350 25% 55%;
+  --accent: 350 100% 94%;
+  --accent-foreground: 0 0% 18%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 350 100% 88%;
+  --input: 350 100% 88%;
+  --ring: 350 100% 88%;
 }
 
 /* Hamster Theme */
 .theme-hamsters {
-  --background: #FFF8DC;
-  --foreground: #2F2F2F;
-  --card: #FAF0E6;
-  --card-foreground: #2F2F2F;
-  --popover: #FAF0E6;
-  --popover-foreground: #2F2F2F;
-  --primary: #D2691E;
-  --primary-foreground: #ffffff;
-  --secondary: #F4A460;
-  --secondary-foreground: #2F2F2F;
-  --muted: #DEB887;
-  --muted-foreground: #A0522D;
-  --accent: #DEB887;
-  --accent-foreground: #2F2F2F;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #F4A460;
-  --input: #F4A460;
-  --ring: #D2691E;
+  --background: 60 100% 97%;
+  --foreground: 0 0% 18%;
+  --card: 34 100% 95%;
+  --card-foreground: 0 0% 18%;
+  --popover: 34 100% 95%;
+  --popover-foreground: 0 0% 18%;
+  --primary: 25 76% 47%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 27 77% 67%;
+  --secondary-foreground: 0 0% 18%;
+  --muted: 34 57% 70%;
+  --muted-foreground: 25 25% 40%;
+  --accent: 34 57% 70%;
+  --accent-foreground: 0 0% 18%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 27 77% 67%;
+  --input: 27 77% 67%;
+  --ring: 25 76% 47%;
 }
 
 /* Reptile Theme */
 .theme-reptiles {
-  --background: #F0FFF0;
-  --foreground: #2F2F2F;
-  --card: #F5FFFA;
-  --card-foreground: #2F2F2F;
-  --popover: #F5FFFA;
-  --popover-foreground: #2F2F2F;
-  --primary: #228B22;
-  --primary-foreground: #ffffff;
-  --secondary: #90EE90;
-  --secondary-foreground: #2F2F2F;
-  --muted: #98FB98;
-  --muted-foreground: #556B55;
-  --accent: #98FB98;
-  --accent-foreground: #2F2F2F;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #90EE90;
-  --input: #90EE90;
-  --ring: #228B22;
+  --background: 120 100% 97%;
+  --foreground: 0 0% 18%;
+  --card: 120 100% 98%;
+  --card-foreground: 0 0% 18%;
+  --popover: 120 100% 98%;
+  --popover-foreground: 0 0% 18%;
+  --primary: 120 61% 34%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 120 73% 75%;
+  --secondary-foreground: 0 0% 18%;
+  --muted: 120 100% 79%;
+  --muted-foreground: 120 15% 47%;
+  --accent: 120 100% 79%;
+  --accent-foreground: 0 0% 18%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 120 73% 75%;
+  --input: 120 73% 75%;
+  --ring: 120 61% 34%;
 }
 
 /* Default Theme */
 .theme-default {
-  --background: #ffffff;
-  --foreground: #171717;
-  --card: #ffffff;
-  --card-foreground: #171717;
-  --popover: #ffffff;
-  --popover-foreground: #171717;
-  --primary: #3b82f6;
-  --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #3b82f6;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 98%;
+  --secondary-foreground: 222 84% 5%;
+  --muted: 210 40% 98%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 210 40% 98%;
+  --accent-foreground: 222 84% 5%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 217 91% 60%;
 }
 
 * {
