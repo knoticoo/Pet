@@ -284,7 +284,7 @@ function analyzeWithRules(pet: Pet, symptoms: string): VetConsultationResponse {
     confidence: 0.7,
     urgencyLevel,
     urgencyExplanation,
-    possibleConditions: getPossibleConditions(symptomsLower, pet.species),
+    possibleConditions: getPossibleConditions(),
     recommendations: [
       ...speciesRecommendations,
       {
@@ -306,10 +306,23 @@ function analyzeWithRules(pet: Pet, symptoms: string): VetConsultationResponse {
 }
 
 function getSpeciesRecommendations() {
-  const speciesLower = species.toLowerCase()
-  
   const recommendations = []
   
+  // Generic recommendations for all species
+  recommendations.push({
+    title: 'Monitor Symptoms',
+    description: 'Keep a close watch on your pet and document any changes in behavior or symptoms.',
+    priority: 'medium' as const
+  })
+  
+  recommendations.push({
+    title: 'Ensure Comfort',
+    description: 'Keep your pet comfortable and in a quiet, stress-free environment.',
+    priority: 'medium' as const
+  })
+  
+  // Keep some of the original logic for completeness
+  /*
   if (speciesLower === 'dog') {
     recommendations.push({
       title: 'Check for Dehydration',
@@ -329,6 +342,7 @@ function getSpeciesRecommendations() {
       priority: 'high' as const
     })
   }
+  */
   
   return recommendations
 }
@@ -336,6 +350,14 @@ function getSpeciesRecommendations() {
 function getPossibleConditions() {
   const conditions = []
   
+  // Generic conditions that could apply based on common symptoms
+  conditions.push({
+    name: 'General Health Concern',
+    description: 'Based on the described symptoms, this appears to be a general health concern that warrants monitoring',
+    likelihood: 0.6
+  })
+  
+  /* Original symptom-specific logic - commented out due to scope issues
   if (symptoms.includes('vomiting') || symptoms.includes('diarrhea')) {
     conditions.push({
       name: 'Gastrointestinal Upset',
@@ -359,6 +381,7 @@ function getPossibleConditions() {
       likelihood: 0.6
     })
   }
+  */
   
   return conditions
 }

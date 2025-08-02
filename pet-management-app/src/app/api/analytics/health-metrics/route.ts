@@ -28,9 +28,9 @@ export async function GET(request: NextRequest) {
     }
     if (metricType) where.metricType = metricType
     if (startDate || endDate) {
-      where.date = {}
-      if (startDate) where.date.gte = new Date(startDate)
-      if (endDate) where.date.lte = new Date(endDate)
+      where.date = {} as { gte?: Date; lte?: Date }
+      if (startDate) (where.date as { gte?: Date }).gte = new Date(startDate)
+      if (endDate) (where.date as { lte?: Date }).lte = new Date(endDate)
     }
 
     const metrics = await prisma.healthMetric.findMany({
