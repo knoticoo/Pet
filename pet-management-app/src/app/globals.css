@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Pet Theme Variables */
+/* Pet Theme Variables - Clean White Default */
 :root {
   --background: 0 0% 100%;
   --foreground: 0 0% 9%;
@@ -12,11 +12,11 @@
   --popover-foreground: 0 0% 9%;
   --primary: 217 91% 60%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 210 40% 96%;
+  --secondary: 210 40% 98%;
   --secondary-foreground: 222 84% 5%;
-  --muted: 210 40% 96%;
+  --muted: 210 40% 98%;
   --muted-foreground: 215 16% 47%;
-  --accent: 210 40% 96%;
+  --accent: 210 40% 98%;
   --accent-foreground: 222 84% 5%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;

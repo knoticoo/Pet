@@ -1,111 +1,118 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions } from '../../auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
-    const petId = searchParams.get('petId')
-    const userId = searchParams.get('userId')
-
-    const where: any = { isPublic: true }
-    if (petId) where.petId = petId
-    if (userId) where.userId = userId
-
-    const posts = await prisma.socialPost.findMany({
-      where,
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
+    // Mock data for now - in a real app, you'd fetch from database
+    const mockPosts = [
+      {
+        id: '1',
+        petId: '1',
+        petName: 'Buddy',
+        petSpecies: 'dog',
+        imageUrl: '/api/placeholder/400/400',
+        caption: 'Having a great day at the park! 🌞',
+        aiAnalysis: {
+          mood: 'happy',
+          activity: 'playing',
+          healthNotes: 'Pet appears healthy and energetic',
+          tags: ['outdoor', 'exercise', 'happy']
         },
-        pet: {
-          select: {
-            id: true,
-            name: true,
-            species: true,
-            breed: true
-          }
-        }
+        likes: 15,
+        comments: 3,
+        createdAt: new Date().toISOString(),
+        isLiked: false
       },
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
-      take: limit
-    })
-
-    const total = await prisma.socialPost.count({ where })
-
-    return NextResponse.json({
-      posts,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
+      {
+        id: '2',
+        petId: '2',
+        petName: 'Whiskers',
+        petSpecies: 'cat',
+        imageUrl: '/api/placeholder/400/400',
+        caption: 'Afternoon nap time 😴',
+        aiAnalysis: {
+          mood: 'calm',
+          activity: 'sleeping',
+          healthNotes: 'Relaxed posture indicates good comfort level',
+          tags: ['indoor', 'rest', 'cozy']
+        },
+        likes: 8,
+        comments: 1,
+        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        isLiked: true
+      },
+      {
+        id: '3',
+        petId: '3',
+        petName: 'Chirpy',
+        petSpecies: 'bird',
+        imageUrl: '/api/placeholder/400/400',
+        caption: 'Learning a new song! 🎵',
+        aiAnalysis: {
+          mood: 'curious',
+          activity: 'singing',
+          healthNotes: 'Active behavior suggests good health',
+          tags: ['music', 'learning', 'vocal']
+        },
+        likes: 12,
+        comments: 5,
+        createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+        isLiked: false
       }
-    })
+    ]
+
+    return NextResponse.json(mockPosts)
+
   } catch (error) {
     console.error('Error fetching social posts:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch social posts' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch posts' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { content, photos, petId, isPublic = true } = await request.json()
+    const { petId, caption, imageUrl } = await request.json()
 
-    const post = await prisma.socialPost.create({
-      data: {
-        userId: session.user.id,
-        petId: petId || null,
-        content,
-        photos: photos ? JSON.stringify(photos) : null,
-        isPublic
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
-        },
-        pet: {
-          select: {
-            id: true,
-            name: true,
-            species: true,
-            breed: true
-          }
-        }
-      }
-    })
+    // Mock AI analysis
+    const aiAnalysis = {
+      mood: 'happy',
+      activity: 'posing',
+      healthNotes: 'Pet appears alert and healthy',
+      tags: ['photo', 'social', 'memory']
+    }
 
-    return NextResponse.json(post)
+    const newPost = {
+      id: Date.now().toString(),
+      petId,
+      petName: 'Pet Name', // Would fetch from database
+      petSpecies: 'dog', // Would fetch from database
+      imageUrl,
+      caption,
+      aiAnalysis,
+      likes: 0,
+      comments: 0,
+      createdAt: new Date().toISOString(),
+      isLiked: false
+    }
+
+    return NextResponse.json(newPost, { status: 201 })
+
   } catch (error) {
     console.error('Error creating social post:', error)
-    return NextResponse.json(
-      { error: 'Failed to create social post' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
   }
 }

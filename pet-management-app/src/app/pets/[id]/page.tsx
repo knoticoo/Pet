@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { AuthGuard } from '@/components/AuthGuard'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Edit, Calendar, Heart, MapPin, Phone, Mail, Trash2 } from 'lucide-react'
+import { ArrowLeft, Edit, Calendar, Heart, MapPin, Phone, Mail, Trash2, Sparkles, Camera, Activity, TrendingUp, Bell, Share2, Star } from 'lucide-react'
 import Link from 'next/link'
 import { t } from '@/lib/translations'
 
@@ -202,36 +202,84 @@ export default function PetDetailPage() {
   return (
     <AuthGuard>
       <div className="space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link href="/pets">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Pets
-              </Button>
-            </Link>
-            <div className={`w-16 h-16 bg-gradient-to-br ${getGradientColor(pet.species)} rounded-full flex items-center justify-center`}>
-              <Heart className="h-8 w-8 text-white" />
+        {/* Modern Header with Hero Section */}
+        <div className="relative">
+          {/* Background gradient */}
+          <div className={`absolute inset-0 bg-gradient-to-r ${getGradientColor(pet.species)} rounded-lg opacity-10`}></div>
+          
+          <div className="relative p-6 md:p-8">
+            <div className="flex items-center justify-between mb-6">
+              <Link href="/pets">
+                <Button variant="outline" size="sm" className="bg-white/80 backdrop-blur-sm">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Pets
+                </Button>
+              </Link>
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" size="sm" className="bg-white/80 backdrop-blur-sm">
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share
+                </Button>
+                <Link href={`/pets/${pet.id}/edit`}>
+                  <Button variant="outline" size="sm" className="bg-white/80 backdrop-blur-sm">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                </Link>
+                <Button variant="destructive" size="sm" onClick={handleDelete}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">{pet.name}</h1>
-              <p className="text-muted-foreground">
-                {pet.breed} • {calculateAge(pet.birthDate)} years old
-              </p>
+
+            <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
+              {/* Pet Avatar */}
+              <div className="relative">
+                <div className={`w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br ${getGradientColor(pet.species)} rounded-2xl flex items-center justify-center shadow-lg`}>
+                  {pet.photo ? (
+                    <img src={pet.photo} alt={pet.name} className="w-full h-full object-cover rounded-2xl" />
+                  ) : (
+                    <Heart className="h-12 w-12 md:h-16 md:w-16 text-white" />
+                  )}
+                </div>
+                <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg">
+                  <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                </div>
+              </div>
+
+              {/* Pet Info */}
+              <div className="flex-1">
+                <div className="flex items-center space-x-3 mb-2">
+                  <h1 className="text-3xl md:text-4xl font-bold text-foreground">{pet.name}</h1>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium text-white bg-gradient-to-r ${getGradientColor(pet.species)}`}>
+                    {pet.species}
+                  </span>
+                </div>
+                <p className="text-lg text-muted-foreground mb-4">
+                  {pet.breed} • {calculateAge(pet.birthDate)} years old • {pet.gender || 'Gender unknown'}
+                </p>
+                
+                {/* Quick Stats */}
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>Born {new Date(pet.birthDate).toLocaleDateString()}</span>
+                  </div>
+                  {pet.adoptionDate && (
+                    <div className="flex items-center space-x-2">
+                      <Heart className="h-4 w-4 text-red-500" />
+                      <span>Adopted {new Date(pet.adoptionDate).toLocaleDateString()}</span>
+                    </div>
+                  )}
+                  {pet.microchipNumber && (
+                    <div className="flex items-center space-x-2">
+                      <Activity className="h-4 w-4 text-muted-foreground" />
+                      <span>Chip: {pet.microchipNumber}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Link href={`/pets/${pet.id}/edit`}>
-              <Button variant="outline">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-            </Link>
-            <Button variant="destructive" onClick={handleDelete}>
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
-            </Button>
           </div>
         </div>
 

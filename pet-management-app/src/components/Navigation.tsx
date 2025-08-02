@@ -103,7 +103,6 @@ export const Navigation = memo(() => {
     const featureNavigation = [
       { name: t('navigation.appointments'), href: '/appointments', icon: Calendar, feature: 'appointments' },
       { name: t('navigation.expenses'), href: '/expenses', icon: DollarSign, feature: 'expenses' },
-      { name: t('navigation.documents'), href: '/documents', icon: FileText, feature: 'documents' },
       { name: t('navigation.reminders'), href: '/reminders', icon: Bell, feature: 'reminders' },
       { name: t('navigation.aiVet'), href: '/ai-vet', icon: Brain, feature: 'ai-vet' },
     ]
