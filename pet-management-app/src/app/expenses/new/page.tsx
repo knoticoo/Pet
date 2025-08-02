@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { t } from '@/lib/translations'
+import { Sparkles, Brain } from 'lucide-react'
 
 interface Pet {
   id: string
@@ -15,11 +17,24 @@ interface Pet {
 }
 
 export default function NewExpensePage() {
-  const router = useRouter()
   const { data: session } = useSession()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter()
   const [pets, setPets] = useState<Pet[]>([])
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [aiSuggesting, setAiSuggesting] = useState(false)
+  const [aiSuggestions, setAiSuggestions] = useState<{
+    category: string
+    confidence: number
+    suggestions: string[]
+  } | null>(null)
+  const [formData, setFormData] = useState({
+    title: '',
+    amount: '',
+    category: '',
+    petId: '',
+    description: ''
+  })
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -41,18 +56,80 @@ export default function NewExpensePage() {
     }
   }
 
+  const getAISuggestions = async (title: string, description: string) => {
+    if (!title && !description) return
+
+    setAiSuggesting(true)
+    try {
+      const response = await fetch('/api/ai/expense-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          title, 
+          description,
+          petSpecies: pets.find(p => p.id === formData.petId)?.species 
+        })
+      })
+
+      if (response.ok) {
+        const suggestions = await response.json()
+        setAiSuggestions(suggestions)
+        
+        // Auto-apply high confidence suggestions
+        if (suggestions.confidence > 0.8 && suggestions.category) {
+          setFormData(prev => ({ ...prev, category: suggestions.category }))
+        }
+      }
+    } catch (error) {
+      console.error('Error getting AI suggestions:', error)
+    } finally {
+      setAiSuggesting(false)
+    }
+  }
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setFormData(prev => ({ ...prev, title: value }))
+    
+    // Debounce AI suggestions
+    clearTimeout(window.aiSuggestionTimeout)
+    window.aiSuggestionTimeout = setTimeout(() => {
+      getAISuggestions(value, formData.description)
+    }, 1000)
+  }
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value
+    setFormData(prev => ({ ...prev, description: value }))
+    
+    // Debounce AI suggestions
+    clearTimeout(window.aiSuggestionTimeout)
+    window.aiSuggestionTimeout = setTimeout(() => {
+      getAISuggestions(formData.title, value)
+    }, 1000)
+  }
+
+  const applySuggestion = (suggestion: string) => {
+    if (suggestion.includes('category:')) {
+      const category = suggestion.split('category:')[1].trim()
+      setFormData(prev => ({ ...prev, category }))
+    } else if (suggestion.includes('title:')) {
+      const title = suggestion.split('title:')[1].trim()
+      setFormData(prev => ({ ...prev, title }))
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setIsSubmitting(true)
+    setSubmitting(true)
     
-    const formData = new FormData(e.currentTarget)
     const expenseData = {
-      title: formData.get('title'),
-      amount: formData.get('amount'),
-      date: formData.get('date'),
-      category: formData.get('category'),
-      petId: formData.get('petId') || null,
-      description: formData.get('description'),
+      title: formData.title,
+      amount: formData.amount,
+      date: new Date().toISOString().split('T')[0], // Keep original date logic
+      category: formData.category,
+      petId: formData.petId || null,
+      description: formData.description,
     }
     
     try {
@@ -76,7 +153,7 @@ export default function NewExpensePage() {
       console.error('Error creating expense:', error)
       alert('Failed to create expense. Please try again.')
     } finally {
-      setIsSubmitting(false)
+      setSubmitting(false)
     }
   }
 
@@ -104,6 +181,52 @@ export default function NewExpensePage() {
           </div>
         </div>
 
+        {/* AI Suggestions Panel */}
+        {(aiSuggesting || aiSuggestions) && (
+          <div className="card p-4 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+            <div className="flex items-center gap-2 mb-3">
+              {aiSuggesting ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
+              ) : (
+                <Brain className="h-4 w-4 text-purple-600" />
+              )}
+              <span className="text-sm font-medium text-purple-800">
+                {aiSuggesting ? 'AI is analyzing...' : 'AI Suggestions'}
+              </span>
+            </div>
+            
+            {aiSuggestions && !aiSuggesting && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-purple-700">
+                    Suggested category: <strong>{aiSuggestions.category}</strong>
+                  </span>
+                  <span className="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full">
+                    {Math.round(aiSuggestions.confidence * 100)}% confident
+                  </span>
+                </div>
+                
+                {aiSuggestions.suggestions.length > 0 && (
+                  <div className="space-y-1">
+                    <span className="text-xs text-purple-600">Smart suggestions:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {aiSuggestions.suggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          onClick={() => applySuggestion(suggestion)}
+                          className="text-xs bg-white text-purple-700 border border-purple-200 px-2 py-1 rounded hover:bg-purple-50 transition-colors"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Form */}
         <div className="card p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -112,14 +235,22 @@ export default function NewExpensePage() {
                 <label htmlFor="title" className="block text-sm font-medium text-foreground mb-2">
                   Expense Title *
                 </label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  required
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                  placeholder="e.g., Vet Visit, Dog Food, Grooming"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="title"
+                    value={formData.title}
+                    onChange={handleTitleChange}
+                    required
+                    className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="e.g., Vet Visit, Dog Food, Grooming"
+                  />
+                  {aiSuggesting && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <Sparkles className="h-4 w-4 text-purple-500 animate-pulse" />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -131,7 +262,8 @@ export default function NewExpensePage() {
                   <input
                     type="number"
                     id="amount"
-                    name="amount"
+                    value={formData.amount}
+                    onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
                     step="0.01"
                     min="0"
                     required
@@ -148,9 +280,7 @@ export default function NewExpensePage() {
                 <input
                   type="date"
                   id="date"
-                  name="date"
-                  required
-                  defaultValue={new Date().toISOString().split('T')[0]}
+                  value={new Date().toISOString().split('T')[0]}
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
@@ -161,7 +291,8 @@ export default function NewExpensePage() {
                 </label>
                 <select
                   id="category"
-                  name="category"
+                  value={formData.category}
+                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                   required
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 >
@@ -185,7 +316,8 @@ export default function NewExpensePage() {
                 </label>
                 <select
                   id="pet"
-                  name="petId"
+                  value={formData.petId}
+                  onChange={(e) => setFormData(prev => ({ ...prev, petId: e.target.value }))}
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <option value="">General/Multiple Pets</option>
@@ -203,7 +335,8 @@ export default function NewExpensePage() {
                 </label>
                 <textarea
                   id="description"
-                  name="description"
+                  value={formData.description}
+                  onChange={handleDescriptionChange}
                   rows={3}
                   className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                   placeholder="Additional details about this expense..."
@@ -239,9 +372,9 @@ export default function NewExpensePage() {
             </div>
 
             <div className="flex space-x-4 pt-6">
-              <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              <Button type="submit" className="flex-1" disabled={submitting}>
                 <DollarSign className="h-4 w-4 mr-2" />
-                {isSubmitting ? 'Adding...' : 'Add Expense'}
+                {submitting ? 'Adding...' : 'Add Expense'}
               </Button>
               <Link href="/expenses" className="flex-1">
                 <Button type="button" variant="outline" className="w-full">
@@ -273,4 +406,11 @@ export default function NewExpensePage() {
       </div>
     </AuthGuard>
   )
+}
+
+// Extend Window interface for TypeScript
+declare global {
+  interface Window {
+    aiSuggestionTimeout: NodeJS.Timeout
+  }
 }

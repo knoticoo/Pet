@@ -202,9 +202,18 @@ export default function SocialGalleryPage() {
                 {/* Image */}
                 <div className={`relative ${viewMode === 'list' ? 'w-48 h-48 flex-shrink-0' : 'aspect-square'}`}>
                   <img
-                    src={post.imageUrl || '/api/placeholder/400/400'}
+                    src={post.imageUrl || '/images/default-pet.jpg'}
                     alt={`${post.petName} photo`}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback to a colored placeholder if image fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.style.backgroundColor = '#f3f4f6';
+                      target.style.display = 'flex';
+                      target.style.alignItems = 'center';
+                      target.style.justifyContent = 'center';
+                      target.innerHTML = `<div style="color: #6b7280; font-size: 14px; text-align: center;">📷<br>No Image</div>`;
+                    }}
                   />
                   {post.aiAnalysis?.mood && (
                     <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-sm">
