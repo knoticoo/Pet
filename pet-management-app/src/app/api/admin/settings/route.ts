@@ -4,12 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 // System settings model - we'll store these in the database
-interface SystemSetting {
-  key: string
-  value: string
-  description: string
-  category: string
-}
+
 
 export async function GET() {
   try {
@@ -95,7 +90,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PUT() {
   try {
     const session = await getServerSession(authOptions)
     

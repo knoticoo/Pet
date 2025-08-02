@@ -9,7 +9,7 @@ import { AdminUserManagement } from '@/components/admin/AdminUserManagement'
 import { AdminPluginManager } from '@/components/admin/AdminPluginManager'
 import { Shield, Settings, Users, Puzzle, Database, LogIn, Trash2, Sparkles, Menu, X, CheckCircle, Activity } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 export default function AdminPanel() {
   const [actionLoading, setActionLoading] = useState<string | null>(null)

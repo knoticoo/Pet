@@ -12,7 +12,6 @@ import {
   CheckCircle, 
   Clock,
   Heart,
-  Upload,
   Sparkles,
   Crown,
   Zap
@@ -225,7 +224,7 @@ export default function AIVetPage() {
                   <div>
                     <h4 className="font-medium">Instant Analysis</h4>
                     <p className="text-sm text-muted-foreground">
-                      Get immediate preliminary assessments of your pet's symptoms
+                      Get immediate preliminary assessments of your pet&apos;s symptoms
                     </p>
                   </div>
                 </div>
@@ -245,7 +244,7 @@ export default function AIVetPage() {
                   <div>
                     <h4 className="font-medium">Breed-Specific Insights</h4>
                     <p className="text-sm text-muted-foreground">
-                      Recommendations tailored to your pet's breed and age
+                      Recommendations tailored to your pet&apos;s breed and age
                     </p>
                   </div>
                 </div>

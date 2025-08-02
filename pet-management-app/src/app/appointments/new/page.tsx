@@ -284,7 +284,7 @@ export default function NewAppointmentPage() {
             </li>
             <li className="flex items-start space-x-2">
               <User className="h-4 w-4 mt-0.5 flex-shrink-0" />
-              <span>Bring your pet's medical history and current medications</span>
+                              <span>Bring your pet&apos;s medical history and current medications</span>
             </li>
           </ul>
         </div>
