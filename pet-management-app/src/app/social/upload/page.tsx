@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Camera, Upload, Sparkles, X, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { AuthGuard } from '@/components/AuthGuard'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Camera, Upload, X, Sparkles, Loader2 } from 'lucide-react'
+import Image from 'next/image'
+import { AuthGuard } from '@/components/AuthGuard'
 import Link from 'next/link'
 
 interface Pet {
@@ -189,9 +189,11 @@ export default function UploadPage() {
               </div>
             ) : (
               <div className="relative">
-                <img
+                <Image
                   src={previewUrl}
                   alt="Preview"
+                  width={500}
+                  height={500}
                   className="w-full max-w-md mx-auto rounded-lg"
                 />
                 <button

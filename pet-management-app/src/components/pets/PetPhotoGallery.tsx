@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Camera, Upload, X, Download, Share2, Grid, List } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
+import { Camera, Upload, Download, Share2, X, Grid, List } from 'lucide-react'
+import Image from 'next/image'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
 interface PetPhoto {
@@ -35,11 +36,7 @@ export function PetPhotoGallery({ petId, petName }: PetPhotoGalleryProps) {
     category: 'general'
   })
 
-  useEffect(() => {
-    fetchPhotos()
-  }, [petId])
-
-  const fetchPhotos = async () => {
+  const fetchPhotos = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(`/api/pets/${petId}/photos`)
@@ -52,7 +49,11 @@ export function PetPhotoGallery({ petId, petName }: PetPhotoGalleryProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [petId])
+
+  useEffect(() => {
+    fetchPhotos()
+  }, [petId, fetchPhotos])
 
   const handleUpload = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -264,12 +265,13 @@ export function PetPhotoGallery({ petId, petName }: PetPhotoGalleryProps) {
             <div key={photo.id} className={`card overflow-hidden ${viewMode === 'list' ? 'flex' : ''}`}>
               {/* Photo */}
               <div className={`relative ${viewMode === 'list' ? 'w-32 h-32 flex-shrink-0' : 'aspect-square'}`}>
-                <img
-                  src={photo.photoUrl}
-                  alt={photo.title}
-                  className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                  onClick={() => setSelectedPhoto(photo)}
-                />
+                                 <Image
+                   src={photo.photoUrl}
+                   alt={photo.title}
+                   fill
+                   className="object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                   onClick={() => setSelectedPhoto(photo)}
+                 />
                 
                 {/* Quick actions overlay */}
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 hover:opacity-100 transition-opacity">
@@ -342,11 +344,12 @@ export function PetPhotoGallery({ petId, petName }: PetPhotoGalleryProps) {
             >
               <X className="h-6 w-6" />
             </Button>
-            <img
-              src={selectedPhoto.photoUrl}
-              alt={selectedPhoto.title}
-              className="max-w-full max-h-full object-contain rounded-lg"
-            />
+                         <Image
+               src={selectedPhoto.photoUrl}
+               alt={selectedPhoto.title}
+               fill
+               className="object-contain rounded-lg"
+             />
             <div className="absolute bottom-4 left-4 right-4 bg-black/50 text-white p-4 rounded-lg">
               <h3 className="font-semibold">{selectedPhoto.title}</h3>
               {selectedPhoto.description && (

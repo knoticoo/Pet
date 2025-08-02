@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
-import { AuthGuard } from '@/components/AuthGuard'
+import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Edit, Bell, Calendar, Clock, Trash2, CheckCircle } from 'lucide-react'
+import { Calendar, Clock, CheckCircle, Trash2, Edit, ArrowLeft, Bell } from 'lucide-react'
+import { AuthGuard } from '@/components/AuthGuard'
 import Link from 'next/link'
 
 
@@ -35,13 +35,7 @@ export default function ReminderDetailPage() {
 
   const reminderId = params.id as string
 
-  useEffect(() => {
-    if (session?.user?.id && reminderId) {
-      fetchReminderDetails()
-    }
-  }, [session, reminderId])
-
-  const fetchReminderDetails = async () => {
+  const fetchReminderDetails = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -60,7 +54,13 @@ export default function ReminderDetailPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [reminderId])
+
+  useEffect(() => {
+    if (session?.user?.id && reminderId) {
+      fetchReminderDetails()
+    }
+  }, [session, reminderId, fetchReminderDetails])
 
   const handleToggleComplete = async () => {
     if (!reminder) return

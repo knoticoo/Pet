@@ -5,8 +5,9 @@ import { AIPetCompanion } from '@/lib/ai-pet-companion'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -14,7 +15,7 @@ export async function POST(
     }
 
     const { interactionType } = await request.json()
-    const petId = params.id
+    const petId = id
 
     if (!interactionType) {
       return NextResponse.json({ error: 'Interaction type is required' }, { status: 400 })
@@ -35,15 +36,16 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const petId = params.id
+    const petId = id
     const companion = AIPetCompanion.getInstance()
     const insights = await companion.getPetInsights(petId, session.user.id)
 

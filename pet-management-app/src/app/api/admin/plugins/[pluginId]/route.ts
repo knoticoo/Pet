@@ -5,8 +5,9 @@ import { prisma } from '@/lib/prisma'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { pluginId: string } }
+  { params }: { params: Promise<{ pluginId: string }> }
 ) {
+  const { pluginId } = await params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.isAdmin) {
@@ -14,7 +15,6 @@ export async function PATCH(
     }
 
     const { isEnabled } = await request.json()
-    const { pluginId } = params
 
     // Update plugin status in database
     await prisma.systemSetting.upsert({
@@ -44,15 +44,14 @@ export async function PATCH(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { pluginId: string } }
+  { params }: { params: Promise<{ pluginId: string }> }
 ) {
+  const { pluginId } = await params
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const { pluginId } = params
 
     // Get plugin status from database
     const pluginStatus = await prisma.systemSetting.findUnique({

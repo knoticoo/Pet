@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Settings, Save, RefreshCw } from 'lucide-react'
 
@@ -22,11 +22,7 @@ export function AdminSystemSettings({ className }: AdminSystemSettingsProps) {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
 
-  useEffect(() => {
-    initializeSettings()
-  }, [])
-
-  const initializeSettings = async () => {
+  const initializeSettings = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -48,7 +44,11 @@ export function AdminSystemSettings({ className }: AdminSystemSettingsProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    initializeSettings()
+  }, [initializeSettings])
 
   const fetchSettings = async () => {
     try {

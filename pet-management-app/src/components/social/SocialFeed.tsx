@@ -5,16 +5,8 @@ import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { 
-  Heart, 
-  MessageCircle, 
-  Share, 
-  Plus, 
-  Camera,
-  Users,
-  Calendar
-} from 'lucide-react'
-import { t } from '@/lib/translations'
+import { Heart, MessageCircle, Share, Calendar, Camera, Plus, Users } from 'lucide-react'
+import Image from 'next/image'
 
 interface SocialPost {
   id: string
@@ -117,8 +109,8 @@ export function SocialFeed() {
     return (
       <div className="text-center py-8">
         <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-lg font-medium mb-2">{t('social.signInRequired')}</h3>
-        <p className="text-muted-foreground mb-4">{t('social.signInToViewFeed')}</p>
+        <h3 className="text-lg font-medium mb-2">Sign In Required</h3>
+        <p className="text-muted-foreground mb-4">Sign in to view the feed</p>
       </div>
     )
   }
@@ -140,7 +132,7 @@ export function SocialFeed() {
           </Avatar>
           <div className="flex-1">
             <textarea
-              placeholder={t('social.whatsOnYourMind')}
+              placeholder="What's on your mind?"
               className="w-full p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary"
               rows={3}
               onKeyDown={(e) => {
@@ -158,12 +150,12 @@ export function SocialFeed() {
               <div className="flex items-center space-x-2">
                 <Button size="sm" variant="outline">
                   <Camera className="w-4 h-4 mr-2" />
-                  {t('social.addPhoto')}
+                  Add Photo
                 </Button>
               </div>
               <Button size="sm">
                 <Plus className="w-4 h-4 mr-2" />
-                {t('social.post')}
+                Post
               </Button>
             </div>
           </div>
@@ -200,10 +192,12 @@ export function SocialFeed() {
               {post.photos && (
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   {JSON.parse(post.photos).map((photo: string, index: number) => (
-                    <img
+                    <Image
                       key={index}
                       src={photo}
                       alt="Post photo"
+                      width={100}
+                      height={100}
                       className="w-full h-32 object-cover rounded-lg"
                     />
                   ))}
@@ -235,8 +229,8 @@ export function SocialFeed() {
         {posts.length === 0 && (
           <div className="text-center py-8">
             <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">{t('social.noPosts')}</h3>
-            <p className="text-muted-foreground">{t('social.beFirstToPost')}</p>
+            <h3 className="text-lg font-medium mb-2">No Posts</h3>
+            <p className="text-muted-foreground">Be the first to post!</p>
           </div>
         )}
       </div>

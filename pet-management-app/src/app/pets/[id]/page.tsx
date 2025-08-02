@@ -1,16 +1,34 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
-import { AuthGuard } from '@/components/AuthGuard'
+import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Edit, Calendar, Heart, Trash2, Camera, Activity, TrendingUp, Bell, Share2, Star, Brain, Target, CheckCircle, Info, Upload, X } from 'lucide-react'
-import Link from 'next/link'
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { 
+  Heart, 
+  Calendar, 
+  Edit, 
+  Trash2, 
+  Star, 
+  Camera, 
+  Upload, 
+  X,
+  Activity,
+  TrendingUp,
+  CheckCircle,
+  ArrowLeft,
+  Share2,
+  Brain,
+  Info,
+  Target,
+  Bell
+} from 'lucide-react'
+import Image from 'next/image'
+import { AuthGuard } from '@/components/AuthGuard'
 import { VirtualPet } from '@/components/pets/VirtualPet'
 import { PetPhotoGallery } from '@/components/pets/PetPhotoGallery'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import Link from 'next/link'
 
 interface Pet {
   id: string
@@ -104,13 +122,7 @@ export default function PetDetailPage() {
 
   const petId = params.id as string
 
-  useEffect(() => {
-    if (session?.user?.id && petId) {
-      fetchPetDetails()
-    }
-  }, [session, petId])
-
-  const fetchPetDetails = async () => {
+  const fetchPetDetails = useCallback(async () => {
     try {
       setLoading(true)
       setError('') // Clear previous errors
@@ -173,7 +185,13 @@ export default function PetDetailPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [petId])
+
+  useEffect(() => {
+    if (session?.user?.id && petId) {
+      fetchPetDetails()
+    }
+  }, [session, petId, fetchPetDetails])
 
   const handlePetInteraction = async (interactionType: string) => {
     try {
@@ -402,10 +420,11 @@ export default function PetDetailPage() {
               <div className="relative group">
                 <div className={`w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br ${getGradientColor(pet.species)} rounded-2xl flex items-center justify-center shadow-lg overflow-hidden`}>
                   {pet.photo ? (
-                    <img 
+                    <Image 
                       src={pet.photo} 
                       alt={pet.name} 
-                      className="w-full h-full object-cover rounded-2xl" 
+                      fill
+                      className="object-cover rounded-2xl"
                     />
                   ) : (
                     <Heart className="h-12 w-12 md:h-16 md:w-16 text-white" />

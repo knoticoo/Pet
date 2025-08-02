@@ -114,7 +114,7 @@ export default function AppointmentsPage() {
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">Appointments</h1>
             <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
-              Manage your pets' veterinary appointments and schedules.
+              Manage your pets&apos; veterinary appointments and schedules.
             </p>
           </div>
           <Link href="/appointments/new">
