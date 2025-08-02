@@ -110,48 +110,63 @@ export default function PetDetailPage() {
   const fetchPetDetails = async () => {
     try {
       setLoading(true)
+      setError('') // Clear previous errors
       
-      // Fetch pet details
+      // Fetch pet details with better error handling
       const petResponse = await fetch(`/api/pets/${petId}`)
-      if (petResponse.ok) {
-        const petData = await petResponse.json()
-        setPet(petData)
+      
+      if (petResponse.status === 401) {
+        setError('You need to be signed in to view this pet.')
+        return
+      } else if (petResponse.status === 403) {
+        setError('You don\'t have permission to view this pet.')
+        return
       } else if (petResponse.status === 404) {
-        setError('Pet not found')
+        setError('Pet not found. It may have been deleted or you may not have access to it.')
+        return
+      } else if (!petResponse.ok) {
+        setError('Failed to load pet details. Please try again.')
         return
       }
 
-      // Fetch health records
-      const healthResponse = await fetch(`/api/pets/${petId}/health`)
-      if (healthResponse.ok) {
-        const healthData = await healthResponse.json()
+      const petData = await petResponse.json()
+      setPet(petData)
+
+      // Fetch additional data in parallel for better performance
+      const [healthResponse, vaccinationResponse, appointmentResponse, insightsResponse] = await Promise.allSettled([
+        fetch(`/api/pets/${petId}/health`),
+        fetch(`/api/pets/${petId}/vaccinations`),
+        fetch(`/api/pets/${petId}/appointments`),
+        fetch(`/api/pets/${petId}/companion`)
+      ])
+
+      // Handle health records
+      if (healthResponse.status === 'fulfilled' && healthResponse.value.ok) {
+        const healthData = await healthResponse.value.json()
         setHealthRecords(healthData)
       }
 
-      // Fetch vaccinations
-      const vaccinationResponse = await fetch(`/api/pets/${petId}/vaccinations`)
-      if (vaccinationResponse.ok) {
-        const vaccinationData = await vaccinationResponse.json()
+      // Handle vaccinations
+      if (vaccinationResponse.status === 'fulfilled' && vaccinationResponse.value.ok) {
+        const vaccinationData = await vaccinationResponse.value.json()
         setVaccinations(vaccinationData)
       }
 
-      // Fetch appointments
-      const appointmentResponse = await fetch(`/api/pets/${petId}/appointments`)
-      if (appointmentResponse.ok) {
-        const appointmentData = await appointmentResponse.json()
+      // Handle appointments
+      if (appointmentResponse.status === 'fulfilled' && appointmentResponse.value.ok) {
+        const appointmentData = await appointmentResponse.value.json()
         setAppointments(appointmentData)
       }
 
-      // Fetch AI insights
-      const insightsResponse = await fetch(`/api/pets/${petId}/companion`)
-      if (insightsResponse.ok) {
-        const insightsData = await insightsResponse.json()
+      // Handle AI insights
+      if (insightsResponse.status === 'fulfilled' && insightsResponse.value.ok) {
+        const insightsData = await insightsResponse.value.json()
         setInsights(insightsData)
       }
 
     } catch (error) {
       console.error('Error fetching pet details:', error)
-      setError('Failed to load pet details')
+      setError('An unexpected error occurred while loading pet details. Please check your internet connection and try again.')
     } finally {
       setLoading(false)
     }
