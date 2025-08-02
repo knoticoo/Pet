@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Heart, Home, Calendar, DollarSign, FileText, Settings, Bell, Shield, LogOut, User, Menu, X, Brain } from 'lucide-react'
+import { Heart, Home, Calendar, DollarSign, FileText, Settings, Bell, Shield, LogOut, User, Menu, X, Brain, Camera } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useFeatures } from '@/hooks/useFeatures'
 import { signOut } from 'next-auth/react'
@@ -105,6 +105,7 @@ export const Navigation = memo(() => {
       { name: t('navigation.expenses'), href: '/expenses', icon: DollarSign, feature: 'expenses' },
       { name: t('navigation.reminders'), href: '/reminders', icon: Bell, feature: 'reminders' },
       { name: t('navigation.aiVet'), href: '/ai-vet', icon: Brain, feature: 'ai-vet' },
+      { name: t('navigation.social'), href: '/social', icon: Camera, feature: 'social-profile' },
     ]
 
     // Admin and settings (always available)

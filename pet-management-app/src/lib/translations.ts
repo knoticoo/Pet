@@ -10,6 +10,7 @@ export const translations = {
     settings: 'Настройки',
     admin: 'Администрирование',
     aiVet: 'ИИ Ветеринар',
+    social: 'Социальная галерея',
     logout: 'Выйти',
     profile: 'Профиль'
   },
