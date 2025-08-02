@@ -105,6 +105,10 @@ export const Navigation = memo(() => {
       { name: t('navigation.expenses'), href: '/expenses', icon: DollarSign, feature: 'expenses' },
       { name: t('navigation.reminders'), href: '/reminders', icon: Bell, feature: 'reminders' },
       { name: t('navigation.aiVet'), href: '/ai-vet', icon: Brain, feature: 'ai-vet' },
+    ]
+
+    // Core features that should always be visible
+    const coreNavigation = [
       { name: t('navigation.social'), href: '/social', icon: Camera, feature: 'social-profile' },
     ]
 
@@ -116,6 +120,11 @@ export const Navigation = memo(() => {
 
     // Build navigation based on enabled features
     const navigation = [...baseNavigation]
+    
+    // Add core navigation items (always visible)
+    coreNavigation.forEach(item => {
+      navigation.push(item)
+    })
     
     // Add feature-dependent items if enabled
     featureNavigation.forEach(item => {
