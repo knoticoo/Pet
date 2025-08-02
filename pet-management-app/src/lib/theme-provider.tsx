@@ -41,6 +41,10 @@ export function ThemeProvider({
     const storedTheme = localStorage.getItem(storageKey) as PetTheme
     if (storedTheme) {
       setThemeState(storedTheme)
+    } else {
+      // Set default white theme if no stored theme
+      setThemeState('default')
+      localStorage.setItem(storageKey, 'default')
     }
     setIsLoaded(true)
   }, [storageKey])

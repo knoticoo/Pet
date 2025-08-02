@@ -10,6 +10,8 @@ import { t } from '@/lib/translations'
 import { useTheme, themes } from '@/lib/theme-provider'
 import { RecentPets } from '@/components/RecentPets'
 import { RecentReminders } from '@/components/RecentReminders'
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
+import { QuickActions } from '@/components/dashboard/QuickActions'
 
 interface Stats {
   totalPets: number
@@ -123,26 +125,7 @@ export default function DashboardPage() {
     <AuthGuard>
       <div className="space-y-8">
         {/* Header with Theme Info */}
-        <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-3xl">{getThemeIcon()}</span>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('dashboard.title')}</h1>
-            </div>
-            <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
-              {t('dashboard.welcome')}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Текущая тема: <span style={{ color: getThemeColor() }}>{themes[theme].name}</span>
-            </p>
-          </div>
-          <Link href="/pets/new">
-            <Button className="flex items-center space-x-2 w-full md:w-auto">
-              <Plus className="h-4 w-4" />
-              <span>{t('dashboard.addPet')}</span>
-            </Button>
-          </Link>
-        </div>
+        <DashboardHeader />
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -194,38 +177,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="card p-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Быстрые действия</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Link href="/pets/new">
-              <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2">
-                <Plus className="h-6 w-6" />
-                <span className="text-sm">Добавить питомца</span>
-              </Button>
-            </Link>
-            
-            <Link href="/appointments/new">
-              <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2">
-                <Calendar className="h-6 w-6" />
-                <span className="text-sm">Записаться к врачу</span>
-              </Button>
-            </Link>
-            
-            <Link href="/expenses/new">
-              <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2">
-                <DollarSign className="h-6 w-6" />
-                <span className="text-sm">Добавить расход</span>
-              </Button>
-            </Link>
-            
-            <Link href="/reminders/new">
-              <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2">
-                <Bell className="h-6 w-6" />
-                <span className="text-sm">Создать напоминание</span>
-              </Button>
-            </Link>
-          </div>
-        </div>
+        <QuickActions />
       </div>
     </AuthGuard>
   )

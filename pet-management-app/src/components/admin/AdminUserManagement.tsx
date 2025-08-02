@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Users, Crown, Shield, RefreshCw, Search } from 'lucide-react'
+import { Users, Crown, Shield, RefreshCw, Search, Trash2, MoreHorizontal } from 'lucide-react'
 
 interface User {
   id: string
@@ -116,6 +116,39 @@ export function AdminUserManagement({ className }: AdminUserManagementProps) {
     await updateUser(userId, {
       isAdmin: !currentAdminStatus,
     })
+  }
+
+  const deleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      setUpdating(userId)
+      setMessage('')
+
+      const response = await fetch('/api/admin/delete-user', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      })
+
+      if (response.ok) {
+        setMessage('User deleted successfully!')
+        await fetchUsers()
+        setTimeout(() => setMessage(''), 3000)
+      } else {
+        const error = await response.json()
+        setMessage(error.error || 'Failed to delete user')
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      setMessage('Failed to delete user')
+    } finally {
+      setUpdating(null)
+    }
   }
 
   const filteredUsers = users.filter(user =>
@@ -234,54 +267,70 @@ export function AdminUserManagement({ className }: AdminUserManagementProps) {
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => makeLifetimeAdmin(user.id)}
-                        disabled={updating === user.id}
-                        className="text-xs"
-                      >
-                        <Crown className="h-3 w-3 mr-1" />
-                        Lifetime Admin
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => makeLifetimePremium(user.id)}
-                        disabled={updating === user.id}
-                        className="text-xs"
-                      >
-                        Lifetime Premium
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => makePremium(user.id)}
-                        disabled={updating === user.id}
-                        className="text-xs"
-                      >
-                        Premium
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => makeFree(user.id)}
-                        disabled={updating === user.id}
-                        className="text-xs"
-                      >
-                        Free
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant={user.isAdmin ? "destructive" : "default"}
-                        onClick={() => toggleAdmin(user.id, user.isAdmin)}
-                        disabled={updating === user.id}
-                        className="text-xs"
-                      >
-                        <Shield className="h-3 w-3 mr-1" />
-                        {user.isAdmin ? 'Remove Admin' : 'Make Admin'}
-                      </Button>
+                    <div className="flex flex-col space-y-2">
+                      {/* Primary Actions Row */}
+                      <div className="flex flex-wrap gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => makeLifetimeAdmin(user.id)}
+                          disabled={updating === user.id}
+                          className="text-xs px-2 py-1"
+                        >
+                          <Crown className="h-3 w-3 mr-1" />
+                          L.Admin
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => makeLifetimePremium(user.id)}
+                          disabled={updating === user.id}
+                          className="text-xs px-2 py-1"
+                        >
+                          L.Premium
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => makePremium(user.id)}
+                          disabled={updating === user.id}
+                          className="text-xs px-2 py-1"
+                        >
+                          Premium
+                        </Button>
+                      </div>
+                      {/* Secondary Actions Row */}
+                      <div className="flex flex-wrap gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => makeFree(user.id)}
+                          disabled={updating === user.id}
+                          className="text-xs px-2 py-1"
+                        >
+                          Free
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={user.isAdmin ? "destructive" : "default"}
+                          onClick={() => toggleAdmin(user.id, user.isAdmin)}
+                          disabled={updating === user.id}
+                          className="text-xs px-2 py-1"
+                        >
+                          <Shield className="h-3 w-3 mr-1" />
+                          {user.isAdmin ? 'Remove Admin' : 'Admin'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => deleteUser(user.id)}
+                          disabled={updating === user.id}
+                          className="text-xs px-2 py-1"
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
                     </div>
                   </td>
                 </tr>
