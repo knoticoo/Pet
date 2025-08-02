@@ -61,6 +61,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.sub = user.id
         token.isAdmin = (user as { isAdmin: boolean }).isAdmin
         token.rememberMe = (user as { rememberMe: boolean }).rememberMe
         
@@ -93,11 +94,11 @@ export const authOptions: NextAuthOptions = {
       
       return token
     },
-    async session({ session }) {
-      if (session.user) {
-        session.user.id = session.user.id!
-        session.user.isAdmin = session.user.isAdmin as boolean
-        session.user.rememberMe = session.user.rememberMe as boolean
+    async session({ session, token }) {
+      if (session.user && token) {
+        session.user.id = token.sub as string
+        session.user.isAdmin = token.isAdmin as boolean
+        session.user.rememberMe = token.rememberMe as boolean
         
         // Set session expiry based on remember me
         if (session.user.rememberMe) {

@@ -47,7 +47,7 @@ export default function AIVetPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (session?.user?.id) {
+    if (session?.user && 'id' in session.user) {
       loadData()
     }
   }, [session])

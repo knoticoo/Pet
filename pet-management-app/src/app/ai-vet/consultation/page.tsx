@@ -30,7 +30,11 @@ interface Pet {
 
 interface AnalysisResult {
   severity: 'low' | 'medium' | 'high' | 'emergency'
-  recommendations: string[]
+  recommendations: (string | {
+    title: string
+    description?: string
+    priority?: 'low' | 'medium' | 'high'
+  })[]
   nextSteps: string[]
   urgency: number
   shouldSeeVet: boolean
@@ -39,6 +43,13 @@ interface AnalysisResult {
   assessment?: string
   urgencyLevel?: string
   urgencyExplanation?: string
+  possibleConditions?: Array<{
+    name: string
+    description?: string
+    likelihood?: number
+  }>
+  followUpTimeline?: string
+  followUpReason?: string
 }
 
 export default function ConsultationPage() {
@@ -424,7 +435,7 @@ export default function ConsultationPage() {
                     <div className="bg-white rounded-lg p-4 mb-4">
                       <h4 className="font-semibold text-gray-900 mb-3">Possible Conditions</h4>
                       <div className="space-y-2">
-                        {analysis.possibleConditions.map((condition: string, index: number) => (
+                        {analysis.possibleConditions.map((condition: {name: string, description?: string, likelihood?: number}, index: number) => (
                           <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                             <div>
                               <span className="font-medium text-gray-900">{condition.name}</span>
@@ -448,15 +459,15 @@ export default function ConsultationPage() {
                     <div className="bg-white rounded-lg p-4 mb-4">
                       <h4 className="font-semibold text-gray-900 mb-3">AI Recommendations</h4>
                       <div className="space-y-3">
-                        {analysis.recommendations.map((rec: string, index: number) => (
+                        {analysis.recommendations.map((rec: string | {title: string, description?: string, priority?: 'low' | 'medium' | 'high'}, index: number) => (
                           <div key={index} className="flex items-start gap-3 p-3 bg-blue-50 rounded-md">
                             <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                             <div>
-                              <p className="text-blue-900 font-medium">{rec.title || rec}</p>
-                              {rec.description && (
+                              <p className="text-blue-900 font-medium">{typeof rec === 'string' ? rec : rec.title}</p>
+                              {typeof rec === 'object' && rec.description && (
                                 <p className="text-blue-700 text-sm mt-1">{rec.description}</p>
                               )}
-                              {rec.priority && (
+                              {typeof rec === 'object' && rec.priority && (
                                 <span className={`inline-block mt-2 px-2 py-1 text-xs rounded ${
                                   rec.priority === 'high' ? 'bg-red-100 text-red-700' :
                                   rec.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
