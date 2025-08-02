@@ -12,7 +12,6 @@ import {
   Settings, 
   ChevronDown, 
   ChevronRight,
-  AlertTriangle,
   CheckCircle,
   Clock,
   Trash2
@@ -65,7 +64,7 @@ export function AdminFeatureManager() {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to load features')
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred while fetching features')
     } finally {
       setLoading(false)
@@ -92,7 +91,7 @@ export function AdminFeatureManager() {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to toggle feature')
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred while toggling feature')
     }
   }
@@ -116,7 +115,7 @@ export function AdminFeatureManager() {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to delete feature')
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred while deleting feature')
     }
   }
@@ -132,13 +131,12 @@ export function AdminFeatureManager() {
       if (response.ok) {
         // Reload features after bulk action
         await loadFeatures()
-        const result = await response.json()
         // You could show a success message here
       } else {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to perform bulk action')
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred while performing bulk action')
     }
   }

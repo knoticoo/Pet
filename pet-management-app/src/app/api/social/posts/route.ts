@@ -162,7 +162,11 @@ export async function POST(request: NextRequest) {
 }
 
 // Use your hosted AI for photo analysis
-async function analyzePhotoWithAI(imageUrl: string, caption: string, pet: any) {
+async function analyzePhotoWithAI(imageUrl: string, caption: string, pet: {
+  species: string;
+  breed: string;
+  name: string;
+}) {
   try {
     const endpoint = await aiVetService.findWorkingEndpoint()
     if (!endpoint) {
@@ -197,7 +201,7 @@ Keep responses brief and positive. Focus on visible behavior and mood.`
         }
       }),
       timeout: 10000
-    } as any)
+    } as RequestInit & { timeout: number })
 
     if (!response.ok) {
       throw new Error(`AI API error: ${response.status}`)
@@ -213,7 +217,12 @@ Keep responses brief and positive. Focus on visible behavior and mood.`
 
 function parsePhotoAnalysis(response: string) {
   const lines = response.split('\n')
-  const analysis: any = {}
+  const analysis: {
+    mood?: string;
+    activity?: string;
+    healthNotes?: string;
+    tags?: string[];
+  } = {}
 
   lines.forEach(line => {
     const cleanLine = line.trim()

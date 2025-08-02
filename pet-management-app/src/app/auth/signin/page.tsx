@@ -38,7 +38,7 @@ export default function SignIn() {
         router.push('/')
         router.refresh()
       }
-    } catch (error) {
+    } catch {
       setError(t('errors.generic'))
     } finally {
       setLoading(false)

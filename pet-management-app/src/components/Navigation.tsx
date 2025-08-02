@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Heart, Home, Calendar, DollarSign, FileText, Settings, Bell, Shield, LogOut, User, Menu, X, Brain, Camera } from 'lucide-react'
+import { Heart, Home, Calendar, DollarSign, Settings, Bell, Shield, LogOut, User, Menu, X, Brain, Camera } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useFeatures } from '@/hooks/useFeatures'
 import { signOut } from 'next-auth/react'
@@ -13,7 +13,7 @@ import { ThemeSelector } from '@/components/ThemeSelector'
 
 // Memoized navigation item component
 const NavigationItem = memo(({ item, pathname, onClick }: {
-  item: { name: string; href: string; icon: any; feature: string }
+  item: { name: string; href: string; icon: React.ComponentType<{ className?: string }>; feature: string }
   pathname: string
   onClick?: () => void
 }) => {
@@ -59,7 +59,7 @@ MobileMenuButton.displayName = 'MobileMenuButton'
 
 // Memoized user menu
 const UserMenu = memo(({ user, onSignOut }: {
-  user: any
+  user: { name?: string; email?: string } | null
   onSignOut: () => void
 }) => (
   <div className="border-t pt-4 mt-4">

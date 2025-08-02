@@ -40,7 +40,7 @@ export function AdminStats() {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to load admin stats')
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred while fetching admin stats')
     } finally {
       setLoading(false)

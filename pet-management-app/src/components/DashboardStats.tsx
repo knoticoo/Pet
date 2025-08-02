@@ -50,7 +50,7 @@ export function DashboardStats() {
       // Calculate upcoming appointments (next 30 days)
       const now = new Date()
       const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
-      const upcomingAppointments = appointments.filter((apt: any) => {
+      const upcomingAppointments = appointments.filter((apt: { date: string }) => {
         const aptDate = new Date(apt.date)
         return aptDate >= now && aptDate <= thirtyDaysFromNow
       }).length
@@ -59,11 +59,11 @@ export function DashboardStats() {
       const currentMonth = now.getMonth()
       const currentYear = now.getFullYear()
       const monthlyExpenses = expenses
-        .filter((expense: any) => {
+        .filter((expense: { date: string; amount: number }) => {
           const expenseDate = new Date(expense.date)
           return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear
         })
-        .reduce((total: number, expense: any) => total + expense.amount, 0)
+        .reduce((total: number, expense: { amount: number }) => total + expense.amount, 0)
 
       setStats({
         totalPets: pets.length,

@@ -90,7 +90,7 @@ export function useFeatures(userId?: string) {
       return ClientFeatureManager.isFeatureEnabled(featureName, enabledFeatures)
     },
 
-    hasPermission: (featureName: string, _permission?: string): boolean => {
+    hasPermission: (featureName: string): boolean => {
       if (!ClientFeatureManager.isFeatureEnabled(featureName, enabledFeatures)) return false
       
       // In a real app, you would check specific permissions here

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bell, Plus, Calendar, Clock, CheckCircle, AlertCircle, Trash2, Edit } from 'lucide-react'
+import { Bell, Plus, Calendar, Clock, CheckCircle, AlertCircle, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
@@ -40,7 +40,7 @@ export default function RemindersPage() {
       } else {
         setError('Failed to fetch reminders')
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred while fetching reminders')
     } finally {
       setLoading(false)
@@ -67,7 +67,7 @@ export default function RemindersPage() {
               } else {
           setError('Не удалось обновить напоминание')
         }
-      } catch (error) {
+      } catch {
         setError('Произошла ошибка при обновлении напоминания')
       }
   }
@@ -87,7 +87,7 @@ export default function RemindersPage() {
               } else {
           setError('Не удалось удалить напоминание')
         }
-      } catch (error) {
+      } catch {
         setError('Произошла ошибка при удалении напоминания')
       }
   }
@@ -266,7 +266,7 @@ export default function RemindersPage() {
                 <Bell className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-foreground mb-2">No active reminders</h3>
                 <p className="text-muted-foreground mb-6">
-                  Create reminders to stay on top of your pets' care schedule.
+                  Create reminders to stay on top of your pets&apos; care schedule.
                 </p>
                 <Link href="/reminders/new">
                   <Button>

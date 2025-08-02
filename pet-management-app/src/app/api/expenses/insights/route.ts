@@ -20,7 +20,11 @@ export async function GET(request: NextRequest) {
     const startDate = new Date()
     startDate.setMonth(startDate.getMonth() - months)
 
-    const whereClause: any = {
+    const whereClause: {
+      userId: string;
+      date: { gte: Date };
+      petId?: string;
+    } = {
       userId: session.user.id,
       date: { gte: startDate }
     }
@@ -75,7 +79,18 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function analyzeExpensesWithAI(expenses: any[], months: number) {
+async function analyzeExpensesWithAI(expenses: Array<{
+  amount: number;
+  category: string;
+  title: string;
+  date: Date;
+  pet?: {
+    name: string;
+    species: string;
+    breed: string;
+    birthDate: Date | null;
+  } | null;
+}>, months: number) {
   try {
     const endpoint = await aiVetService.findWorkingEndpoint()
     if (!endpoint) {
@@ -86,7 +101,7 @@ async function analyzeExpensesWithAI(expenses: any[], months: number) {
     const totalAmount = expenses.reduce((sum, exp) => sum + exp.amount, 0)
     const avgMonthly = totalAmount / months
     
-    const categories = expenses.reduce((acc: any, exp) => {
+    const categories = expenses.reduce((acc: Record<string, number>, exp) => {
       acc[exp.category] = (acc[exp.category] || 0) + exp.amount
       return acc
     }, {})
@@ -131,7 +146,7 @@ Focus on practical pet care budgeting advice and cost optimization.`
         }
       }),
       timeout: 15000
-    } as any)
+    } as RequestInit & { timeout: number })
 
     if (!response.ok) {
       throw new Error(`AI API error: ${response.status}`)
@@ -147,7 +162,13 @@ Focus on practical pet care budgeting advice and cost optimization.`
 
 function parseExpenseInsights(response: string) {
   const lines = response.split('\n')
-  const insights: any = {}
+  const insights: {
+    summary?: string;
+    trends?: string[];
+    recommendations?: string[];
+    budgetSuggestions?: string[];
+    alerts?: string[];
+  } = {}
 
   lines.forEach(line => {
     const cleanLine = line.trim()
@@ -174,11 +195,16 @@ function parseExpenseInsights(response: string) {
   }
 }
 
-function getFallbackInsights(expenses: any[]) {
+function getFallbackInsights(expenses: Array<{
+  amount: number;
+  category: string;
+  title: string;
+  date: Date;
+}>) {
   const totalAmount = expenses.reduce((sum, exp) => sum + exp.amount, 0)
   const avgMonthly = totalAmount / 6
   
-  const categories = expenses.reduce((acc: any, exp) => {
+  const categories = expenses.reduce((acc: Record<string, number>, exp) => {
     acc[exp.category] = (acc[exp.category] || 0) + exp.amount
     return acc
   }, {})

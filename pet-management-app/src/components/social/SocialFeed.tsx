@@ -56,7 +56,7 @@ export function SocialFeed() {
       } else {
         setError('Failed to fetch posts')
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred while fetching posts')
     } finally {
       setLoading(false)
@@ -77,7 +77,7 @@ export function SocialFeed() {
       } else {
         setError('Failed to create post')
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred while creating post')
     }
   }

@@ -47,7 +47,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
           <Shield className="h-12 w-12 text-red-600 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-foreground mb-2">Access Denied</h2>
           <p className="text-muted-foreground mb-6">
-            You don't have administrator privileges to access this page.
+            You don&apos;t have administrator privileges to access this page.
           </p>
           <Link href="/">
             <Button variant="outline">Go to Dashboard</Button>
