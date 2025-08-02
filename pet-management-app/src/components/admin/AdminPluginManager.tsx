@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -10,13 +10,11 @@ import {
   Camera, 
   BarChart3, 
   Users, 
-  Settings, 
   ChevronDown, 
   ChevronRight,
   AlertTriangle,
   CheckCircle,
   Clock,
-  Trash2,
   Brain,
   Sparkles
 } from 'lucide-react'
@@ -30,7 +28,7 @@ interface Plugin {
   isEnabled: boolean
   isCore: boolean
   dependencies?: string[]
-  settings?: Record<string, any>
+  settings?: Record<string, unknown>
   permissions?: string[]
 }
 
@@ -146,14 +144,14 @@ export function AdminPluginManager() {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to toggle plugin')
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred while toggling plugin')
     } finally {
       setLoading(false)
     }
   }
 
-  const updatePluginSettings = async (pluginId: string, settings: Record<string, any>) => {
+  const updatePluginSettings = async (pluginId: string, settings: Record<string, unknown>) => {
     try {
       const response = await fetch(`/api/admin/plugins/${pluginId}/settings`, {
         method: 'PUT',
@@ -170,7 +168,7 @@ export function AdminPluginManager() {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to update plugin settings')
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred while updating plugin settings')
     }
   }
@@ -364,7 +362,7 @@ export function AdminPluginManager() {
                   </div>
                   {typeof value === 'boolean' ? (
                     <Switch
-                      checked={value}
+                      checked={value as boolean}
                       onCheckedChange={(checked) => {
                         const newSettings = { ...selectedPlugin.settings, [key]: checked }
                         updatePluginSettings(selectedPlugin.id, newSettings)

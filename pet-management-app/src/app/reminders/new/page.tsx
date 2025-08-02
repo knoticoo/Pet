@@ -35,7 +35,7 @@ export default function NewReminderPage() {
       } else {
         setError('Failed to fetch pets')
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred while fetching pets')
     } finally {
       setLoading(false)
@@ -80,7 +80,7 @@ export default function NewReminderPage() {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to create reminder')
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred while creating reminder')
     } finally {
       setIsSubmitting(false)

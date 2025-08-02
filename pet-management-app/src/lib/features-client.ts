@@ -6,11 +6,11 @@ export interface FeatureConfig {
   category: 'core' | 'health' | 'finance' | 'social' | 'advanced'
   isCore: boolean
   version: string
-  component?: React.ComponentType<any>
+  component?: React.ComponentType<Record<string, unknown>>
   routes?: string[]
   permissions?: string[]
   dependencies?: string[]
-  config?: Record<string, any>
+  config?: Record<string, unknown>
 }
 
 export interface PluginManifest {
@@ -32,7 +32,7 @@ export interface PluginManifest {
     icon: string
     permissions?: string[]
   }>
-  config?: Record<string, any>
+  config?: Record<string, unknown>
 }
 
 // Core features that are always available

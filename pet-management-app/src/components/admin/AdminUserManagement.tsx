@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Users, Crown, Shield, RefreshCw, Search, Trash2, MoreHorizontal } from 'lucide-react'
+import { Users, Crown, Shield, RefreshCw, Search, Trash2 } from 'lucide-react'
 
 interface User {
   id: string

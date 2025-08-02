@@ -7,7 +7,6 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
   TrendingUp, 
-  TrendingDown, 
   Activity, 
   Weight,
   Heart,
@@ -79,35 +78,10 @@ export function HealthAnalytics() {
         const alertsData = await alertsResponse.json()
         setAlerts(alertsData)
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred while fetching data')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const addMetric = async (metricData: {
-    petId: string
-    metricType: string
-    value: number
-    unit: string
-    notes?: string
-  }) => {
-    try {
-      const response = await fetch('/api/analytics/health-metrics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(metricData)
-      })
-
-      if (response.ok) {
-        const newMetric = await response.json()
-        setMetrics(prev => [newMetric, ...prev])
-      } else {
-        setError('Failed to add metric')
-      }
-    } catch (error) {
-      setError('An error occurred while adding metric')
     }
   }
 

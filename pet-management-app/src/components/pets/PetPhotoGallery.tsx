@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Camera, Upload, X, Heart, Download, Share2, Plus, Grid, List } from 'lucide-react'
+import { Camera, Upload, X, Download, Share2, Grid, List } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
@@ -321,7 +321,7 @@ export function PetPhotoGallery({ petId, petName }: PetPhotoGalleryProps) {
           <Camera className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <h4 className="text-lg font-semibold text-foreground mb-2">No photos yet</h4>
           <p className="text-muted-foreground mb-4">
-            Start building {petName}'s photo collection by uploading the first photo!
+            Start building {petName}&apos;s photo collection by uploading the first photo!
           </p>
           <Button onClick={() => setShowUploadDialog(true)}>
             <Upload className="h-4 w-4 mr-2" />

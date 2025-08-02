@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
+  adapter: PrismaAdapter(prisma) as PrismaAdapter,
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -59,14 +59,14 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
-        token.isAdmin = (user as any).isAdmin
-        token.rememberMe = (user as any).rememberMe
+        token.isAdmin = (user as { isAdmin: boolean }).isAdmin
+        token.rememberMe = (user as { rememberMe: boolean }).rememberMe
         
         // Set different expiration times based on remember me
         const now = Math.floor(Date.now() / 1000)
-        if ((user as any).rememberMe) {
+        if ((user as { rememberMe: boolean }).rememberMe) {
           // Remember me: 30 days
           token.exp = now + (30 * 24 * 60 * 60)
         } else {
@@ -93,14 +93,14 @@ export const authOptions: NextAuthOptions = {
       
       return token
     },
-    async session({ session, token }) {
-      if (token) {
-        session.user.id = token.sub!
-        session.user.isAdmin = token.isAdmin as boolean
-        session.user.rememberMe = token.rememberMe as boolean
+    async session({ session }) {
+      if (session.user) {
+        session.user.id = session.user.id!
+        session.user.isAdmin = session.user.isAdmin as boolean
+        session.user.rememberMe = session.user.rememberMe as boolean
         
         // Set session expiry based on remember me
-        if (token.rememberMe) {
+        if (session.user.rememberMe) {
           session.expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
         } else {
           session.expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -150,7 +150,7 @@ export const authOptions: NextAuthOptions = {
   useSecureCookies: process.env.NODE_ENV === 'production',
   // Add events to handle session updates
   events: {
-    async session({ session, token }) {
+    async session({ session }) {
       // Log session access for debugging
       console.log('Session accessed:', { userId: session.user.id, expires: session.expires })
     }

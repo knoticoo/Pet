@@ -1,17 +1,15 @@
 'use client'
 
-import { Settings, User, Bell, Shield, Palette, Database, Crown, CreditCard } from 'lucide-react'
+import { User, Bell, Shield, Palette, Database, Crown, CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { t } from '@/lib/translations'
-import { useTheme, themes } from '@/lib/theme-provider'
 import { ThemeSelector } from '@/components/ThemeSelector'
 
 export default function SettingsPage() {
   const { data: session } = useSession()
-  const { theme, setTheme } = useTheme()
   const [activeSection, setActiveSection] = useState('profile')
   const [saving, setSaving] = useState(false)
   const [userSubscription, setUserSubscription] = useState<{

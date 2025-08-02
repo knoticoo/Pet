@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Camera, Heart, MessageCircle, Share2, Sparkles, Upload, Eye, Grid, List } from 'lucide-react'
+import { Camera, Heart, MessageCircle, Share2, Sparkles, Upload, Grid, List } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 import { useSession } from 'next-auth/react'
@@ -78,7 +78,7 @@ export default function SocialGalleryPage() {
           text: post.caption,
           url: window.location.href
         })
-      } catch (error) {
+      } catch {
         console.log('Share cancelled')
       }
     } else {

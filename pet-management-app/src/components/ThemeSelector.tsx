@@ -21,7 +21,7 @@ export function ThemeSelector() {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleThemeChange = (newTheme: string) => {
-    setTheme(newTheme as any)
+    setTheme(newTheme as 'default' | 'dogs' | 'cats' | 'birds' | 'fish' | 'rabbits' | 'hamsters' | 'reptiles')
     setIsOpen(false)
   }
 

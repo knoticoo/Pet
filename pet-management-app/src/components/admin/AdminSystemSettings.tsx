@@ -222,7 +222,7 @@ export function AdminSystemSettings({ className }: AdminSystemSettingsProps) {
           <Settings className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-2">No Settings Found</h3>
           <p className="text-muted-foreground">
-            Click "Refresh" to initialize default settings.
+            Click &quot;Refresh&quot; to initialize default settings.
           </p>
         </div>
       )}

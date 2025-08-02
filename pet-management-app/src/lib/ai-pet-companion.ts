@@ -9,12 +9,6 @@ interface PetCompanionResponse {
   careReminder?: string
 }
 
-interface PetInteraction {
-  type: 'pet' | 'play' | 'feed' | 'walk' | 'groom'
-  response: PetCompanionResponse
-  timestamp: Date
-}
-
 export class AIPetCompanion {
   private static instance: AIPetCompanion
   private ollamaEndpoint = process.env.OLLAMA_ENDPOINT || 'http://localhost:11434'
@@ -86,7 +80,16 @@ export class AIPetCompanion {
     }
   }
 
-  private async generateAIResponse(pet: any, interactionType: string): Promise<PetCompanionResponse | null> {
+  private async generateAIResponse(pet: {
+    id: string;
+    name: string;
+    species: string;
+    breed?: string;
+    birthDate?: Date;
+    healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
+    vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
+    appointments: Array<{ date: Date; title: string; status: string }>;
+  }, interactionType: string): Promise<PetCompanionResponse | null> {
     try {
       const prompt = this.buildPetPrompt(pet, interactionType)
       
@@ -111,13 +114,22 @@ export class AIPetCompanion {
 
       const data = await response.json()
       return this.parseAIResponse(data.response, pet.species)
-    } catch (error) {
+    } catch {
       console.log('AI response generation failed, using fallback')
       return null
     }
   }
 
-  private buildPetPrompt(pet: any, interactionType: string): string {
+  private buildPetPrompt(pet: {
+    id: string;
+    name: string;
+    species: string;
+    breed?: string;
+    birthDate?: Date;
+    healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
+    vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
+    appointments: Array<{ date: Date; title: string; status: string }>;
+  }, interactionType: string): string {
     const species = pet.species.toLowerCase()
     const behaviors = this.speciesBehaviors[species as keyof typeof this.speciesBehaviors] || this.speciesBehaviors.dog
     
@@ -166,14 +178,23 @@ Keep it short, friendly, and in character. Format as JSON:
           careReminder: parsed.careReminder
         }
       }
-    } catch (error) {
+    } catch {
       console.log('Failed to parse AI response')
     }
 
     return this.getDefaultResponse()
   }
 
-  private getRuleBasedResponse(pet: any, interactionType: string): PetCompanionResponse {
+  private getRuleBasedResponse(pet: {
+    id: string;
+    name: string;
+    species: string;
+    breed?: string;
+    birthDate?: Date;
+    healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
+    vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
+    appointments: Array<{ date: Date; title: string; status: string }>;
+  }, interactionType: string): PetCompanionResponse {
     const species = pet.species.toLowerCase()
     const behaviors = this.speciesBehaviors[species as keyof typeof this.speciesBehaviors] || this.speciesBehaviors.dog
     
@@ -211,7 +232,7 @@ Keep it short, friendly, and in character. Format as JSON:
 
     return {
       message,
-      mood: mood as any,
+      mood: mood as 'happy' | 'excited' | 'calm' | 'curious' | 'playful' | 'sleepy',
       action,
       healthTip,
       activitySuggestion: activity,
@@ -237,7 +258,7 @@ Keep it short, friendly, and in character. Format as JSON:
     return greetings[species as keyof typeof greetings] || 'Hello!'
   }
 
-  private calculateAge(birthDate: string | Date | null): number {
+  private calculateAge(birthDate: Date | null): number {
     if (!birthDate) return 1
     const today = new Date()
     const birth = new Date(birthDate)
@@ -250,7 +271,22 @@ Keep it short, friendly, and in character. Format as JSON:
     return age
   }
 
-  async getPetInsights(petId: string, userId: string): Promise<any> {
+  async getPetInsights(petId: string, userId: string): Promise<{
+    healthStatus: {
+      status: string;
+      lastCheckup: string | null;
+      vaccinations: number;
+      recommendations: string[];
+    };
+    activityLevel: {
+      level: string;
+      weeklyDuration: number;
+      recommendations: string[];
+    };
+    careRecommendations: string[];
+    upcomingEvents: Array<{ id: string; title: string; date: string; type: string }>;
+    funFacts: string[];
+  }> {
     try {
       const pet = await prisma.pet.findFirst({
         where: { id: petId, userId },
@@ -276,11 +312,31 @@ Keep it short, friendly, and in character. Format as JSON:
       return insights
     } catch (error) {
       console.error('Error getting pet insights:', error)
-      return null
+      return {
+        healthStatus: { status: 'unknown', lastCheckup: null, vaccinations: 0, recommendations: [] },
+        activityLevel: { level: 'unknown', weeklyDuration: 0, recommendations: [] },
+        careRecommendations: [],
+        upcomingEvents: [],
+        funFacts: []
+      }
     }
   }
 
-  private analyzeHealthStatus(pet: any): any {
+  private analyzeHealthStatus(pet: {
+    id: string;
+    name: string;
+    species: string;
+    breed?: string;
+    birthDate?: Date;
+    healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
+    vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
+    appointments: Array<{ date: Date; title: string; status: string }>;
+  }): {
+    status: string;
+    lastCheckup: string | null;
+    vaccinations: number;
+    recommendations: string[];
+  } {
     const recentHealthRecords = pet.healthRecords.slice(0, 3)
     const recentVaccinations = pet.vaccinations.slice(0, 3)
     
@@ -292,9 +348,22 @@ Keep it short, friendly, and in character. Format as JSON:
     }
   }
 
-  private analyzeActivityLevel(pet: any): any {
-    const recentActivities = pet.activities.slice(0, 7)
-    const totalDuration = recentActivities.reduce((sum: number, activity: any) => sum + (activity.duration || 0), 0)
+  private analyzeActivityLevel(pet: {
+    id: string;
+    name: string;
+    species: string;
+    breed?: string;
+    birthDate?: Date;
+    healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
+    vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
+    appointments: Array<{ date: Date; title: string; status: string }>;
+  }): {
+    level: string;
+    weeklyDuration: number;
+    recommendations: string[];
+  } {
+    const recentActivities = pet.activities?.slice(0, 7) || []
+    const totalDuration = recentActivities.reduce((sum: number, activity: { duration?: number }) => sum + (activity.duration || 0), 0)
     
     return {
       level: totalDuration > 300 ? 'high' : totalDuration > 150 ? 'medium' : 'low',
@@ -303,7 +372,16 @@ Keep it short, friendly, and in character. Format as JSON:
     }
   }
 
-  private generateCareRecommendations(pet: any): string[] {
+  private generateCareRecommendations(pet: {
+    id: string;
+    name: string;
+    species: string;
+    breed?: string;
+    birthDate?: Date;
+    healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
+    vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
+    appointments: Array<{ date: Date; title: string; status: string }>;
+  }): string[] {
     const recommendations = []
     const age = this.calculateAge(pet.birthDate)
     
@@ -320,22 +398,40 @@ Keep it short, friendly, and in character. Format as JSON:
     return recommendations
   }
 
-  private getUpcomingEvents(pet: any): any[] {
+  private getUpcomingEvents(pet: {
+    id: string;
+    name: string;
+    species: string;
+    breed?: string;
+    birthDate?: Date;
+    healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
+    vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
+    appointments: Array<{ date: Date; title: string; status: string }>;
+  }): Array<{ id: string; title: string; date: string; type: string }> {
     const events = []
     
-    pet.appointments.forEach((appointment: any) => {
+    pet.appointments.forEach((appointment: { id: string; date: Date; title: string; status: string }) => {
       events.push({
-        type: 'appointment',
+        id: appointment.id,
         title: appointment.title,
-        date: appointment.date,
-        description: appointment.description
+        date: appointment.date.toISOString(),
+        type: 'appointment'
       })
     })
     
     return events
   }
 
-  private generateFunFacts(pet: any): string[] {
+  private generateFunFacts(pet: {
+    id: string;
+    name: string;
+    species: string;
+    breed?: string;
+    birthDate?: Date;
+    healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
+    vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
+    appointments: Array<{ date: Date; title: string; status: string }>;
+  }): string[] {
     const facts = []
     const species = pet.species.toLowerCase()
     
@@ -350,7 +446,16 @@ Keep it short, friendly, and in character. Format as JSON:
     return facts
   }
 
-  private getHealthRecommendations(pet: any): string[] {
+  private getHealthRecommendations(pet: {
+    id: string;
+    name: string;
+    species: string;
+    breed?: string;
+    birthDate?: Date;
+    healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
+    vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
+    appointments: Array<{ date: Date; title: string; status: string }>;
+  }): string[] {
     const recommendations = []
     const age = this.calculateAge(pet.birthDate)
     
@@ -365,7 +470,16 @@ Keep it short, friendly, and in character. Format as JSON:
     return recommendations
   }
 
-  private getActivityRecommendations(pet: any): string[] {
+  private getActivityRecommendations(pet: {
+    id: string;
+    name: string;
+    species: string;
+    breed?: string;
+    birthDate?: Date;
+    healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
+    vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
+    appointments: Array<{ date: Date; title: string; status: string }>;
+  }): string[] {
     const recommendations = []
     const species = pet.species.toLowerCase()
     

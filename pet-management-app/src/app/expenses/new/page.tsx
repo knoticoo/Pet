@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { t } from '@/lib/translations'
 import { Sparkles, Brain } from 'lucide-react'
 
 interface Pet {
@@ -20,7 +19,6 @@ export default function NewExpensePage() {
   const { data: session } = useSession()
   const router = useRouter()
   const [pets, setPets] = useState<Pet[]>([])
-  const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [aiSuggesting, setAiSuggesting] = useState(false)
   const [aiSuggestions, setAiSuggestions] = useState<{
@@ -51,8 +49,6 @@ export default function NewExpensePage() {
       }
     } catch (error) {
       console.error('Error fetching pets:', error)
-    } finally {
-      setLoading(false)
     }
   }
 

@@ -80,7 +80,7 @@ export default function UploadPage() {
       })
 
       if (response.ok) {
-        const post = await response.json()
+        await response.json()
         router.push('/social')
       } else {
         const error = await response.json()

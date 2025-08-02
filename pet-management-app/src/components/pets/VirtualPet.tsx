@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Heart, Play, Coffee, Utensils, Scissors, Zap, Sparkles, Star, Gift } from 'lucide-react'
+import { Heart, Play, Utensils, Scissors, Zap, Sparkles, Star, Gift } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface VirtualPetProps {
@@ -13,7 +13,7 @@ interface VirtualPetProps {
     temperament?: string
     personality?: string
   }
-  onInteraction: (type: string) => Promise<any>
+  onInteraction: (type: string) => Promise<{ success: boolean; message: string; data?: unknown }>
 }
 
 interface PetAnimation {
@@ -50,7 +50,7 @@ export function VirtualPet({ pet, onInteraction }: VirtualPetProps) {
     glow: false
   })
   const [isInteracting, setIsInteracting] = useState(false)
-  const [lastResponse, setLastResponse] = useState<any>(null)
+  const [lastResponse, setLastResponse] = useState<{ success: boolean; message: string; data?: unknown } | null>(null)
   const [mood, setMood] = useState<'happy' | 'excited' | 'calm' | 'curious' | 'playful' | 'sleepy'>('happy')
   const [energy, setEnergy] = useState(75)
   const [happiness, setHappiness] = useState(80)
@@ -267,10 +267,10 @@ export function VirtualPet({ pet, onInteraction }: VirtualPetProps) {
     try {
       const response = await onInteraction(type)
       setLastResponse(response)
-      setMood(response.mood)
+      setMood(response.data?.mood || 'happy') // Assuming response.data.mood is the new way to get mood
       
       // Set animation based on response
-      const animation = animations[response.mood] || animations.happy
+      const animation = animations[response.data?.mood || 'happy'] || animations.happy // Assuming response.data.mood is the new way to get mood
       setCurrentAnimation(animation)
       
       // Reset to idle after animation
