@@ -102,6 +102,18 @@ model Pet {
   description     String?
   isActive        Boolean   @default(true)
   
+  // New enhanced fields
+  weight          Float?    // in kg
+  height          Float?    // in cm
+  color           String?   // primary color
+  personality     String?   // personality traits
+  favoriteFood    String?   // favorite food
+  favoriteToy     String?   // favorite toy
+  specialNeeds    String?   // special care requirements
+  temperament     String?   // calm, energetic, shy, etc.
+  trainingLevel   String?   // basic, intermediate, advanced
+  socialBehavior  String?   // how they interact with other pets/people
+  
   // Relationships
   userId          String
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
