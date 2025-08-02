@@ -1,5 +1,51 @@
 import { Plugin, PluginConfig } from './plugin-manager'
 
+// Define proper types for photography plugin
+interface GrowthAnalysis {
+  estimatedAge: number
+  growthStage: 'puppy' | 'adolescent' | 'adult' | 'senior'
+  healthIndicators: string[]
+  recommendations: string[]
+  confidence: number
+}
+
+interface GrowthTimeline {
+  petId: string
+  photos: Array<{
+    id: string
+    url: string
+    date: string
+    analysis?: GrowthAnalysis
+  }>
+  milestones: Array<{
+    date: string
+    type: string
+    description: string
+  }>
+}
+
+interface PhotoBookOptions {
+  theme: 'classic' | 'modern' | 'playful' | 'elegant'
+  includeHealthData: boolean
+  includeMilestones: boolean
+  maxPhotos: number
+  title: string
+  description?: string
+}
+
+interface PhotoBook {
+  id: string
+  title: string
+  pages: Array<{
+    pageNumber: number
+    photos: string[]
+    text?: string
+    layout: 'grid' | 'single' | 'collage'
+  }>
+  generatedAt: string
+  downloadUrl?: string
+}
+
 export class PetPhotographyPlugin implements Plugin {
   config: PluginConfig = {
     id: 'pet-photography',
@@ -37,17 +83,17 @@ export class PetPhotographyPlugin implements Plugin {
     // Disable photo features, cleanup, etc.
   }
 
-  getSettings(): Record<string, any> {
+  getSettings(): Record<string, unknown> {
     return this.config.settings || {}
   }
 
-  async updateSettings(settings: Record<string, any>): Promise<void> {
+  async updateSettings(settings: Record<string, unknown>): Promise<void> {
     this.config.settings = { ...this.config.settings, ...settings }
     // Save settings to database
   }
 
   // AI Vet Integration Methods
-  async analyzeGrowthPhoto(photoUrl: string, petId: string, date: string): Promise<any> {
+  async analyzeGrowthPhoto(photoUrl: string, petId: string, date: string): Promise<GrowthAnalysis | null> {
     try {
       const response = await fetch('/api/ai-vet/analyze-growth', {
         method: 'POST',
@@ -61,7 +107,7 @@ export class PetPhotographyPlugin implements Plugin {
     }
   }
 
-  async createGrowthTimeline(petId: string): Promise<any> {
+  async createGrowthTimeline(petId: string): Promise<GrowthTimeline | null> {
     try {
       const response = await fetch(`/api/photography/growth-timeline/${petId}`)
       return await response.json()
@@ -71,7 +117,7 @@ export class PetPhotographyPlugin implements Plugin {
     }
   }
 
-  async generatePhotoBook(petId: string, options: any): Promise<any> {
+  async generatePhotoBook(petId: string, options: PhotoBookOptions): Promise<PhotoBook | null> {
     try {
       const response = await fetch('/api/photography/generate-photobook', {
         method: 'POST',

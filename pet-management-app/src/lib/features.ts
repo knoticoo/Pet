@@ -473,7 +473,7 @@ export class FeatureManager {
     )
   }
 
-  async getUserEnabledFeatures(userId: string): Promise<FeatureConfig[]> {
+  async getUserEnabledFeatures(_userId: string): Promise<FeatureConfig[]> {
     try {
       // Get user subscription info to determine feature access
       // Note: User subscription info is used for AI service limitations, not feature access
