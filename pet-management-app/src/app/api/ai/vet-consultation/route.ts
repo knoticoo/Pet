@@ -234,7 +234,7 @@ function parseOllamaVetResponse(response: string): VetConsultationResponse | nul
   }
 }
 
-function analyzeWithRules(pet: Pet, symptoms: string, _duration?: string, _additionalInfo?: string): VetConsultationResponse {
+function analyzeWithRules(pet: Pet, symptoms: string): VetConsultationResponse {
   const symptomsLower = symptoms.toLowerCase()
   
   // Emergency keywords
@@ -285,7 +285,7 @@ function analyzeWithRules(pet: Pet, symptoms: string, _duration?: string, _addit
   }
 }
 
-function getSpeciesRecommendations(_species: string, _symptoms: string) {
+function getSpeciesRecommendations() {
   const speciesLower = species.toLowerCase()
   
   const recommendations = []
@@ -313,7 +313,7 @@ function getSpeciesRecommendations(_species: string, _symptoms: string) {
   return recommendations
 }
 
-function getPossibleConditions(_symptoms: string, _species: string) {
+function getPossibleConditions() {
   const conditions = []
   
   if (symptoms.includes('vomiting') || symptoms.includes('diarrhea')) {

@@ -19,7 +19,7 @@ export default function NewAppointmentPage() {
   const { data: session } = useSession()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [pets, setPets] = useState<Pet[]>([])
-  const [loading, setLoading] = useState(true)
+
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -36,8 +36,6 @@ export default function NewAppointmentPage() {
       }
     } catch (error) {
       console.error('Error fetching pets:', error)
-    } finally {
-      setLoading(false)
     }
   }
 
