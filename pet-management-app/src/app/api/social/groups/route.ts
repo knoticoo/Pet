@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const breed = searchParams.get('breed')
     const isPublic = searchParams.get('isPublic')
 
-    const where: any = {}
+    const where: Record<string, unknown> = {}
     if (breed) where.breed = breed
     if (isPublic !== null) where.isPublic = isPublic === 'true'
 

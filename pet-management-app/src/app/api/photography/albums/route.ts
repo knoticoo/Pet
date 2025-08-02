@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const petId = searchParams.get('petId')
 
-    const where: any = { userId: session.user.id }
+    const where: Record<string, string> = { userId: session.user.id }
     if (petId) where.petId = petId
 
     const albums = await prisma.photoAlbum.findMany({

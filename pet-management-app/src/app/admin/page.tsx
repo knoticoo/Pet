@@ -7,7 +7,7 @@ import { AdminGuard } from '@/components/admin/AdminGuard'
 import { AdminSystemSettings } from '@/components/admin/AdminSystemSettings'
 import { AdminUserManagement } from '@/components/admin/AdminUserManagement'
 import { AdminPluginManager } from '@/components/admin/AdminPluginManager'
-import { Shield, Settings, Users, Puzzle, Database, LogIn, Trash2, Sparkles, Menu, X, AlertTriangle, CheckCircle, Clock, Activity } from 'lucide-react'
+import { Shield, Settings, Users, Puzzle, Database, LogIn, Trash2, Sparkles, Menu, X, CheckCircle, Activity } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 

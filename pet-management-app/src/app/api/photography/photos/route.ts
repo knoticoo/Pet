@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
 
-    const where: any = { userId: session.user.id }
+    const where: Record<string, string> = { userId: session.user.id }
     if (petId) where.petId = petId
     if (category) where.category = category
 

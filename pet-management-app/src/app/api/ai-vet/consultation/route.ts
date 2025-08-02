@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { aiVetService } from '@/lib/ai-vet-service'
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {

@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const severity = searchParams.get('severity')
     const isRead = searchParams.get('isRead')
 
-    const where: any = {}
+    const where: Record<string, unknown> = {}
     if (petId) {
       // Verify pet belongs to user
       const pet = await prisma.pet.findFirst({
