@@ -91,7 +91,7 @@ export class AIVetService {
     let aiAnalysis: SymptomAnalysis | null = null
     try {
       aiAnalysis = await this.getAIAnalysis(input, language)
-    } catch (error) {
+    } catch {
       console.log('AI analysis unavailable, using rule-based fallback')
     }
 
@@ -223,7 +223,7 @@ Brief responses. Recommend vet for serious issues.`
           }
         }),
         timeout: 15000
-      } as any)
+      } as RequestInit & { timeout: number })
 
       if (!response.ok) {
         throw new Error(`Ollama API error: ${response.status}`)
@@ -264,7 +264,7 @@ Brief responses. Recommend vet for serious issues.`
       } else {
         // English parsing (existing code)
         if (cleanLine.startsWith('SEVERITY:')) {
-          analysis.severity = cleanLine.split(':')[1].trim() as any
+          analysis.severity = cleanLine.split(':')[1].trim() as 'low' | 'medium' | 'high' | 'emergency'
         } else if (cleanLine.startsWith('URGENCY:')) {
           analysis.urgency = parseInt(cleanLine.split(':')[1].trim()) || 5
         } else if (cleanLine.startsWith('VET_NEEDED:')) {
@@ -280,15 +280,15 @@ Brief responses. Recommend vet for serious issues.`
     })
 
     // Provide defaults with appropriate language
-    const defaults = this.getDefaultResponses(language)
+    const defaultResponses = this.getDefaultResponses(language)
     
     return {
       severity: analysis.severity || 'medium',
       urgency: analysis.urgency || 5,
       shouldSeeVet: analysis.shouldSeeVet ?? true,
-      recommendations: analysis.recommendations || defaults.recommendations,
-      nextSteps: analysis.nextSteps || defaults.nextSteps,
-      estimatedCause: analysis.estimatedCause || defaults.estimatedCause
+      recommendations: analysis.recommendations || defaultResponses.recommendations,
+      nextSteps: analysis.nextSteps || defaultResponses.nextSteps,
+      estimatedCause: analysis.estimatedCause || defaultResponses.estimatedCause
     }
   }
 
@@ -320,7 +320,7 @@ Brief responses. Recommend vet for serious issues.`
 
   private getRuleBasedAnalysis(input: ConsultationInput, language: string = 'en'): SymptomAnalysis {
     const symptoms = input.symptoms.toLowerCase()
-    let bestMatch: any = null
+    let bestMatch: { severity: 'low' | 'medium' | 'high' | 'emergency'; urgency: number; shouldSeeVet: boolean; recommendations: string[]; nextSteps: string[]; estimatedCause: string[] } | null = null
     let highestScore = 0
 
     // Find best matching symptom in database (works with both languages)
