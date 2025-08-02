@@ -4,7 +4,7 @@ import { Calendar, Plus, Clock, MapPin, User } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { useEffect, useState } from 'react'
 
 interface Appointment {
@@ -25,7 +25,7 @@ interface Appointment {
 }
 
 export default function AppointmentsPage() {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
 

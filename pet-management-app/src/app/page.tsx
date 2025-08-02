@@ -3,7 +3,7 @@
 import { Heart, Calendar, DollarSign, Bell } from 'lucide-react'
 
 import { AuthGuard } from '@/components/AuthGuard'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { useEffect, useState } from 'react'
 import { t } from '@/lib/translations'
 
@@ -20,7 +20,7 @@ interface Stats {
 }
 
 export default function DashboardPage() {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
 
   const [stats, setStats] = useState<Stats>({
     totalPets: 0,

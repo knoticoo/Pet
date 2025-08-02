@@ -235,7 +235,7 @@ export const Navigation = memo(() => {
             </div>
             
             {/* Mobile User Menu */}
-            <UserMenu user={user} onSignOut={handleSignOut} />
+            <UserMenu user={user ? { name: user.name, email: user.email } : null} onSignOut={handleSignOut} />
           </div>
         )}
       </div>

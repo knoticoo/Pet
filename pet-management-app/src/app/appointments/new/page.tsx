@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 
 interface Pet {
   id: string
@@ -16,7 +16,7 @@ interface Pet {
 
 export default function NewAppointmentPage() {
   const router = useRouter()
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [pets, setPets] = useState<Pet[]>([])
 

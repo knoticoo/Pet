@@ -3,7 +3,7 @@
 import { Bell, Plus, Calendar, Pill, Heart, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { useEffect, useState, useCallback, memo } from 'react'
 import { t } from '@/lib/translations'
 import { formatDate } from '@/lib/utils'
@@ -106,7 +106,7 @@ const ReminderCard = memo(({ reminder }: { reminder: Reminder }) => {
 ReminderCard.displayName = 'ReminderCard'
 
 export const RecentReminders = memo(() => {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const [reminders, setReminders] = useState<Reminder[]>([])
   const [loading, setLoading] = useState(true)
 

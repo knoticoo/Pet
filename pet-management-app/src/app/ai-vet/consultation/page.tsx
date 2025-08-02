@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 
 import { AuthGuard } from '@/components/AuthGuard'
 import { Button } from '@/components/ui/button'
@@ -53,7 +53,7 @@ interface AnalysisResult {
 }
 
 export default function ConsultationPage() {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
 
   const [pets, setPets] = useState<Pet[]>([])
   const [selectedPet, setSelectedPet] = useState('')

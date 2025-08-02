@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -49,7 +49,7 @@ interface HealthAlert {
 }
 
 export function HealthAnalytics() {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const [metrics, setMetrics] = useState<HealthMetric[]>([])
   const [alerts, setAlerts] = useState<HealthAlert[]>([])
   const [loading, setLoading] = useState(true)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { Button } from '@/components/ui/button'
 import { Heart, MessageCircle, Share2, Camera, Sparkles, Grid, List, Upload } from 'lucide-react'
 import Image from 'next/image'
@@ -27,7 +27,7 @@ interface SocialPost {
 }
 
 export default function SocialGalleryPage() {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const [posts, setPosts] = useState<SocialPost[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')

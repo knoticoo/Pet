@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedSession } from '@/lib/session-types'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(
@@ -9,7 +8,7 @@ export async function GET(
 ) {
   const { id } = await params
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     if (!session?.user?.isAdmin) {
       return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 })
     }
@@ -35,7 +34,7 @@ export async function PUT(
 ) {
   const { id } = await params
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     if (!session?.user?.isAdmin) {
       return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 })
     }
@@ -79,7 +78,7 @@ export async function DELETE(
 ) {
   const { id } = await params
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     if (!session?.user?.isAdmin) {
       return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 })
     }
@@ -115,7 +114,7 @@ export async function PATCH(
 ) {
   const { id } = await params
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     if (!session?.user?.isAdmin) {
       return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 })
     }

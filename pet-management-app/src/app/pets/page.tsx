@@ -4,7 +4,7 @@ import { Heart, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { useEffect, useState } from 'react'
 import { t } from '@/lib/translations'
 
@@ -18,7 +18,7 @@ interface Pet {
 }
 
 export default function PetsPage() {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const [pets, setPets] = useState<Pet[]>([])
   const [loading, setLoading] = useState(true)
 

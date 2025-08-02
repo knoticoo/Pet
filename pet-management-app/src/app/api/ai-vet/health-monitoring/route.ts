@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedSession } from "@/lib/session-types"
 import { prisma } from '@/lib/prisma'
 import { aiVetService } from '@/lib/ai-vet-service'
 
@@ -46,7 +45,7 @@ interface HealthAnalysis {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -98,14 +97,20 @@ export async function GET(request: NextRequest) {
     ])
 
     // Use AI to analyze health trends
-    const healthAnalysis = await analyzeHealthTrendsWithAI(pet, appointments, expenses, consultations)
+    const healthAnalysis = await analyzeHealthTrendsWithAI({
+      id: pet.id,
+      name: pet.name,
+      species: pet.species,
+      breed: pet.breed || undefined,
+      birthDate: pet.birthDate || new Date()
+    }, appointments as never[], expenses as never[], consultations as never[])
 
     return NextResponse.json({
       pet: {
         name: pet.name,
         species: pet.species,
         breed: pet.breed,
-        age: calculateAge(pet.birthDate)
+        age: calculateAge(pet.birthDate || new Date())
       },
       healthAnalysis,
       dataPoints: {
@@ -171,8 +176,7 @@ Focus on preventive care, early detection, and breed-specific health considerati
           num_predict: 350,
           num_ctx: 1024
         }
-      }),
-      timeout: 20000
+      })
     })
 
     if (!response.ok) {
@@ -189,7 +193,7 @@ Focus on preventive care, early detection, and breed-specific health considerati
 
 function parseHealthAnalysis(response: string): HealthAnalysis {
   const lines = response.split('\n')
-  const analysis: Record<string, unknown> = {}
+  const analysis: Partial<HealthAnalysis> = {}
 
   lines.forEach(line => {
     const cleanLine = line.trim()
@@ -197,7 +201,8 @@ function parseHealthAnalysis(response: string): HealthAnalysis {
     if (cleanLine.startsWith('HEALTH_SCORE:')) {
       analysis.healthScore = parseInt(cleanLine.split(':')[1].trim()) || 7
     } else if (cleanLine.startsWith('RISK_LEVEL:')) {
-      analysis.riskLevel = cleanLine.split(':')[1].trim().toLowerCase()
+      const risk = cleanLine.split(':')[1].trim().toLowerCase()
+      analysis.riskLevel = (['low', 'medium', 'high'].includes(risk) ? risk : 'low') as 'low' | 'medium' | 'high'
     } else if (cleanLine.startsWith('TRENDS:')) {
       analysis.trends = cleanLine.split(':')[1].split(',').map(t => t.trim()).filter(t => t)
     } else if (cleanLine.startsWith('PREDICTIONS:')) {
@@ -231,7 +236,7 @@ function getFallbackHealthAnalysis(pet: Pet, appointments: Appointment[], expens
 
   // Basic health scoring based on available data
   let healthScore = 8
-  let riskLevel = 'low'
+  let riskLevel: 'low' | 'medium' | 'high' = 'low'
   const alerts: string[] = []
 
   if (petAge > 8) {
@@ -239,7 +244,7 @@ function getFallbackHealthAnalysis(pet: Pet, appointments: Appointment[], expens
     riskLevel = 'medium'
   }
 
-  if (hasRecentConsultations && consultations.some(c => c.severity === 'high')) {
+  if (hasRecentConsultations && consultations.some(c => (c as {severity?: string}).severity === 'high')) {
     healthScore -= 2
     riskLevel = 'high'
     alerts.push('Recent high-severity symptoms reported')

@@ -4,7 +4,7 @@ import { DollarSign, Plus, Calendar, Receipt, TrendingUp, PieChart } from 'lucid
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { useEffect, useState } from 'react'
 import { t } from '@/lib/translations'
 
@@ -23,7 +23,7 @@ interface Expense {
 }
 
 export default function ExpensesPage() {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [loading, setLoading] = useState(true)
 

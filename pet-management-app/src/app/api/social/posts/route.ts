@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getAuthenticatedSession } from "@/lib/session-types"
 import { prisma } from '@/lib/prisma'
 import { aiVetService } from '@/lib/ai-vet-service'
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -80,7 +79,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getAuthenticatedSession()
     
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -127,7 +126,10 @@ export async function POST(request: NextRequest) {
     // Use hosted AI for image analysis
     let aiAnalysis
     try {
-      aiAnalysis = await analyzePhotoWithAI(imageUrl, caption, pet)
+      aiAnalysis = await analyzePhotoWithAI(imageUrl, caption, {
+        ...pet,
+        breed: pet.breed || 'Mixed'
+      })
     } catch (error) {
       console.log('AI analysis failed, using fallback:', error)
       // Fallback analysis

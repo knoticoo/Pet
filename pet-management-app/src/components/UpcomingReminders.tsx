@@ -3,7 +3,7 @@
 import { Bell, Calendar, Pill, Heart, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
-import { useSession } from 'next-auth/react'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { useEffect, useState } from 'react'
 import { t } from '@/lib/translations'
 
@@ -37,7 +37,7 @@ const priorityColors = {
 }
 
 export function UpcomingReminders() {
-  const { data: session } = useSession()
+  const { session } = useAuthenticatedSession()
   const [reminders, setReminders] = useState<Reminder[]>([])
   const [loading, setLoading] = useState(true)
 
