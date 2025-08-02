@@ -86,7 +86,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { petId, caption, imageUrl } = await request.json()
+    // Handle both JSON and FormData
+    let petId: string
+    let caption: string
+    let imageUrl: string
+
+    const contentType = request.headers.get('content-type')
+    
+    if (contentType?.includes('multipart/form-data')) {
+      const formData = await request.formData()
+      petId = formData.get('petId') as string
+      caption = formData.get('caption') as string
+      const imageFile = formData.get('image') as File
+      
+      if (!imageFile) {
+        return NextResponse.json({ error: 'No image provided' }, { status: 400 })
+      }
+
+      // For now, use a placeholder URL - in production you'd upload to cloud storage
+      imageUrl = '/api/placeholder/400/400'
+    } else {
+      const body = await request.json()
+      petId = body.petId
+      caption = body.caption
+      imageUrl = body.imageUrl
+    }
 
     // Get pet information for AI analysis
     const pet = await prisma.pet.findFirst({
