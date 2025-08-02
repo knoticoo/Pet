@@ -351,3 +351,29 @@ body {
     radial-gradient(circle at 20% 80%, rgba(34, 139, 34, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(152, 251, 152, 0.1) 0%, transparent 50%);
 }
+
+/* Custom animations for Virtual Pet */
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+/* Particle effects */
+@keyframes float-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100px);
+  }
+}
+
+.animate-float-up {
+  animation: float-up 2s ease-out forwards;
+}

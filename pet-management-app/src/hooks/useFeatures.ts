@@ -67,6 +67,10 @@ export function useFeatures(userId?: string) {
       const defaultFeatures = [
         { name: 'dashboard', displayName: 'Dashboard', category: 'core', isCore: true },
         { name: 'pets', displayName: 'Pet Management', category: 'core', isCore: true },
+        { name: 'social-profile', displayName: 'Social Profiles', category: 'social', isCore: true },
+        { name: 'expenses', displayName: 'Expenses', category: 'finance', isCore: true },
+        { name: 'appointments', displayName: 'Appointments', category: 'health', isCore: true },
+        { name: 'reminders', displayName: 'Reminders', category: 'health', isCore: true },
         { name: 'settings', displayName: 'Settings', category: 'core', isCore: true }
       ]
       setAvailableFeatures(defaultFeatures)

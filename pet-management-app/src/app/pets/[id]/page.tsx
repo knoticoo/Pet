@@ -5,11 +5,12 @@ import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { AuthGuard } from '@/components/AuthGuard'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Edit, Calendar, Heart, MapPin, Phone, Mail, Trash2, Sparkles, Camera, Activity, TrendingUp, Bell, Share2, Star, Brain, Zap, Target, Users, Award, Clock, AlertCircle, CheckCircle, Info } from 'lucide-react'
+import { ArrowLeft, Edit, Calendar, Heart, MapPin, Phone, Mail, Trash2, Sparkles, Camera, Activity, TrendingUp, Bell, Share2, Star, Brain, Zap, Target, Users, Award, Clock, AlertCircle, CheckCircle, Info, Upload, X } from 'lucide-react'
 import Link from 'next/link'
 import { t } from '@/lib/translations'
 import { VirtualPet } from '@/components/pets/VirtualPet'
 import { PetPhotoGallery } from '@/components/pets/PetPhotoGallery'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
 interface Pet {
   id: string
@@ -98,6 +99,8 @@ export default function PetDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<'overview' | 'photos' | 'health' | 'activities'>('overview')
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
   const petId = params.id as string
 
@@ -254,6 +257,80 @@ export default function PetDetailPage() {
     }
   }
 
+  const handlePhotoUpload = async (event: React.FormEvent) => {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget as HTMLFormElement)
+    const file = formData.get('photo') as File
+
+    if (!file) {
+      alert('Please select a photo')
+      return
+    }
+
+    // Validate file type and size
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      alert('Image size must be less than 5MB')
+      return
+    }
+
+    setUploadingPhoto(true)
+    try {
+      const uploadFormData = new FormData()
+      uploadFormData.append('photo', file)
+
+      const response = await fetch(`/api/pets/${petId}/profile-photo`, {
+        method: 'POST',
+        body: uploadFormData
+      })
+
+      if (response.ok) {
+        const updatedPet = await response.json()
+        setPet(updatedPet)
+        setShowPhotoUpload(false)
+        
+        // Show success message
+        alert('Profile photo updated successfully!')
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to upload photo')
+      }
+    } catch (error) {
+      console.error('Error uploading photo:', error)
+      alert('Failed to upload photo')
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
+
+  const removeProfilePhoto = async () => {
+    if (!confirm('Are you sure you want to remove the profile photo?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/pets/${petId}/profile-photo`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        const updatedPet = await response.json()
+        setPet(updatedPet)
+        alert('Profile photo removed successfully!')
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to remove photo')
+      }
+    } catch (error) {
+      console.error('Error removing photo:', error)
+      alert('Failed to remove photo')
+    }
+  }
+
   if (loading) {
     return (
       <AuthGuard>
@@ -321,15 +398,86 @@ export default function PetDetailPage() {
             </div>
 
             <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
-              {/* Pet Avatar */}
-              <div className="relative">
-                <div className={`w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br ${getGradientColor(pet.species)} rounded-2xl flex items-center justify-center shadow-lg`}>
+              {/* Pet Avatar with Upload */}
+              <div className="relative group">
+                <div className={`w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br ${getGradientColor(pet.species)} rounded-2xl flex items-center justify-center shadow-lg overflow-hidden`}>
                   {pet.photo ? (
-                    <img src={pet.photo} alt={pet.name} className="w-full h-full object-cover rounded-2xl" />
+                    <img 
+                      src={pet.photo} 
+                      alt={pet.name} 
+                      className="w-full h-full object-cover rounded-2xl" 
+                    />
                   ) : (
                     <Heart className="h-12 w-12 md:h-16 md:w-16 text-white" />
                   )}
+                  
+                  {/* Upload overlay */}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl">
+                    <Dialog open={showPhotoUpload} onOpenChange={setShowPhotoUpload}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          size="sm" 
+                          className="bg-white/90 text-black hover:bg-white"
+                        >
+                          <Camera className="h-4 w-4 mr-1" />
+                          {pet.photo ? 'Change' : 'Add Photo'}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Update Profile Photo</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handlePhotoUpload} className="space-y-4">
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                            <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <input
+                              type="file"
+                              name="photo"
+                              accept="image/*"
+                              required
+                              className="w-full"
+                            />
+                            <p className="text-sm text-gray-500 mt-2">
+                              Choose an image file (max 5MB)
+                            </p>
+                          </div>
+                          
+                          <div className="flex gap-3">
+                            <Button 
+                              type="submit" 
+                              disabled={uploadingPhoto}
+                              className="flex-1"
+                            >
+                              {uploadingPhoto ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                  Uploading...
+                                </>
+                              ) : (
+                                <>
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Upload Photo
+                                </>
+                              )}
+                            </Button>
+                            
+                            {pet.photo && (
+                              <Button 
+                                type="button" 
+                                variant="destructive"
+                                onClick={removeProfilePhoto}
+                                className="px-3"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </div>
+                
                 <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg">
                   <Star className="h-4 w-4 text-yellow-500 fill-current" />
                 </div>

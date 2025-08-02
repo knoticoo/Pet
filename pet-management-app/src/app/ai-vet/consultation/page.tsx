@@ -16,7 +16,10 @@ import {
   Heart,
   Upload,
   Loader2,
-  Crown
+  Crown,
+  Sparkles,
+  Zap,
+  Target
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -167,34 +170,29 @@ export default function ConsultationPage() {
     setAnalysis(null)
 
     try {
-      const response = await fetch('/api/ai-vet/consultation', {
+      // Enhanced AI analysis with Ollama
+      const response = await fetch('/api/ai/vet-consultation', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           petId: selectedPet,
-          symptoms,
-          duration,
-          language,
-        }),
+          symptoms: symptoms,
+          urgency: 0, // Placeholder, will be calculated by backend
+          duration: duration,
+          additionalInfo: '', // Placeholder
+          enhancedAnalysis: true // Request enhanced Ollama analysis
+        })
       })
 
-      const data = await response.json()
-
       if (response.ok) {
-        setAnalysis(data.analysis)
+        const result = await response.json()
+        setAnalysis(result)
       } else {
-        if (response.status === 429) {
-          const upgradeText = language === 'ru' 
-            ? ' Рассмотрите возможность обновления до премиума для неограниченных консультаций.'
-            : ' Consider upgrading to premium for unlimited consultations.'
-          setError(data.error + upgradeText)
-        } else {
-          setError(data.error || (language === 'ru' ? 'Не удалось проанализировать симптомы' : 'Failed to analyze symptoms'))
-        }
+        const error = await response.json()
+        setError(error.message || (language === 'ru' ? 'Не удалось проанализировать симптомы' : 'Failed to analyze symptoms'))
       }
     } catch (error) {
+      console.error('Error during consultation:', error)
       setError(language === 'ru' ? 'Ошибка сети. Попробуйте еще раз.' : 'Network error. Please try again.')
     } finally {
       setIsAnalyzing(false)
@@ -379,112 +377,144 @@ export default function ConsultationPage() {
 
             {analysis && (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">{getText('results')}</h3>
-                  <Badge className={getSeverityColor(analysis.severity)}>
-                    {analysis.severity.toUpperCase()}
-                  </Badge>
-                </div>
-
-                {/* Urgency Score */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <span className="font-medium">{getText('urgencyScore')}</span>
-                  <span className={`text-2xl font-bold ${getUrgencyColor(analysis.urgency)}`}>
-                    {analysis.urgency}/10
-                  </span>
-                </div>
-
-                {/* Emergency Warning */}
-                {analysis.severity === 'emergency' && (
-                  <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
-                    <div className="flex items-start space-x-3">
-                      <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-red-900">{getText('emergency')}</h4>
-                        <p className="text-sm text-red-800 mt-1">
-                          {getText('emergencyText')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Possible Causes */}
-                <div>
-                  <h4 className="font-medium mb-3">{getText('possibleCauses')}</h4>
-                  <ul className="space-y-2">
-                    {analysis.estimatedCause.map((cause, index) => (
-                      <li key={index} className="flex items-start space-x-2">
-                        <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
-                        <span className="text-sm">{cause}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Recommendations */}
-                <div>
-                  <h4 className="font-medium mb-3">{getText('careRecommendations')}</h4>
-                  <ul className="space-y-2">
-                    {analysis.recommendations.map((rec, index) => (
-                      <li key={index} className="flex items-start space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm">{rec}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Next Steps */}
-                <div>
-                  <h4 className="font-medium mb-3">{getText('nextSteps')}</h4>
-                  <ul className="space-y-2">
-                    {analysis.nextSteps.map((step, index) => (
-                      <li key={index} className="flex items-start space-x-2">
-                        <span className="w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium mt-0.5">
-                          {index + 1}
+                {/* AI Confidence Score */}
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Brain className="h-6 w-6 text-purple-600" />
+                    <h3 className="text-lg font-semibold text-purple-900">AI Analysis Results</h3>
+                    {analysis.confidence && (
+                      <div className="ml-auto">
+                        <span className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+                          {Math.round(analysis.confidence * 100)}% Confidence
                         </span>
-                        <span className="text-sm">{step}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Primary Assessment */}
+                  <div className="bg-white rounded-lg p-4 mb-4">
+                    <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                      <Target className="h-4 w-4 text-blue-600" />
+                      Primary Assessment
+                    </h4>
+                    <p className="text-gray-700">{analysis.assessment}</p>
+                  </div>
 
-                {/* Vet Recommendation */}
-                {analysis.shouldSeeVet && (
-                  <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
-                    <div className="flex items-start space-x-3">
-                      <Stethoscope className="h-5 w-5 text-amber-600 mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-amber-900">{getText('vetRecommended')}</h4>
-                        <p className="text-sm text-amber-800 mt-1">
-                          {getText('vetRecommendedText')}
-                        </p>
+                  {/* Urgency Level */}
+                  {analysis.urgencyLevel && (
+                    <div className={`rounded-lg p-4 mb-4 ${
+                      analysis.urgencyLevel === 'emergency' ? 'bg-red-50 border border-red-200' :
+                      analysis.urgencyLevel === 'urgent' ? 'bg-orange-50 border border-orange-200' :
+                      analysis.urgencyLevel === 'moderate' ? 'bg-yellow-50 border border-yellow-200' :
+                      'bg-green-50 border border-green-200'
+                    }`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        {analysis.urgencyLevel === 'emergency' && <AlertTriangle className="h-5 w-5 text-red-600" />}
+                        {analysis.urgencyLevel === 'urgent' && <Clock className="h-5 w-5 text-orange-600" />}
+                        {analysis.urgencyLevel === 'moderate' && <Zap className="h-5 w-5 text-yellow-600" />}
+                        {analysis.urgencyLevel === 'low' && <CheckCircle className="h-5 w-5 text-green-600" />}
+                        <h4 className={`font-semibold ${
+                          analysis.urgencyLevel === 'emergency' ? 'text-red-800' :
+                          analysis.urgencyLevel === 'urgent' ? 'text-orange-800' :
+                          analysis.urgencyLevel === 'moderate' ? 'text-yellow-800' :
+                          'text-green-800'
+                        }`}>
+                          {analysis.urgencyLevel.charAt(0).toUpperCase() + analysis.urgencyLevel.slice(1)} Priority
+                        </h4>
+                      </div>
+                      <p className={`text-sm ${
+                        analysis.urgencyLevel === 'emergency' ? 'text-red-700' :
+                        analysis.urgencyLevel === 'urgent' ? 'text-orange-700' :
+                        analysis.urgencyLevel === 'moderate' ? 'text-yellow-700' :
+                        'text-green-700'
+                      }`}>
+                        {analysis.urgencyExplanation || 'Based on the symptoms described, this appears to be a routine concern.'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Possible Conditions */}
+                  {analysis.possibleConditions && analysis.possibleConditions.length > 0 && (
+                    <div className="bg-white rounded-lg p-4 mb-4">
+                      <h4 className="font-semibold text-gray-900 mb-3">Possible Conditions</h4>
+                      <div className="space-y-2">
+                        {analysis.possibleConditions.map((condition: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                            <div>
+                              <span className="font-medium text-gray-900">{condition.name}</span>
+                              {condition.description && (
+                                <p className="text-sm text-gray-600 mt-1">{condition.description}</p>
+                              )}
+                            </div>
+                            {condition.likelihood && (
+                              <span className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                                {Math.round(condition.likelihood * 100)}%
+                              </span>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Actions */}
-                <div className="flex space-x-3 pt-4 border-t">
-                  <Link href="/appointments/new" className="flex-1">
-                    <Button variant="outline" className="w-full">
-                      <Clock className="h-4 w-4 mr-2" />
-                      {getText('scheduleAppointment')}
-                    </Button>
-                  </Link>
-                  <Button 
-                    onClick={() => {
-                      setAnalysis(null)
-                      setSymptoms('')
-                      setDuration('')
-                      setSelectedPet('')
-                    }}
-                    variant="outline"
-                    className="flex-1"
-                  >
-                    {getText('newConsultation')}
-                  </Button>
+                  {/* Enhanced Recommendations */}
+                  {analysis.recommendations && analysis.recommendations.length > 0 && (
+                    <div className="bg-white rounded-lg p-4 mb-4">
+                      <h4 className="font-semibold text-gray-900 mb-3">AI Recommendations</h4>
+                      <div className="space-y-3">
+                        {analysis.recommendations.map((rec: any, index: number) => (
+                          <div key={index} className="flex items-start gap-3 p-3 bg-blue-50 rounded-md">
+                            <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-blue-900 font-medium">{rec.title || rec}</p>
+                              {rec.description && (
+                                <p className="text-blue-700 text-sm mt-1">{rec.description}</p>
+                              )}
+                              {rec.priority && (
+                                <span className={`inline-block mt-2 px-2 py-1 text-xs rounded ${
+                                  rec.priority === 'high' ? 'bg-red-100 text-red-700' :
+                                  rec.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                  'bg-green-100 text-green-700'
+                                }`}>
+                                  {rec.priority} priority
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Follow-up Timeline */}
+                  {analysis.followUpTimeline && (
+                    <div className="bg-white rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-900 mb-3">Recommended Follow-up</h4>
+                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded-md">
+                        <Clock className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="text-green-900 font-medium">{analysis.followUpTimeline}</p>
+                          {analysis.followUpReason && (
+                            <p className="text-green-700 text-sm mt-1">{analysis.followUpReason}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Disclaimer */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-yellow-800 mb-1">Important Disclaimer</h4>
+                      <p className="text-yellow-700 text-sm">
+                        This AI analysis is for informational purposes only and should not replace professional veterinary care. 
+                        Always consult with a qualified veterinarian for proper diagnosis and treatment, especially for urgent symptoms.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
