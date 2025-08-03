@@ -153,8 +153,8 @@ export async function POST(request: NextRequest) {
     console.error('❌ Error details:', {
       name: error instanceof Error ? error.name : 'Unknown',
       message: error instanceof Error ? error.message : 'Unknown error',
-      code: error.code,
-      meta: error.meta
+      code: (error as any).code,
+      meta: (error as any).meta
     })
     return NextResponse.json({ 
       error: 'Failed to create expense',
