@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { size: string[] } }
+  context: { params: Promise<{ size: string[] }> }
 ) {
   try {
+    const params = await context.params
     const sizeStr = params.size.join('/')
     const [width, height] = sizeStr.split('/').map(s => parseInt(s) || 400)
 

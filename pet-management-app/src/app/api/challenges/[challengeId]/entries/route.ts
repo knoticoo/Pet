@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { challengeId: string } }
+  context: { params: Promise<{ challengeId: string }> }
 ) {
   try {
     const session = await getAuthenticatedSession()
@@ -13,7 +13,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { challengeId } = params
+    const { challengeId } = await context.params
 
     const entries = await prisma.challengeEntry.findMany({
       where: { challengeId },
@@ -64,7 +64,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { challengeId: string } }
+  context: { params: Promise<{ challengeId: string }> }
 ) {
   try {
     const session = await getAuthenticatedSession()
@@ -73,7 +73,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { challengeId } = params
+    const { challengeId } = await context.params
     const userId = session.user.id
 
     // Check if challenge exists and is active

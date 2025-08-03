@@ -60,13 +60,30 @@ export async function GET() {
         petName: story.pet.name,
         petSpecies: story.pet.species,
         imageUrl: story.imageUrl,
-        caption: story.caption,
+        caption: story.caption || '',
         viewCount: story.viewCount,
         createdAt: story.createdAt.toISOString(),
         expiresAt: story.expiresAt.toISOString()
       })
       return acc
-    }, {} as Record<string, any>)
+    }, {} as Record<string, {
+      user: {
+        id: string;
+        name: string | null;
+        avatar: string | null;
+      };
+      stories: Array<{
+        id: string;
+        petId: string;
+        petName: string;
+        petSpecies: string;
+        imageUrl: string;
+        caption: string;
+        viewCount: number;
+        createdAt: string;
+        expiresAt: string;
+      }>;
+    }>)
 
     return NextResponse.json(Object.values(groupedStories))
 

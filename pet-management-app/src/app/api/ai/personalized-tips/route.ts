@@ -68,7 +68,18 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function generatePetSpecificTips(pet: any, category?: string | null) {
+async function generatePetSpecificTips(pet: { 
+  id: string; 
+  name: string; 
+  species: string; 
+  breed?: string | null; 
+  birthDate?: Date | null; 
+  gender?: string | null; 
+  weight?: number | null; 
+  temperament?: string | null; 
+  specialNeeds?: string | null; 
+  trainingLevel?: string | null 
+}, category?: string | null) {
   try {
     const endpoint = await aiVetService.findWorkingEndpoint()
     if (!endpoint) {
@@ -193,7 +204,7 @@ function parsePersonalizedTips(aiResponse: string, petId: string, petName: strin
   return tips.length > 0 ? tips : getFallbackTips({ id: petId, name: petName })
 }
 
-function getFallbackTips(pet: any) {
+function getFallbackTips(pet: { id: string; name: string; species?: string }) {
   const tips = [
     {
       petId: pet.id,
