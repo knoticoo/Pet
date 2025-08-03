@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Heart, Plus, Calendar, DollarSign, Bell } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -59,8 +59,9 @@ interface Expense {
 }
 
 export default function DashboardPage() {
-  const { session } = useAuthenticatedSession()
+  const { session, isLoading: sessionLoading } = useAuthenticatedSession()
   const [isLoading, setIsLoading] = useState(true)
+  const [hasMounted, setHasMounted] = useState(false)
   const [stats, setStats] = useState<DashboardStats>({
     totalPets: 0,
     upcomingAppointments: 0,
@@ -70,16 +71,25 @@ export default function DashboardPage() {
   const [recentPets, setRecentPets] = useState<Pet[]>([])
   const [recentReminders, setRecentReminders] = useState<Reminder[]>([])
 
+  // Handle client-side mounting
   useEffect(() => {
+    setHasMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!hasMounted || sessionLoading) return
+
     if (session?.user?.id) {
       // Only show loading on first visit or if data is not cached
-      const hasVisited = sessionStorage.getItem('dashboard-visited')
+      const hasVisited = typeof window !== 'undefined' ? sessionStorage.getItem('dashboard-visited') : null
       if (!hasVisited) {
         // First time visit - show loading
         const timer = setTimeout(() => {
           loadDashboardData()
           setIsLoading(false)
-          sessionStorage.setItem('dashboard-visited', 'true')
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('dashboard-visited', 'true')
+          }
         }, 2000)
         return () => clearTimeout(timer)
       } else {
@@ -87,10 +97,13 @@ export default function DashboardPage() {
         loadDashboardData()
         setIsLoading(false)
       }
+    } else if (!sessionLoading) {
+      // No session, stop loading
+      setIsLoading(false)
     }
-  }, [session])
+  }, [session, sessionLoading, hasMounted, loadDashboardData])
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       // Fetch dashboard data
       const [petsRes, remindersRes, appointmentsRes, expensesRes] = await Promise.all([
@@ -133,7 +146,7 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error loading dashboard data:', error)
     }
-  }
+  }, [])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('de-DE', {
@@ -169,8 +182,23 @@ export default function DashboardPage() {
     }
   }
 
-  if (isLoading) {
+  // Prevent hydration mismatch by not rendering loading screen on server
+  if (isLoading && hasMounted) {
     return <LoadingScreen isVisible={true} onComplete={() => setIsLoading(false)} />
+  }
+
+  // Show a simple loading state during SSR
+  if (isLoading && !hasMounted) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  // Don't render anything until mounted to prevent hydration issues
+  if (!hasMounted) {
+    return null
   }
 
   return (
