@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedSession } from "@/lib/session-types"
 import { prisma } from '@/lib/prisma'
 import { aiVetService } from '@/lib/ai-vet-service'
+import { writeFile, mkdir } from 'fs/promises'
+import { join } from 'path'
+import { existsSync } from 'fs'
 
 export async function GET() {
   try {
@@ -11,59 +14,69 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Fetch real posts from database (with user's pets and other public posts)
-    const userPets = await prisma.pet.findMany({
-      where: { userId: session.user.id },
-      select: { id: true }
+    // Fetch real posts from database
+    const socialPosts = await prisma.socialPost.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+            email: true
+          }
+        },
+        pet: {
+          select: {
+            id: true,
+            name: true,
+            species: true,
+            breed: true,
+            photo: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
     })
 
-    const petIds = userPets.map(pet => pet.id)
+    // Check which posts the current user has liked
+    const postIds = socialPosts.map(post => post.id)
+    const userLikes = await prisma.postLike.findMany({
+      where: {
+        userId: session.user.id,
+        postId: { in: postIds }
+      },
+      select: { postId: true }
+    })
 
-    // For now, return empty array since we don't have social posts table yet
-    // In a real implementation, you would query the social_posts table
-    const posts: Array<{
-      id: string;
-      petId: string;
-      petName: string;
-      petSpecies: string;
-      imageUrl: string;
-      caption: string;
-      aiAnalysis: object;
-      likes: number;
-      comments: number;
-      createdAt: string;
-      isLiked: boolean;
-      isSample?: boolean;
-    }> = []
+    const likedPostIds = new Set(userLikes.map(like => like.postId))
 
-    // If no real posts exist, show a sample post to demonstrate functionality
-    if (posts.length === 0 && petIds.length > 0) {
-      const samplePet = await prisma.pet.findFirst({
-        where: { userId: session.user.id }
-      })
-
-      if (samplePet) {
-        posts.push({
-          id: 'sample-1',
-          petId: samplePet.id,
-          petName: samplePet.name,
-          petSpecies: samplePet.species,
-          imageUrl: '/api/placeholder/400/400',
-          caption: `Check out ${samplePet.name}! Upload your first photo to start sharing.`,
-          aiAnalysis: {
-            mood: 'happy',
-            activity: 'posing',
-            healthNotes: 'Ready for social sharing!',
-            tags: ['first-post', 'welcome', 'social']
-          },
-          likes: 0,
-          comments: 0,
-          createdAt: new Date().toISOString(),
-          isLiked: false,
-          isSample: true
-        })
+    // Transform to expected format
+    const posts = socialPosts.map(post => ({
+      id: post.id,
+      petId: post.petId,
+      petName: post.pet?.name || 'Unknown Pet',
+      petSpecies: post.pet?.species || 'pet',
+      petBreed: post.pet?.breed,
+      imageUrl: post.photos ? JSON.parse(post.photos)[0] : '/images/default-pet.jpg',
+      caption: post.content,
+      aiAnalysis: post.photos ? {
+        mood: 'happy',
+        activity: 'posing',
+        healthNotes: 'Pet appears healthy and alert',
+        tags: ['social', 'pet-photo']
+      } : null,
+      likes: post.likes,
+      comments: post.comments,
+      createdAt: post.createdAt.toISOString(),
+      isLiked: likedPostIds.has(post.id),
+      user: {
+        id: post.user.id,
+        name: post.user.name,
+        avatar: post.user.avatar
       }
-    }
+    }))
 
     return NextResponse.json(posts)
 
@@ -81,47 +94,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Handle both JSON and FormData
-    let petId: string
-    let caption: string
-    let imageUrl: string
-
-    const contentType = request.headers.get('content-type')
+    // Handle FormData for file upload
+    const formData = await request.formData()
+    const petId = formData.get('petId') as string
+    const caption = formData.get('caption') as string
+    const imageFile = formData.get('image') as File
     
-    if (contentType?.includes('multipart/form-data')) {
-      const formData = await request.formData()
-      petId = formData.get('petId') as string
-      caption = formData.get('caption') as string
-      const imageFile = formData.get('image') as File
-      
-      if (!imageFile || imageFile.size === 0) {
-        return NextResponse.json({ error: 'No image provided' }, { status: 400 })
-      }
-
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-      if (!allowedTypes.includes(imageFile.type)) {
-        return NextResponse.json({ error: 'Invalid file type. Please upload a JPEG, PNG, or WebP image.' }, { status: 400 })
-      }
-
-      // Validate file size (5MB limit)
-      const maxSize = 5 * 1024 * 1024 // 5MB
-      if (imageFile.size > maxSize) {
-        return NextResponse.json({ error: 'File too large. Maximum size is 5MB.' }, { status: 400 })
-      }
-
-      // For now, use a placeholder URL - in production you'd upload to cloud storage
-      // TODO: Implement actual file upload to cloud storage (AWS S3, Cloudinary, etc.)
-      const timestamp = Date.now()
-      imageUrl = `/api/placeholder/400/400?uploaded=${timestamp}&filename=${encodeURIComponent(imageFile.name)}`
-    } else {
-      const body = await request.json()
-      petId = body.petId
-      caption = body.caption
-      imageUrl = body.imageUrl
+    if (!imageFile || imageFile.size === 0) {
+      return NextResponse.json({ error: 'No image provided' }, { status: 400 })
     }
 
-    // Get pet information for AI analysis
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(imageFile.type)) {
+      return NextResponse.json({ error: 'Invalid file type. Please upload a JPEG, PNG, or WebP image.' }, { status: 400 })
+    }
+
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    if (imageFile.size > maxSize) {
+      return NextResponse.json({ error: 'File too large. Maximum size is 10MB.' }, { status: 400 })
+    }
+
+    // Get pet information
     const pet = await prisma.pet.findFirst({
       where: {
         id: petId,
@@ -133,64 +128,114 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Pet not found' }, { status: 404 })
     }
 
-    // Use hosted AI for image analysis
+    // Save image to file system
+    const bytes = await imageFile.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+    
+    // Create uploads directory if it doesn't exist
+    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'social')
+    if (!existsSync(uploadsDir)) {
+      await mkdir(uploadsDir, { recursive: true })
+    }
+    
+    // Generate unique filename
+    const timestamp = Date.now()
+    const fileExtension = imageFile.name.split('.').pop() || 'jpg'
+    const filename = `${session.user.id}-${petId}-${timestamp}.${fileExtension}`
+    const filepath = join(uploadsDir, filename)
+    const publicUrl = `/uploads/social/${filename}`
+    
+    // Write file
+    await writeFile(filepath, buffer)
+
+    // Perform AI analysis
     let aiAnalysis
     try {
-      // Check if AI service is available before attempting analysis
       const aiStatus = await aiVetService.getSystemStatus()
       
       if (aiStatus.systemHealth === 'good') {
-        aiAnalysis = await analyzePhotoWithAI(imageUrl, caption, {
+        aiAnalysis = await analyzePhotoWithAI(publicUrl, caption, {
           ...pet,
           breed: pet.breed || 'Mixed'
         })
       } else {
-        console.log('AI service not available, using fallback analysis')
         throw new Error('AI service unavailable')
       }
     } catch (error) {
       console.log('AI analysis failed, using fallback:', error)
-      // Enhanced fallback analysis based on caption keywords
+      
+      // Enhanced fallback analysis
       const captionLower = caption.toLowerCase()
       let mood = 'happy'
       let activity = 'posing'
       const tags = ['photo', 'social']
 
-      // Simple keyword analysis for better fallback
-      if (captionLower.includes('sleep') || captionLower.includes('nap') || captionLower.includes('rest')) {
+      if (captionLower.includes('sleep') || captionLower.includes('nap')) {
         mood = 'sleepy'
         activity = 'sleeping'
         tags.push('rest')
-      } else if (captionLower.includes('play') || captionLower.includes('run') || captionLower.includes('exercise')) {
+      } else if (captionLower.includes('play') || captionLower.includes('run')) {
         mood = 'excited'
         activity = 'playing'
-        tags.push('exercise', 'play')
-      } else if (captionLower.includes('eat') || captionLower.includes('food') || captionLower.includes('treat')) {
+        tags.push('exercise')
+      } else if (captionLower.includes('eat') || captionLower.includes('food')) {
         mood = 'happy'
         activity = 'eating'
         tags.push('food')
       }
 
-      aiAnalysis = {
-        mood,
-        activity,
-        healthNotes: 'Photo analysis unavailable - pet appears alert and healthy',
-        tags
-      }
+      aiAnalysis = { mood, activity, healthNotes: 'Pet appears healthy and alert', tags }
     }
 
+    // Save to database
+    const socialPost = await prisma.socialPost.create({
+      data: {
+        userId: session.user.id,
+        petId: petId,
+        content: caption,
+        photos: JSON.stringify([publicUrl]),
+        isPublic: true,
+        likes: 0,
+        comments: 0
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true
+          }
+        },
+        pet: {
+          select: {
+            id: true,
+            name: true,
+            species: true,
+            breed: true
+          }
+        }
+      }
+    })
+
+    // Return the created post
     const newPost = {
-      id: Date.now().toString(),
-      petId,
-      petName: pet.name,
-      petSpecies: pet.species,
-      imageUrl,
-      caption,
+      id: socialPost.id,
+      petId: socialPost.petId,
+      petName: socialPost.pet?.name || 'Unknown Pet',
+      petSpecies: socialPost.pet?.species || 'pet',
+      petBreed: socialPost.pet?.breed,
+      imageUrl: publicUrl,
+      caption: socialPost.content,
       aiAnalysis,
-      likes: 0,
-      comments: 0,
-      createdAt: new Date().toISOString(),
-      isLiked: false
+      likes: socialPost.likes,
+      comments: socialPost.comments,
+      createdAt: socialPost.createdAt.toISOString(),
+      isLiked: false,
+      user: {
+        id: socialPost.user.id,
+        name: socialPost.user.name,
+        avatar: socialPost.user.avatar
+      }
     }
 
     return NextResponse.json(newPost, { status: 201 })

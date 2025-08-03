@@ -9,12 +9,12 @@ export async function GET(
   try {
     const session = await getAuthenticatedSession()
     
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { userId } = await context.params
-    const currentUserId = session.user.id
+    const params = await context.params
+    const userId = params.userId
 
     // Fetch user profile
     const user = await prisma.user.findUnique({
@@ -26,14 +26,7 @@ export async function GET(
         avatar: true,
         bio: true,
         location: true,
-        isAdmin: true,
-        subscriptionTier: true,
-        createdAt: true,
-        _count: {
-          select: {
-            pets: true
-          }
-        }
+        createdAt: true
       }
     })
 
@@ -41,34 +34,23 @@ export async function GET(
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Check if current user is following this user
-    let isFollowing = false
-    if (currentUserId !== userId) {
-      const followRecord = await prisma.userFollow.findUnique({
-        where: {
-          followerId_followingId: {
-            followerId: currentUserId,
-            followingId: userId
-          }
-        }
-      })
-      isFollowing = !!followRecord
-    }
+    // Get stats
+    const [postsCount, petsCount, followersCount, followingCount] = await Promise.all([
+      prisma.socialPost.count({ where: { userId } }),
+      prisma.pet.count({ where: { userId } }),
+      prisma.userFollow.count({ where: { followingId: userId } }),
+      prisma.userFollow.count({ where: { followerId: userId } })
+    ])
 
-    // Count user's stories (non-expired)
-    const storyCount = await prisma.petStory.count({
+    // Check if current user is following this user
+    const isFollowing = session.user.id !== userId ? await prisma.userFollow.findUnique({
       where: {
-        pet: {
-          userId: userId
-        },
-        expiresAt: {
-          gt: new Date()
+        followerId_followingId: {
+          followerId: session.user.id,
+          followingId: userId
         }
       }
-    })
-
-    // Count challenges won (placeholder - you'd implement this based on your challenge system)
-    const challengesWon = 0 // TODO: Implement actual challenge counting
+    }) !== null : false
 
     const profile = {
       id: user.id,
@@ -77,14 +59,15 @@ export async function GET(
       avatar: user.avatar,
       bio: user.bio,
       location: user.location,
-      isAdmin: user.isAdmin,
-      subscriptionTier: user.subscriptionTier,
-      joinedDate: user.createdAt.toISOString(),
-      petCount: user._count.pets,
-      storyCount,
-      challengesWon,
-      isOwnProfile: currentUserId === userId,
-      isFollowing
+      createdAt: user.createdAt.toISOString(),
+      isOwnProfile: session.user.id === userId,
+      isFollowing,
+      stats: {
+        postsCount,
+        petsCount,
+        followersCount,
+        followingCount
+      }
     }
 
     return NextResponse.json(profile)

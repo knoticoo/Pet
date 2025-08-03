@@ -93,6 +93,8 @@ model User {
   followingTo       UserFollow[] @relation("UserFollower")
   behaviorInsights  BehaviorInsight[]
   personalizedTips  PersonalizedTip[]
+  postLikes         PostLike[]
+  postComments      PostComment[]
 
   @@map("users")
 }
@@ -466,6 +468,10 @@ model SocialPost {
   user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   pet   Pet?         @relation(fields: [petId], references: [id], onDelete: Cascade)
   group SocialGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  // Social interactions
+  postLikes     PostLike[]
+  postComments  PostComment[]
 
   @@map("social_posts")
 }
@@ -752,4 +758,32 @@ model PhotoAnalysis {
   
   @@index([petId, analysisType])
   @@map("photo_analyses")
+}
+
+// Social Media Interactions
+model PostLike {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+  
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post SocialPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, postId])
+  @@map("post_likes")
+}
+
+model PostComment {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post SocialPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@map("post_comments")
 }
