@@ -32,8 +32,11 @@ echo ""
 
 # Check if running as root
 if [ "$EUID" -eq 0 ]; then
-    echo -e "${RED}❌ Please don't run as root. Use a regular user.${NC}"
-    exit 1
+    echo -e "${YELLOW}⚠️  Running as root. Installing to /opt/petcare${NC}"
+    INSTALL_DIR="/opt/petcare"
+else
+    echo -e "${GREEN}✓ Running as regular user. Installing to ~/petcare${NC}"
+    INSTALL_DIR="~/petcare"
 fi
 
 # Check system requirements
@@ -61,12 +64,20 @@ fi
 # Check if Docker is installed
 if ! command -v docker &> /dev/null; then
     echo -e "${BLUE}🐳 Installing Docker...${NC}"
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    sudo apt update
-    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-    sudo usermod -aG docker $USER
-    echo -e "${GREEN}✓ Docker installed${NC}"
+    if [ "$EUID" -eq 0 ]; then
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+        apt update
+        apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+        echo -e "${GREEN}✓ Docker installed as root${NC}"
+    else
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        sudo apt update
+        sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+        sudo usermod -aG docker $USER
+        echo -e "${GREEN}✓ Docker installed${NC}"
+    fi
 else
     echo -e "${GREEN}✓ Docker already installed${NC}"
 fi

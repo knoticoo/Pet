@@ -31,8 +31,11 @@ echo ""
 
 # Check if running as root
 if [ "$EUID" -eq 0 ]; then
-    echo -e "${RED}❌ Please don't run as root. Use a regular user.${NC}"
-    exit 1
+    echo -e "${YELLOW}⚠️  Running as root. Using systemctl directly.${NC}"
+    SUDO_CMD=""
+else
+    echo -e "${GREEN}✓ Running as regular user. Using sudo for systemctl.${NC}"
+    SUDO_CMD="sudo"
 fi
 
 # Check system requirements
@@ -69,8 +72,8 @@ fi
 
 # Start Ollama service
 echo -e "${BLUE}🤖 Starting Ollama service...${NC}"
-sudo systemctl start ollama || true
-sudo systemctl enable ollama || true
+$SUDO_CMD systemctl start ollama || true
+$SUDO_CMD systemctl enable ollama || true
 
 # Wait for Ollama to be ready
 echo -e "${BLUE}⏳ Waiting for Ollama to be ready...${NC}"
@@ -219,7 +222,11 @@ echo "🔧 Ollama Commands:"
 echo "  ollama list          - List available models"
 echo "  ollama ps            - Show running models"
 echo "  ollama pull phi:2.7b - Download optimized model"
-echo "  sudo systemctl restart ollama - Restart Ollama"
+if [ "$EUID" -eq 0 ]; then
+    echo "  systemctl restart ollama - Restart Ollama (as root)"
+else
+    echo "  sudo systemctl restart ollama - Restart Ollama"
+fi
 EOF
 
 chmod +x ../monitor-ai-vet.sh
@@ -230,8 +237,15 @@ cat > ../restart-ai-vet.sh << 'EOF'
 
 echo "🔄 Restarting PetCare AI system..."
 
+# Check if running as root
+if [ "$EUID" -eq 0 ]; then
+    SUDO_CMD=""
+else
+    SUDO_CMD="sudo"
+fi
+
 # Restart Ollama
-sudo systemctl restart ollama
+$SUDO_CMD systemctl restart ollama
 sleep 5
 
 # Navigate to app directory
@@ -258,8 +272,15 @@ cat > ../stop-ai-vet.sh << 'EOF'
 
 echo "🛑 Stopping PetCare AI system..."
 
+# Check if running as root
+if [ "$EUID" -eq 0 ]; then
+    SUDO_CMD=""
+else
+    SUDO_CMD="sudo"
+fi
+
 # Stop Ollama
-sudo systemctl stop ollama
+$SUDO_CMD systemctl stop ollama
 
 # Kill Node.js processes
 pkill -f "next dev" || true
@@ -286,7 +307,11 @@ echo -e "${BLUE}📖 Ollama Commands:${NC}"
 echo "  ollama list          - List available models"
 echo "  ollama ps            - Show running models"
 echo "  ollama pull phi:2.7b - Download optimized model"
-echo "  sudo systemctl restart ollama - Restart Ollama"
+if [ "$EUID" -eq 0 ]; then
+    echo "  systemctl restart ollama - Restart Ollama (as root)"
+else
+    echo "  sudo systemctl restart ollama - Restart Ollama"
+fi
 echo ""
 echo -e "${BLUE}📖 Features:${NC}"
 echo "✅ Unique AI responses (no hardcoded answers)"
