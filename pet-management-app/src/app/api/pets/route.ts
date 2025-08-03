@@ -42,8 +42,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: t('errors.unauthorized') }, { status: 401 })
     }
 
+    // Debug: Log session information
+    console.log('=== PET CREATION DEBUG ===')
+    console.log('Session user ID:', session.user.id)
+    console.log('Session user email:', session.user.email)
+
+    // Verify user exists in database
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id }
+    })
+
+    if (!user) {
+      console.error('❌ User not found in database:', session.user.id)
+      return NextResponse.json({ 
+        error: 'User not found in database' 
+      }, { status: 401 })
+    }
+
+    console.log('✅ User found in database:', user.id, user.email)
+
     const body = await request.json()
     const { name, species, breed, birthDate, age, weight, color, notes } = body
+
+    console.log('📝 Request body:', body)
 
     // Validate required fields
     if (!name || !species) {
@@ -68,21 +89,31 @@ export async function POST(request: NextRequest) {
       description += description ? `\nColor: ${color}` : `Color: ${color}`
     }
 
+    const petData = {
+      name: name.toString(),
+      species: species.toString(),
+      breed: breed?.toString() || null,
+      description: description || null,
+      birthDate: calculatedBirthDate ? new Date(calculatedBirthDate) : null,
+      userId: session.user.id,
+      isActive: true
+    }
+
+    console.log('🐾 Creating pet with data:', petData)
+
     const pet = await prisma.pet.create({
-      data: {
-        name: name.toString(),
-        species: species.toString(),
-        breed: breed?.toString() || null,
-        description: description || null,
-        birthDate: calculatedBirthDate ? new Date(calculatedBirthDate) : null,
-        userId: session.user.id,
-        isActive: true
-      }
+      data: petData
     })
 
+    console.log('✅ Pet created successfully:', pet.id)
     return NextResponse.json(pet, { status: 201 })
   } catch (error) {
-    console.error('Error creating pet:', error)
+    console.error('❌ Error creating pet:', error)
+    console.error('❌ Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json({ 
       error: 'Failed to create pet', 
       details: error instanceof Error ? error.message : 'Unknown error'
