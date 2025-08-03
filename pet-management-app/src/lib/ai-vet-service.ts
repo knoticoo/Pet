@@ -329,7 +329,14 @@ Brief responses. Recommend vet for serious issues.`
         const score = key.length
         if (score > highestScore) {
           highestScore = score
-          bestMatch = data
+          bestMatch = {
+            severity: data.severity as 'low' | 'medium' | 'high' | 'emergency',
+            urgency: data.urgency,
+            shouldSeeVet: data.vetNeeded,
+            recommendations: data.recommendations,
+            nextSteps: data.recommendations, // Using recommendations as nextSteps
+            estimatedCause: data.causes
+          }
         }
       }
     })
@@ -354,28 +361,7 @@ Brief responses. Recommend vet for serious issues.`
       }
     }
 
-    const match = bestMatch as {
-      severity: string;
-      urgency: number;
-      vetNeeded: boolean;
-      recommendations: string[];
-      causes: string[];
-    }
-    
-    return {
-      severity: match.severity,
-      urgency: match.urgency,
-      shouldSeeVet: match.vetNeeded,
-      recommendations: match.recommendations,
-      nextSteps: [
-        match.vetNeeded ? 
-          (language === 'ru' ? 'Запишитесь к ветеринару' : 'Schedule veterinary appointment') : 
-          (language === 'ru' ? 'Продолжайте наблюдение' : 'Continue monitoring'),
-        language === 'ru' ? 'Обеспечьте комфорт питомца' : 'Keep pet comfortable',
-        language === 'ru' ? 'Документируйте любые изменения' : 'Document any changes'
-      ],
-      estimatedCause: match.causes
-    }
+    return bestMatch!
   }
 
   private containsRussianSymptom(symptoms: string, englishKey: string): boolean {

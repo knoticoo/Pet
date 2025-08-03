@@ -67,15 +67,57 @@ export class AIPetCompanion {
 
       // Generate AI response
       const aiResponse = await this.generateAIResponse({
-        ...pet,
-        breed: pet.breed || 'Mixed'
+        id: pet.id,
+        name: pet.name,
+        species: pet.species,
+        breed: pet.breed || 'Mixed',
+        birthDate: pet.birthDate || undefined,
+        personality: (pet as { personality?: string | null }).personality || undefined,
+        temperament: (pet as { temperament?: string | null }).temperament || undefined,
+        favoriteFood: (pet as { favoriteFood?: string | null }).favoriteFood || undefined,
+        favoriteToy: (pet as { favoriteToy?: string | null }).favoriteToy || undefined,
+        healthRecords: pet.healthRecords.map(hr => ({
+          date: hr.date,
+          title: hr.title,
+          diagnosis: hr.diagnosis || undefined
+        })),
+        vaccinations: pet.vaccinations.map(v => ({
+          dateGiven: v.dateGiven,
+          vaccineName: v.vaccineName
+        })),
+        appointments: pet.appointments.map(a => ({
+          date: a.date,
+          title: a.title,
+          status: a.status
+        }))
       }, interactionType)
       
       // Fallback to rule-based response if AI fails
       if (!aiResponse) {
         return this.getRuleBasedResponse({
-          ...pet,
-          breed: pet.breed || 'Mixed'
+          id: pet.id,
+          name: pet.name,
+          species: pet.species,
+          breed: pet.breed || 'Mixed',
+          birthDate: pet.birthDate || undefined,
+          personality: (pet as { personality?: string | null }).personality || undefined,
+          temperament: (pet as { temperament?: string | null }).temperament || undefined,
+          favoriteFood: (pet as { favoriteFood?: string | null }).favoriteFood || undefined,
+          favoriteToy: (pet as { favoriteToy?: string | null }).favoriteToy || undefined,
+          healthRecords: pet.healthRecords.map(hr => ({
+            date: hr.date,
+            title: hr.title,
+            diagnosis: hr.diagnosis || undefined
+          })),
+          vaccinations: pet.vaccinations.map(v => ({
+            dateGiven: v.dateGiven,
+            vaccineName: v.vaccineName
+          })),
+          appointments: pet.appointments.map(a => ({
+            date: a.date,
+            title: a.title,
+            status: a.status
+          }))
         }, interactionType)
       }
 
@@ -92,6 +134,10 @@ export class AIPetCompanion {
     species: string;
     breed?: string;
     birthDate?: Date;
+    personality?: string;
+    temperament?: string;
+    favoriteFood?: string;
+    favoriteToy?: string;
     healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
     vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
     appointments: Array<{ date: Date; title: string; status: string }>;
@@ -132,6 +178,10 @@ export class AIPetCompanion {
     species: string;
     breed?: string;
     birthDate?: Date;
+    personality?: string;
+    temperament?: string;
+    favoriteFood?: string;
+    favoriteToy?: string;
     healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
     vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
     appointments: Array<{ date: Date; title: string; status: string }>;
@@ -139,16 +189,16 @@ export class AIPetCompanion {
     const species = pet.species.toLowerCase()
     const behaviors = this.speciesBehaviors[species as keyof typeof this.speciesBehaviors] || this.speciesBehaviors.dog
     
-          return `You are ${pet.name}, a ${this.calculateAge(pet.birthDate) || 'young'} ${pet.breed || species} ${species}. 
+          return `You are ${pet.name}, a ${this.calculateAge(pet.birthDate || null) || 'young'} ${pet.breed || species} ${species}. 
     
 Pet details:
 - Name: ${pet.name}
 - Breed: ${pet.breed || 'Unknown'}
 - Age: ${this.calculateAge(pet.birthDate || null)} years
-- Personality: ${(pet as { personality?: string }).personality || 'friendly'}
-- Temperament: ${(pet as { temperament?: string }).temperament || 'calm'}
-- Favorite food: ${(pet as { favoriteFood?: string }).favoriteFood || 'treats'}
-- Favorite toy: ${(pet as { favoriteToy?: string }).favoriteToy || 'any toy'}
+- Personality: ${pet.personality || 'friendly'}
+- Temperament: ${pet.temperament || 'calm'}
+- Favorite food: ${pet.favoriteFood || 'treats'}
+- Favorite toy: ${pet.favoriteToy || 'any toy'}
 
 Interaction type: ${interactionType}
 
@@ -197,6 +247,10 @@ Keep it short, friendly, and in character. Format as JSON:
     species: string;
     breed?: string;
     birthDate?: Date;
+    personality?: string;
+    temperament?: string;
+    favoriteFood?: string;
+    favoriteToy?: string;
     healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
     vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
     appointments: Array<{ date: Date; title: string; status: string }>;
@@ -221,7 +275,7 @@ Keep it short, friendly, and in character. Format as JSON:
         message = `${greeting} Ready for ${activity}!`
         break
       case 'feed':
-        message = `${greeting} ${(pet as { favoriteFood?: string }).favoriteFood ? `I love ${(pet as { favoriteFood: string }).favoriteFood}!` : 'Yummy!'}`
+        message = `${greeting} ${pet.favoriteFood ? `I love ${pet.favoriteFood}!` : 'Yummy!'}`
         healthTip = 'Remember to provide fresh water daily'
         break
       case 'walk':
@@ -315,12 +369,35 @@ Keep it short, friendly, and in character. Format as JSON:
         }
       }
 
+      const petData = {
+        id: pet.id,
+        name: pet.name,
+        species: pet.species,
+        breed: pet.breed || 'Mixed',
+        birthDate: pet.birthDate || undefined,
+        activities: (pet as { activities?: Array<{ duration?: number }> }).activities,
+        healthRecords: pet.healthRecords.map(hr => ({
+          date: hr.date,
+          title: hr.title,
+          diagnosis: hr.diagnosis || undefined
+        })),
+        vaccinations: pet.vaccinations.map(v => ({
+          dateGiven: v.dateGiven,
+          vaccineName: v.vaccineName
+        })),
+        appointments: pet.appointments.map(a => ({
+          date: a.date,
+          title: a.title,
+          status: a.status
+        }))
+      }
+
       const insights = {
-        healthStatus: this.analyzeHealthStatus({...pet, breed: pet.breed || 'Mixed'}),
-        activityLevel: this.analyzeActivityLevel({...pet, breed: pet.breed || 'Mixed'}),
-        careRecommendations: this.generateCareRecommendations({...pet, breed: pet.breed || 'Mixed'}),
-        upcomingEvents: this.getUpcomingEvents({...pet, breed: pet.breed || 'Mixed'}),
-        funFacts: this.generateFunFacts({...pet, breed: pet.breed || 'Mixed'})
+        healthStatus: this.analyzeHealthStatus(petData),
+        activityLevel: this.analyzeActivityLevel(petData),
+        careRecommendations: this.generateCareRecommendations(petData),
+        upcomingEvents: this.getUpcomingEvents(petData),
+        funFacts: this.generateFunFacts(petData)
       }
 
       return insights
@@ -368,6 +445,7 @@ Keep it short, friendly, and in character. Format as JSON:
     species: string;
     breed?: string;
     birthDate?: Date;
+    activities?: Array<{ duration?: number }>;
     healthRecords: Array<{ date: Date; title: string; diagnosis?: string }>;
     vaccinations: Array<{ dateGiven: Date; vaccineName: string }>;
     appointments: Array<{ date: Date; title: string; status: string }>;
@@ -376,7 +454,7 @@ Keep it short, friendly, and in character. Format as JSON:
     weeklyDuration: number;
     recommendations: string[];
   } {
-    const recentActivities = (pet as { activities?: Array<{ duration?: number }> }).activities?.slice(0, 7) || []
+    const recentActivities = pet.activities?.slice(0, 7) || []
     const totalDuration = recentActivities.reduce((sum: number, activity: { duration?: number }) => sum + (activity.duration || 0), 0)
     
     return {
@@ -426,7 +504,7 @@ Keep it short, friendly, and in character. Format as JSON:
     
     pet.appointments.forEach((appointment) => {
               events.push({
-          id: (appointment as { id?: string }).id || Math.random().toString(),
+          id: (appointment as { id?: string }).id || `appt-${Math.random().toString(36).substr(2, 9)}`,
           title: appointment.title,
           date: appointment.date.toISOString(),
           type: 'appointment'
