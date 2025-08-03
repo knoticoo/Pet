@@ -70,20 +70,26 @@ else
     echo -e "${GREEN}✓ Ollama already installed${NC}"
 fi
 
-# Start Ollama service
+# Start Ollama service (manual start for non-systemd systems)
 echo -e "${BLUE}🤖 Starting Ollama service...${NC}"
-$SUDO_CMD systemctl start ollama || true
-$SUDO_CMD systemctl enable ollama || true
+ollama serve &
+sleep 5
 
 # Wait for Ollama to be ready
 echo -e "${BLUE}⏳ Waiting for Ollama to be ready...${NC}"
-sleep 5
+for i in {1..30}; do
+    if curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
+        echo -e "${GREEN}✓ Ollama is ready${NC}"
+        break
+    fi
+    echo -e "${YELLOW}⏳ Waiting for Ollama... (${i}/30)${NC}"
+    sleep 2
+done
 
 # Check if Ollama is running
 if ! curl -s http://localhost:11434/api/tags > /dev/null; then
-    echo -e "${YELLOW}⚠️  Ollama not responding, trying to start manually...${NC}"
-    ollama serve &
-    sleep 10
+    echo -e "${RED}❌ Failed to start Ollama${NC}"
+    exit 1
 fi
 
 # Download optimized AI model for 3.2GB RAM
@@ -94,30 +100,36 @@ echo -e "${YELLOW}📥 This may take several minutes depending on your internet 
 echo -e "${BLUE}🧹 Cleaning up existing models...${NC}"
 ollama list | grep -E "(llama2:7b|llama3)" | awk '{print $1}' | xargs -r ollama rm || true
 
-# Download small model optimized for 3.2GB RAM
-echo -e "${BLUE}📥 Downloading phi:2.7b (1.6GB) - optimized for your RAM...${NC}"
-if ollama pull phi:2.7b; then
-    echo -e "${GREEN}✓ Model downloaded successfully${NC}"
+# Check if phi:2.7b model is already available
+echo -e "${BLUE}📋 Checking available models...${NC}"
+if ollama list | grep -q "phi:2.7b"; then
+    echo -e "${GREEN}✓ phi:2.7b model already available${NC}"
 else
-    echo -e "${YELLOW}⚠️  Model download failed, trying alternative...${NC}"
-    if ollama pull llama2:3b; then
-        echo -e "${GREEN}✓ Alternative model downloaded${NC}"
+    # Download phi:2.7b model optimized for 3.2GB RAM
+    echo -e "${BLUE}📥 Downloading phi:2.7b (1.6GB) - optimized for your RAM...${NC}"
+    echo -e "${YELLOW}📥 This may take several minutes depending on your internet connection...${NC}"
+    
+    if ollama pull phi:2.7b; then
+        echo -e "${GREEN}✓ Model downloaded successfully${NC}"
     else
-        echo -e "${RED}❌ Failed to download any model${NC}"
+        echo -e "${RED}❌ Failed to download phi:2.7b model${NC}"
         exit 1
     fi
 fi
 
-# Wait for model to be available
-echo -e "${BLUE}⏳ Waiting for model to be ready...${NC}"
-sleep 10
+# Ensure model is loaded and ready
+echo -e "${BLUE}⏳ Ensuring model is loaded and ready...${NC}"
+ollama run phi:2.7b "test" > /dev/null 2>&1 &
+sleep 5
+pkill -f "ollama run" || true
 
-# Test Ollama
-echo -e "${BLUE}🧪 Testing Ollama...${NC}"
-if curl -s http://localhost:11434/api/tags | grep -q "phi:2.7b\|llama2:3b"; then
-    echo -e "${GREEN}✓ Ollama is working with optimized model${NC}"
+# Test Ollama with the specific model
+echo -e "${BLUE}🧪 Testing Ollama with phi:2.7b...${NC}"
+if ollama list | grep -q "phi:2.7b"; then
+    echo -e "${GREEN}✓ Ollama is working with phi:2.7b model${NC}"
 else
-    echo -e "${YELLOW}⚠️  Model may still be downloading. Check with: ollama list${NC}"
+    echo -e "${RED}❌ phi:2.7b model not available${NC}"
+    exit 1
 fi
 
 # Navigate to pet-management-app
@@ -198,7 +210,7 @@ echo "🤖 Ollama Status:"
 if curl -s http://localhost:11434/api/tags > /dev/null; then
     echo "✅ Ollama is running"
     echo "📊 Available models:"
-    curl -s http://localhost:11434/api/tags | grep -o '"name":"[^"]*"' | cut -d'"' -f4 2>/dev/null || echo "No models loaded"
+    ollama list 2>/dev/null || echo "No models loaded"
 else
     echo "❌ Ollama is not responding"
 fi
@@ -222,11 +234,8 @@ echo "🔧 Ollama Commands:"
 echo "  ollama list          - List available models"
 echo "  ollama ps            - Show running models"
 echo "  ollama pull phi:2.7b - Download optimized model"
-if [ "$EUID" -eq 0 ]; then
-    echo "  systemctl restart ollama - Restart Ollama (as root)"
-else
-    echo "  sudo systemctl restart ollama - Restart Ollama"
-fi
+echo "  ollama serve         - Start Ollama manually"
+echo "  pkill -f ollama      - Stop Ollama manually"
 EOF
 
 chmod +x ../monitor-ai-vet.sh
@@ -237,15 +246,13 @@ cat > ../restart-ai-vet.sh << 'EOF'
 
 echo "🔄 Restarting PetCare AI system..."
 
-# Check if running as root
-if [ "$EUID" -eq 0 ]; then
-    SUDO_CMD=""
-else
-    SUDO_CMD="sudo"
-fi
+# Kill existing Ollama processes
+pkill -f "ollama serve" || true
+pkill -f "ollama run" || true
+sleep 2
 
-# Restart Ollama
-$SUDO_CMD systemctl restart ollama
+# Start Ollama
+ollama serve &
 sleep 5
 
 # Navigate to app directory
@@ -272,15 +279,9 @@ cat > ../stop-ai-vet.sh << 'EOF'
 
 echo "🛑 Stopping PetCare AI system..."
 
-# Check if running as root
-if [ "$EUID" -eq 0 ]; then
-    SUDO_CMD=""
-else
-    SUDO_CMD="sudo"
-fi
-
-# Stop Ollama
-$SUDO_CMD systemctl stop ollama
+# Kill Ollama processes
+pkill -f "ollama serve" || true
+pkill -f "ollama run" || true
 
 # Kill Node.js processes
 pkill -f "next dev" || true
@@ -307,11 +308,8 @@ echo -e "${BLUE}📖 Ollama Commands:${NC}"
 echo "  ollama list          - List available models"
 echo "  ollama ps            - Show running models"
 echo "  ollama pull phi:2.7b - Download optimized model"
-if [ "$EUID" -eq 0 ]; then
-    echo "  systemctl restart ollama - Restart Ollama (as root)"
-else
-    echo "  sudo systemctl restart ollama - Restart Ollama"
-fi
+echo "  ollama serve         - Start Ollama manually"
+echo "  pkill -f ollama      - Stop Ollama manually"
 echo ""
 echo -e "${BLUE}📖 Features:${NC}"
 echo "✅ Unique AI responses (no hardcoded answers)"
