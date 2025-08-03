@@ -11,65 +11,48 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Mock data for now - in a real app, you'd fetch from database
-    const mockPosts = [
-      {
-        id: '1',
-        petId: '1',
-        petName: 'Buddy',
-        petSpecies: 'dog',
-        imageUrl: '/api/placeholder/400/400',
-        caption: 'Having a great day at the park! 🌞',
-        aiAnalysis: {
-          mood: 'happy',
-          activity: 'playing',
-          healthNotes: 'Pet appears healthy and energetic',
-          tags: ['outdoor', 'exercise', 'happy']
-        },
-        likes: 15,
-        comments: 3,
-        createdAt: new Date().toISOString(),
-        isLiked: false
-      },
-      {
-        id: '2',
-        petId: '2',
-        petName: 'Whiskers',
-        petSpecies: 'cat',
-        imageUrl: '/api/placeholder/400/400',
-        caption: 'Afternoon nap time 😴',
-        aiAnalysis: {
-          mood: 'calm',
-          activity: 'sleeping',
-          healthNotes: 'Relaxed posture indicates good comfort level',
-          tags: ['indoor', 'rest', 'cozy']
-        },
-        likes: 8,
-        comments: 1,
-        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        isLiked: true
-      },
-      {
-        id: '3',
-        petId: '3',
-        petName: 'Chirpy',
-        petSpecies: 'bird',
-        imageUrl: '/api/placeholder/400/400',
-        caption: 'Learning a new song! 🎵',
-        aiAnalysis: {
-          mood: 'curious',
-          activity: 'singing',
-          healthNotes: 'Active behavior suggests good health',
-          tags: ['music', 'learning', 'vocal']
-        },
-        likes: 12,
-        comments: 5,
-        createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-        isLiked: false
-      }
-    ]
+    // Fetch real posts from database (with user's pets and other public posts)
+    const userPets = await prisma.pet.findMany({
+      where: { userId: session.user.id },
+      select: { id: true }
+    })
 
-    return NextResponse.json(mockPosts)
+    const petIds = userPets.map(pet => pet.id)
+
+    // For now, return empty array since we don't have social posts table yet
+    // In a real implementation, you would query the social_posts table
+    const posts: any[] = []
+
+    // If no real posts exist, show a sample post to demonstrate functionality
+    if (posts.length === 0 && petIds.length > 0) {
+      const samplePet = await prisma.pet.findFirst({
+        where: { userId: session.user.id }
+      })
+
+      if (samplePet) {
+        posts.push({
+          id: 'sample-1',
+          petId: samplePet.id,
+          petName: samplePet.name,
+          petSpecies: samplePet.species,
+          imageUrl: '/api/placeholder/400/400',
+          caption: `Check out ${samplePet.name}! Upload your first photo to start sharing.`,
+          aiAnalysis: {
+            mood: 'happy',
+            activity: 'posing',
+            healthNotes: 'Ready for social sharing!',
+            tags: ['first-post', 'welcome', 'social']
+          },
+          likes: 0,
+          comments: 0,
+          createdAt: new Date().toISOString(),
+          isLiked: false,
+          isSample: true
+        })
+      }
+    }
+
+    return NextResponse.json(posts)
 
   } catch (error) {
     console.error('Error fetching social posts:', error)
@@ -98,12 +81,26 @@ export async function POST(request: NextRequest) {
       caption = formData.get('caption') as string
       const imageFile = formData.get('image') as File
       
-      if (!imageFile) {
+      if (!imageFile || imageFile.size === 0) {
         return NextResponse.json({ error: 'No image provided' }, { status: 400 })
       }
 
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+      if (!allowedTypes.includes(imageFile.type)) {
+        return NextResponse.json({ error: 'Invalid file type. Please upload a JPEG, PNG, or WebP image.' }, { status: 400 })
+      }
+
+      // Validate file size (5MB limit)
+      const maxSize = 5 * 1024 * 1024 // 5MB
+      if (imageFile.size > maxSize) {
+        return NextResponse.json({ error: 'File too large. Maximum size is 5MB.' }, { status: 400 })
+      }
+
       // For now, use a placeholder URL - in production you'd upload to cloud storage
-      imageUrl = '/api/placeholder/400/400'
+      // TODO: Implement actual file upload to cloud storage (AWS S3, Cloudinary, etc.)
+      const timestamp = Date.now()
+      imageUrl = `/api/placeholder/400/400?uploaded=${timestamp}&filename=${encodeURIComponent(imageFile.name)}`
     } else {
       const body = await request.json()
       petId = body.petId
@@ -126,18 +123,46 @@ export async function POST(request: NextRequest) {
     // Use hosted AI for image analysis
     let aiAnalysis
     try {
-      aiAnalysis = await analyzePhotoWithAI(imageUrl, caption, {
-        ...pet,
-        breed: pet.breed || 'Mixed'
-      })
+      // Check if AI service is available before attempting analysis
+      const aiStatus = await aiVetService.getSystemStatus()
+      
+      if (aiStatus.systemHealth === 'good') {
+        aiAnalysis = await analyzePhotoWithAI(imageUrl, caption, {
+          ...pet,
+          breed: pet.breed || 'Mixed'
+        })
+      } else {
+        console.log('AI service not available, using fallback analysis')
+        throw new Error('AI service unavailable')
+      }
     } catch (error) {
       console.log('AI analysis failed, using fallback:', error)
-      // Fallback analysis
+      // Enhanced fallback analysis based on caption keywords
+      const captionLower = caption.toLowerCase()
+      let mood = 'happy'
+      let activity = 'posing'
+      const tags = ['photo', 'social']
+
+      // Simple keyword analysis for better fallback
+      if (captionLower.includes('sleep') || captionLower.includes('nap') || captionLower.includes('rest')) {
+        mood = 'sleepy'
+        activity = 'sleeping'
+        tags.push('rest')
+      } else if (captionLower.includes('play') || captionLower.includes('run') || captionLower.includes('exercise')) {
+        mood = 'excited'
+        activity = 'playing'
+        tags.push('exercise', 'play')
+      } else if (captionLower.includes('eat') || captionLower.includes('food') || captionLower.includes('treat')) {
+        mood = 'happy'
+        activity = 'eating'
+        tags.push('food')
+      }
+
       aiAnalysis = {
-        mood: 'happy',
-        activity: 'posing',
-        healthNotes: 'Photo analysis unavailable - pet appears alert',
-        tags: ['photo', 'social', 'memory']
+        mood,
+        activity,
+        healthNotes: 'Photo analysis unavailable - pet appears alert and healthy',
+        tags
       }
     }
 
@@ -198,11 +223,13 @@ Keep responses brief and positive. Focus on visible behavior and mood.`
         options: {
           temperature: 0.3,
           top_p: 0.8,
-          num_predict: 150,
-          num_ctx: 512
+          num_predict: 100, // Reduced for faster response
+          num_ctx: 512,
+          num_thread: 1,
+          repeat_penalty: 1.1
         }
       }),
-      timeout: 10000
+      timeout: 8000 // Reduced timeout to fail faster
     } as RequestInit & { timeout: number })
 
     if (!response.ok) {

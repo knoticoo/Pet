@@ -29,6 +29,8 @@ export async function DELETE(request: NextRequest) {
 
     const { userId } = await request.json()
 
+    console.log('Delete user request:', { userId, sessionUserId: session.user.id })
+
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
@@ -43,8 +45,15 @@ export async function DELETE(request: NextRequest) {
       where: { id: userId }
     })
 
+    console.log('User to delete lookup result:', { userId, found: !!userToDelete })
+
     if (!userToDelete) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      // Log all available users for debugging
+      const allUsers = await prisma.user.findMany({
+        select: { id: true, email: true }
+      })
+      console.log('Available users:', allUsers)
+      return NextResponse.json({ error: `User not found. ID: ${userId}` }, { status: 404 })
     }
 
     // Delete user and all related data
