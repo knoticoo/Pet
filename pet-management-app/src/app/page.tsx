@@ -71,38 +71,6 @@ export default function DashboardPage() {
   const [recentPets, setRecentPets] = useState<Pet[]>([])
   const [recentReminders, setRecentReminders] = useState<Reminder[]>([])
 
-  // Handle client-side mounting
-  useEffect(() => {
-    setHasMounted(true)
-  }, [])
-
-  useEffect(() => {
-    if (!hasMounted || sessionLoading) return
-
-    if (session?.user?.id) {
-      // Only show loading on first visit or if data is not cached
-      const hasVisited = typeof window !== 'undefined' ? sessionStorage.getItem('dashboard-visited') : null
-      if (!hasVisited) {
-        // First time visit - show loading
-        const timer = setTimeout(() => {
-          loadDashboardData()
-          setIsLoading(false)
-          if (typeof window !== 'undefined') {
-            sessionStorage.setItem('dashboard-visited', 'true')
-          }
-        }, 2000)
-        return () => clearTimeout(timer)
-      } else {
-        // Subsequent visits - load data without loading screen
-        loadDashboardData()
-        setIsLoading(false)
-      }
-    } else if (!sessionLoading) {
-      // No session, stop loading
-      setIsLoading(false)
-    }
-  }, [session, sessionLoading, hasMounted, loadDashboardData])
-
   const loadDashboardData = useCallback(async () => {
     try {
       // Fetch dashboard data
@@ -147,6 +115,38 @@ export default function DashboardPage() {
       console.error('Error loading dashboard data:', error)
     }
   }, [])
+
+  // Handle client-side mounting
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!hasMounted || sessionLoading) return
+
+    if (session?.user?.id) {
+      // Only show loading on first visit or if data is not cached
+      const hasVisited = typeof window !== 'undefined' ? sessionStorage.getItem('dashboard-visited') : null
+      if (!hasVisited) {
+        // First time visit - show loading
+        const timer = setTimeout(() => {
+          loadDashboardData()
+          setIsLoading(false)
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('dashboard-visited', 'true')
+          }
+        }, 2000)
+        return () => clearTimeout(timer)
+      } else {
+        // Subsequent visits - load data without loading screen
+        loadDashboardData()
+        setIsLoading(false)
+      }
+    } else if (!sessionLoading) {
+      // No session, stop loading
+      setIsLoading(false)
+    }
+  }, [session, sessionLoading, hasMounted, loadDashboardData])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('de-DE', {
