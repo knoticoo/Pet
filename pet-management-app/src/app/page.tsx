@@ -146,7 +146,7 @@ export default function DashboardPage() {
       // No session, stop loading
       setIsLoading(false)
     }
-  }, [session, sessionLoading, hasMounted, loadDashboardData])
+  }, [session, sessionLoading, hasMounted])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('de-DE', {
