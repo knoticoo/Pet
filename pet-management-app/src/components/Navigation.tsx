@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Heart, Home, Calendar, DollarSign, Settings, Bell, Shield, LogOut, User, Menu, X, Brain, Camera, ChevronDown, Search, Plus } from 'lucide-react'
+import { Heart, Home, Calendar, DollarSign, Settings, Bell, Shield, LogOut, User, Menu, X, Brain, Camera, ChevronDown, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useFeatures } from '@/hooks/useFeatures'
 import { signOut } from 'next-auth/react'
@@ -14,11 +14,10 @@ import { Badge } from '@/components/ui/badge'
 import { Logo } from './Logo'
 
 // Memoized navigation item component with improved styling
-const NavigationItem = memo(({ item, pathname, onClick, isMobile = false }: {
+const NavigationItem = memo(({ item, pathname, onClick }: {
   item: { name: string; href: string; icon: React.ComponentType<{ className?: string }>; feature: string; badge?: string }
   pathname: string
   onClick?: () => void
-  isMobile?: boolean
 }) => {
   const isActive = pathname === item.href
   const Icon = item.icon
@@ -323,7 +322,6 @@ export const Navigation = memo(() => {
                   item={item}
                   pathname={pathname}
                   onClick={handleMobileMenuClose}
-                  isMobile={true}
                 />
               ))}
             </div>
@@ -333,7 +331,7 @@ export const Navigation = memo(() => {
               user={user ? { 
                 name: user.name || undefined, 
                 email: user.email || undefined,
-                avatar: user.avatar || undefined
+                avatar: user.image || undefined
               } : null} 
               onSignOut={handleSignOut} 
             />

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { MODEL_REQUIREMENTS } from './ai-config'
 
 // AI Service Types
 interface AIConsultationInput {
@@ -358,10 +359,7 @@ END_ANALYSIS`
   }
 
   private getOptimalConfig() {
-    // Import configuration dynamically to avoid circular dependencies
-    const { defaultAIConfig, MODEL_REQUIREMENTS } = require('./ai-config')
-    
-    const modelConfig = MODEL_REQUIREMENTS[this.modelName] || MODEL_REQUIREMENTS['llama3.1:3b']
+    const modelConfig = MODEL_REQUIREMENTS[this.modelName as keyof typeof MODEL_REQUIREMENTS] || MODEL_REQUIREMENTS['llama3.1:3b']
     
     return {
       temperature: modelConfig.temperature || 0.85,
@@ -434,7 +432,11 @@ END_ANALYSIS`
   private parsePhotoAnalysisResponse(response: string, petInfo: { species: string, breed: string }): AIPhotoAnalysis {
     const lines = response.split('\n')
     const analysis: Partial<AIPhotoAnalysis> = {
-      petHealth: {},
+      petHealth: {
+        mood: '',
+        activity: '',
+        healthNotes: ''
+      },
       tags: [],
       healthAlerts: [],
       recommendations: []
@@ -586,7 +588,7 @@ END_ANALYSIS`
         memoryUsage: process.memoryUsage().heapUsed / 1024 / 1024, // MB
         modelName: this.modelName
       }
-    } catch (error) {
+    } catch {
       return {
         isAvailable: false,
         modelLoaded: false,
@@ -609,8 +611,6 @@ END_ANALYSIS`
           analysis: JSON.stringify(analysis),
           severity: analysis.severity,
           urgency: analysis.urgency,
-          confidence: analysis.confidence,
-          reasoning: analysis.reasoning,
           createdAt: new Date()
         }
       })

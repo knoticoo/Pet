@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Heart, Plus, Calendar, DollarSign, Bell, TrendingUp, Users, Activity } from 'lucide-react'
+import { Heart, Plus, Calendar, DollarSign, Bell } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
