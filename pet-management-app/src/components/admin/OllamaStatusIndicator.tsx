@@ -34,7 +34,7 @@ export function OllamaStatusIndicator() {
     const interval = setInterval(checkStatus, 30000)
     
     return () => clearInterval(interval)
-  }, [checkStatus])
+  }, []) // Remove checkStatus from dependencies to prevent infinite loop
 
   if (loading) {
     return (
