@@ -8,6 +8,7 @@ import { Camera, Upload, X, Sparkles, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { AuthGuard } from '@/components/AuthGuard'
 import Link from 'next/link'
+import { t } from '@/lib/translations'
 
 interface Pet {
   id: string
@@ -224,28 +225,28 @@ export default function UploadPage() {
           <div className="card p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
             <div className="flex items-center gap-3 mb-4">
               <Sparkles className="h-6 w-6 text-purple-600" />
-              <h3 className="text-lg font-semibold text-purple-900">AI-Powered Analysis</h3>
+              <h3 className="text-lg font-semibold text-purple-900">{t('social.aiPoweredFeatures')}</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="flex items-start space-x-2">
                 <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
                 <div>
-                  <p className="font-medium text-purple-800">Mood Detection</p>
-                  <p className="text-purple-700">AI will analyze your pet&apos;s mood from the photo</p>
+                  <p className="font-medium text-purple-800">{t('social.moodDetection')}</p>
+                  <p className="text-purple-700">{t('social.moodDetectionDesc')}</p>
                 </div>
               </div>
               <div className="flex items-start space-x-2">
                 <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
                 <div>
-                  <p className="font-medium text-purple-800">Activity Recognition</p>
-                  <p className="text-purple-700">Automatically identify what your pet is doing</p>
+                  <p className="font-medium text-purple-800">{t('social.activityRecognition')}</p>
+                  <p className="text-purple-700">{t('social.activityRecognitionDesc')}</p>
                 </div>
               </div>
               <div className="flex items-start space-x-2">
                 <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
                 <div>
-                  <p className="font-medium text-purple-800">Health Insights</p>
-                  <p className="text-purple-700">Get general wellness observations</p>
+                  <p className="font-medium text-purple-800">{t('social.healthInsights')}</p>
+                  <p className="text-purple-700">{t('social.healthInsightsDesc')}</p>
                 </div>
               </div>
             </div>

@@ -550,4 +550,125 @@
   .backdrop-blur-3xl {
     backdrop-filter: blur(64px);
   }
+
+  /* Pet Theme Classes */
+  .theme-dogs {
+    --primary: 25 56% 31%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 34 44% 69%;
+    --secondary-foreground: 25 56% 31%;
+    --accent: 27 87% 67%;
+    --accent-foreground: 25 56% 31%;
+    --background: 60 9% 98%;
+    --foreground: 25 56% 31%;
+    --card: 60 9% 98%;
+    --card-foreground: 25 56% 31%;
+    --muted: 34 44% 69%;
+    --muted-foreground: 25 56% 31%;
+  }
+
+  .theme-cats {
+    --primary: 270 50% 60%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 300 29% 97%;
+    --secondary-foreground: 270 50% 60%;
+    --accent: 270 50% 90%;
+    --accent-foreground: 270 50% 60%;
+    --background: 270 100% 99%;
+    --foreground: 270 50% 60%;
+    --card: 270 100% 99%;
+    --card-foreground: 270 50% 60%;
+    --muted: 300 29% 97%;
+    --muted-foreground: 270 50% 60%;
+  }
+
+  .theme-birds {
+    --primary: 120 61% 50%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 120 61% 90%;
+    --secondary-foreground: 120 61% 50%;
+    --accent: 120 61% 85%;
+    --accent-foreground: 120 61% 50%;
+    --background: 120 100% 99%;
+    --foreground: 120 61% 50%;
+    --card: 120 100% 99%;
+    --card-foreground: 120 61% 50%;
+    --muted: 120 61% 90%;
+    --muted-foreground: 120 61% 50%;
+  }
+
+  .theme-fish {
+    --primary: 220 70% 50%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 220 70% 90%;
+    --secondary-foreground: 220 70% 50%;
+    --accent: 220 70% 85%;
+    --accent-foreground: 220 70% 50%;
+    --background: 220 100% 99%;
+    --foreground: 220 70% 50%;
+    --card: 220 100% 99%;
+    --card-foreground: 220 70% 50%;
+    --muted: 220 70% 90%;
+    --muted-foreground: 220 70% 50%;
+  }
+
+  .theme-rabbits {
+    --primary: 350 100% 88%;
+    --primary-foreground: 350 100% 20%;
+    --secondary: 350 100% 95%;
+    --secondary-foreground: 350 100% 88%;
+    --accent: 350 100% 92%;
+    --accent-foreground: 350 100% 88%;
+    --background: 350 100% 99%;
+    --foreground: 350 100% 20%;
+    --card: 350 100% 99%;
+    --card-foreground: 350 100% 20%;
+    --muted: 350 100% 95%;
+    --muted-foreground: 350 100% 88%;
+  }
+
+  .theme-hamsters {
+    --primary: 25 76% 45%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 34 44% 69%;
+    --secondary-foreground: 25 76% 45%;
+    --accent: 27 87% 67%;
+    --accent-foreground: 25 76% 45%;
+    --background: 60 9% 98%;
+    --foreground: 25 76% 45%;
+    --card: 60 9% 98%;
+    --card-foreground: 25 76% 45%;
+    --muted: 34 44% 69%;
+    --muted-foreground: 25 76% 45%;
+  }
+
+  .theme-reptiles {
+    --primary: 120 61% 34%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 120 61% 90%;
+    --secondary-foreground: 120 61% 34%;
+    --accent: 120 61% 85%;
+    --accent-foreground: 120 61% 34%;
+    --background: 120 100% 99%;
+    --foreground: 120 61% 34%;
+    --card: 120 100% 99%;
+    --card-foreground: 120 61% 34%;
+    --muted: 120 61% 90%;
+    --muted-foreground: 120 61% 34%;
+  }
+
+  .theme-default {
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+  }
 }

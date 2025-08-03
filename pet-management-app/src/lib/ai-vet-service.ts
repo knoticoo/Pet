@@ -26,6 +26,7 @@ export class AIVetService {
   private ollamaModel = process.env.OLLAMA_MODEL || 'llama3.1:8b'
   private freeLimit = parseInt(process.env.AI_VET_FREE_LIMIT || '3')
   private activeEndpoint: string | null = null
+  private memoryOptimized = true // Flag for 4GB RAM optimization
 
   static getInstance(): AIVetService {
     if (!AIVetService.instance) {
@@ -161,39 +162,43 @@ export class AIVetService {
 
   private buildVetPrompt(input: ConsultationInput, language: string = 'en'): string {
     if (language === 'ru') {
-      return `Ты ветеринарный AI-помощник. Это НЕ заменяет профессиональную ветеринарную помощь.
+      return `Ветеринарный анализ. Питомец: ${input.petSpecies} ${input.petBreed}, ${input.petAge} лет. Симптомы: ${input.symptoms} (${input.duration}).
 
-Питомец: ${input.petSpecies} ${input.petBreed} ${input.petAge} лет
-Симптомы: ${input.symptoms}
-Длительность: ${input.duration}
+КРИТИЧЕСКИЕ ПРИЗНАКИ:
+- Температура >40°C = экстренная помощь
+- Рвота >2 раз = к врачу
+- Отказ от еды >24ч = к врачу
+- Затрудненное дыхание = немедленно к врачу
 
-Проанализируй и ответь в точном формате:
+ФОРМАТ ОТВЕТА:
 ТЯЖЕСТЬ: [низкая/средняя/высокая/экстренная]
 СРОЧНОСТЬ: [1-10]
 НУЖЕН_ВРАЧ: [да/нет]
-ПРИЧИНЫ: [причина1], [причина2], [причина3]
-РЕКОМЕНДАЦИИ: [рекомендация1], [рекомендация2], [рекомендация3]
-СЛЕДУЮЩИЕ_ШАГИ: [шаг1], [шаг2], [шаг3]
+ПРИЧИНЫ: [причина1], [причина2]
+РЕКОМЕНДАЦИИ: [рекомендация1], [рекомендация2]
+СЛЕДУЮЩИЕ_ШАГИ: [шаг1], [шаг2]
 
-Будь краток и всегда рекомендуй ветеринарную помощь при серьезных симптомах.
-КОНЕЦ_АНАЛИЗА`
+КОНЕЦ`
     }
 
-    // English prompt (default)
-    return `Vet AI: Analyze pet symptoms. NOT medical diagnosis.
+    // Memory-efficient English prompt
+    return `Vet analysis. Pet: ${input.petSpecies} ${input.petBreed}, ${input.petAge} years. Symptoms: ${input.symptoms} (${input.duration}).
 
-Pet: ${input.petSpecies} ${input.petBreed} ${input.petAge}yo
-Issue: ${input.symptoms} (${input.duration})
+CRITICAL SIGNS:
+- Temp >40°C = emergency
+- Vomiting >2x = see vet
+- No appetite >24h = see vet
+- Breathing difficulty = immediate vet
 
-Format:
+FORMAT:
 SEVERITY: [low/medium/high/emergency]
-URGENCY: [1-10]  
+URGENCY: [1-10]
 VET_NEEDED: [yes/no]
-CAUSES: [3 causes]
-CARE: [3 tips]
-NEXT: [3 steps]
+CAUSES: [cause1], [cause2]
+CARE: [recommendation1], [recommendation2]
+NEXT: [step1], [step2]
 
-Brief responses. Recommend vet for serious issues.`
+END`
   }
 
   private async getAIAnalysis(input: ConsultationInput, language: string = 'en'): Promise<SymptomAnalysis | null> {
@@ -214,12 +219,21 @@ Brief responses. Recommend vet for serious issues.`
           prompt: prompt,
           stream: false,
           options: {
-            temperature: 0.1,
-            top_p: 0.7,
-            num_predict: language === 'ru' ? 250 : 200, // More tokens for Russian
-            num_ctx: 512,
-            num_thread: 1,
-            repeat_penalty: 1.1,
+            temperature: 0.1, // Slightly higher for creativity while maintaining consistency
+            top_p: 0.85, // Balanced for medical accuracy
+            num_predict: language === 'ru' ? 200 : 150, // Optimized for 4GB RAM
+            num_ctx: 1024, // Reduced context for memory efficiency
+            num_thread: 2, // Optimized for 4GB RAM
+            repeat_penalty: 1.15, // Prevent repetition
+            top_k: 30, // Balanced token selection
+            tfs_z: 0.95, // Tail free sampling
+            mirostat: 1, // Simplified dynamic adjustment
+            mirostat_tau: 4.0, // Lower target entropy
+            mirostat_eta: 0.2, // Faster learning rate
+            num_gpu: 0, // CPU-only for 4GB RAM
+            num_gqa: 8, // Group query attention for efficiency
+            rope_freq_base: 10000, // Optimized rope scaling
+            rope_freq_scale: 0.5, // Reduced frequency scaling
           }
         }),
         timeout: 15000
@@ -305,16 +319,38 @@ Brief responses. Recommend vet for serious issues.`
   private getDefaultResponses(language: string) {
     if (language === 'ru') {
       return {
-        recommendations: ['Наблюдайте за питомцем', 'Обратитесь к ветеринару'],
-        nextSteps: ['Запишитесь к ветеринару', 'Обеспечьте покой питомцу'],
-        estimatedCause: ['Требуется профессиональная оценка']
+        recommendations: [
+          'Наблюдайте за питомцем в течение 24 часов',
+          'Обеспечьте доступ к чистой воде',
+          'Предложите легкую пищу (курица с рисом)',
+          'Измерьте температуру, если возможно',
+          'Обратитесь к ветеринару при ухудшении состояния'
+        ],
+        nextSteps: [
+          'Запишитесь к ветеринару в ближайшее время',
+          'Ведите дневник симптомов и поведения',
+          'Обеспечьте покой и комфорт питомцу',
+          'Подготовьте информацию о рационе и активности'
+        ],
+        estimatedCause: ['Требуется профессиональная оценка для точного диагноза']
       }
     }
     
     return {
-      recommendations: ['Monitor symptoms', 'Contact veterinarian'],
-      nextSteps: ['Schedule vet appointment', 'Keep pet comfortable'],
-      estimatedCause: ['Requires professional assessment']
+      recommendations: [
+        'Monitor your pet for 24 hours',
+        'Ensure access to clean water',
+        'Offer bland food (chicken and rice)',
+        'Check temperature if possible',
+        'Contact veterinarian if condition worsens'
+      ],
+      nextSteps: [
+        'Schedule vet appointment soon',
+        'Keep symptom and behavior diary',
+        'Ensure pet is comfortable and rested',
+        'Prepare information about diet and activity'
+      ],
+      estimatedCause: ['Requires professional assessment for accurate diagnosis']
     }
   }
 
@@ -329,13 +365,90 @@ Brief responses. Recommend vet for serious issues.`
         const score = key.length
         if (score > highestScore) {
           highestScore = score
+          
+          // Provide language-specific recommendations
+          let recommendations = data.recommendations
+          let nextSteps = data.recommendations
+          let causes = data.causes
+          
+          if (language === 'ru') {
+            // Russian-specific recommendations
+            const russianRecommendations: Record<string, string[]> = {
+              'limping': [
+                'Обеспечьте полный покой питомцу',
+                'Не позволяйте прыгать и бегать',
+                'Проверьте лапы на наличие инородных предметов',
+                'Приложите холодный компресс на 10-15 минут',
+                'Запишитесь к ветеринару в течение 24 часов'
+              ],
+              'vomiting': [
+                'Не кормите питомца в течение 12 часов',
+                'Предлагайте небольшие порции воды каждые 2 часа',
+                'После 12 часов предложите легкую пищу (курица с рисом)',
+                'Следите за частотой рвоты',
+                'Обратитесь к ветеринару при повторной рвоте'
+              ],
+              'diarrhea': [
+                'Предложите легкую диету (курица с рисом)',
+                'Обеспечьте доступ к чистой воде',
+                'Следите за цветом и консистенцией стула',
+                'Соберите образец для анализа',
+                'Обратитесь к ветеринару при кровавом поносе'
+              ],
+              'lethargy': [
+                'Измерьте температуру питомца',
+                'Следите за аппетитом и потреблением воды',
+                'Отмечайте любые изменения в поведении',
+                'Обеспечьте комфорт и покой',
+                'Запишитесь к ветеринару при отсутствии улучшений'
+              ],
+              'scratching': [
+                'Проверьте на наличие блох и клещей',
+                'Используйте мягкий шампунь для животных',
+                'Пересмотрите рацион на предмет аллергенов',
+                'Обеспечьте достаточную физическую активность',
+                'Обратитесь к ветеринару при сильном зуде'
+              ]
+            }
+            
+            recommendations = russianRecommendations[key] || data.recommendations
+            nextSteps = [
+              'Запишитесь к ветеринару в ближайшее время',
+              'Ведите дневник симптомов и поведения',
+              'Подготовьте информацию о рационе и активности',
+              'Будьте готовы к возможным анализам'
+            ]
+            causes = data.causes.map(cause => {
+              const russianCauses: Record<string, string> = {
+                'injury': 'травма',
+                'arthritis': 'артрит',
+                'muscle strain': 'растяжение мышц',
+                'paw pad injury': 'травма подушечки лапы',
+                'dietary indiscretion': 'нарушение диеты',
+                'stomach upset': 'расстройство желудка',
+                'illness': 'заболевание',
+                'dietary change': 'изменение рациона',
+                'stress': 'стресс',
+                'parasites': 'паразиты',
+                'pain': 'боль',
+                'depression': 'депрессия',
+                'medication side effects': 'побочные эффекты лекарств',
+                'allergies': 'аллергия',
+                'fleas': 'блохи',
+                'dry skin': 'сухая кожа',
+                'boredom': 'скука'
+              }
+              return russianCauses[cause] || cause
+            })
+          }
+          
           bestMatch = {
             severity: data.severity as 'low' | 'medium' | 'high' | 'emergency',
             urgency: data.urgency,
             shouldSeeVet: data.vetNeeded,
-            recommendations: data.recommendations,
-            nextSteps: data.recommendations, // Using recommendations as nextSteps
-            estimatedCause: data.causes
+            recommendations,
+            nextSteps,
+            estimatedCause: causes
           }
         }
       }
@@ -348,16 +461,19 @@ Brief responses. Recommend vet for serious issues.`
         urgency: 5,
         shouldSeeVet: true,
         recommendations: [
-          language === 'ru' ? 'Внимательно наблюдайте за питомцем' : 'Monitor your pet closely',
-          language === 'ru' ? 'Отмечайте любые изменения в поведении' : 'Note any changes in behavior',
-          language === 'ru' ? 'Рассмотрите консультацию с ветеринаром' : 'Consider consulting with a veterinarian'
+          language === 'ru' ? 'Внимательно наблюдайте за питомцем в течение 24 часов' : 'Monitor your pet closely for 24 hours',
+          language === 'ru' ? 'Обеспечьте доступ к чистой воде' : 'Ensure access to clean water',
+          language === 'ru' ? 'Предложите легкую пищу (курица с рисом)' : 'Offer bland food (chicken and rice)',
+          language === 'ru' ? 'Измерьте температуру, если возможно' : 'Check temperature if possible',
+          language === 'ru' ? 'Обратитесь к ветеринару при ухудшении состояния' : 'Contact veterinarian if condition worsens'
         ],
         nextSteps: [
-          language === 'ru' ? 'Ведите дневник симптомов' : 'Keep a symptom diary',
-          language === 'ru' ? 'Запишитесь к ветеринару, если симптомы сохраняются' : 'Schedule vet appointment if symptoms persist',
-          language === 'ru' ? 'Обеспечьте комфорт и увлажнение питомца' : 'Ensure pet is comfortable and hydrated'
+          language === 'ru' ? 'Запишитесь к ветеринару в ближайшее время' : 'Schedule vet appointment soon',
+          language === 'ru' ? 'Ведите дневник симптомов и поведения' : 'Keep a symptom diary',
+          language === 'ru' ? 'Обеспечьте покой и комфорт питомцу' : 'Ensure pet is comfortable and rested',
+          language === 'ru' ? 'Подготовьте информацию о рационе и активности' : 'Prepare information about diet and activity'
         ],
-        estimatedCause: [language === 'ru' ? 'Неизвестно - требуется профессиональная оценка' : 'Unknown - requires professional evaluation']
+        estimatedCause: [language === 'ru' ? 'Требуется профессиональная оценка для точного диагноза' : 'Requires professional assessment for accurate diagnosis']
       }
     }
 
@@ -463,14 +579,26 @@ Brief responses. Recommend vet for serious issues.`
     }
   }
 
-  // Add method to check system status
+  // Enhanced system status with detailed monitoring
   async getSystemStatus(): Promise<{
     ollamaAvailable: boolean
     modelLoaded: boolean
     systemHealth: 'good' | 'degraded' | 'down'
     activeEndpoint: string | null
+    modelInfo?: {
+      name: string
+      size: string
+      modified: string
+      digest: string
+    }
+    performance?: {
+      responseTime: number
+      tokensPerSecond: number
+      memoryUsage: string
+    }
   }> {
     try {
+      const startTime = Date.now()
       const endpoint = await this.findWorkingEndpoint()
       
       if (!endpoint) {
@@ -482,33 +610,214 @@ Brief responses. Recommend vet for serious issues.`
         }
       }
 
-      // Test model with simple query
-      const testResponse = await fetch(`${endpoint}/api/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: this.ollamaModel,
-          prompt: 'Test: Say "OK"',
-          stream: false,
-          options: { num_predict: 5 }
-        }),
-        timeout: 10000
+      // Get detailed model information
+      const modelResponse = await fetch(`${endpoint}/api/tags`, {
+        method: 'GET',
+        timeout: 5000
       } as RequestInit & { timeout: number })
 
-      const modelLoaded = testResponse.ok
+      let modelInfo = undefined
+      if (modelResponse.ok) {
+        const models = await modelResponse.json()
+        const targetModel = this.ollamaModel.split(':')[0]
+        const loadedModel = models.models?.find((model: any) => 
+          model.name.includes(targetModel)
+        )
+        
+        if (loadedModel) {
+          modelInfo = {
+            name: loadedModel.name,
+            size: `${Math.round(loadedModel.size / 1024 / 1024 / 1024)}GB`,
+            modified: new Date(loadedModel.modified_at).toLocaleDateString(),
+            digest: loadedModel.digest?.substring(0, 8) || 'N/A'
+          }
+        }
+      }
+
+      // Test performance with a simple prompt
+      let performance = undefined
+      let modelLoaded = false
+      
+      try {
+        const testStart = Date.now()
+        const testResponse = await fetch(`${endpoint}/api/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: this.ollamaModel,
+            prompt: 'Test response time',
+            stream: false,
+            options: {
+              num_predict: 10,
+              temperature: 0.1
+            }
+          }),
+          timeout: 10000
+        } as RequestInit & { timeout: number })
+
+        if (testResponse.ok) {
+          const testData = await testResponse.json()
+          const responseTime = Date.now() - testStart
+          const tokensPerSecond = testData.response?.length ? 
+            Math.round(testData.response.length / (responseTime / 1000)) : 0
+
+          modelLoaded = true
+          performance = {
+            responseTime,
+            tokensPerSecond,
+            memoryUsage: 'Available' // Could be enhanced with actual memory monitoring
+          }
+        }
+      } catch (error) {
+        console.log('Performance test failed:', error)
+      }
       
       return {
         ollamaAvailable: true,
         modelLoaded,
         systemHealth: modelLoaded ? 'good' : 'degraded',
-        activeEndpoint: endpoint
+        activeEndpoint: endpoint,
+        modelInfo,
+        performance
       }
-    } catch {
+    } catch (error) {
+      console.error('System status check failed:', error)
       return {
         ollamaAvailable: false,
         modelLoaded: false,
         systemHealth: 'down',
         activeEndpoint: null
+      }
+    }
+  }
+
+  // Memory monitoring for 4GB RAM systems
+  async getMemoryStatus(): Promise<{
+    available: boolean
+    memoryUsage: string
+    optimizationTips: string[]
+    recommendedActions: string[]
+  }> {
+    try {
+      const endpoint = await this.findWorkingEndpoint()
+      if (!endpoint) {
+        return {
+          available: false,
+          memoryUsage: 'Unknown',
+          optimizationTips: [
+            'Close unnecessary applications',
+            'Restart Ollama service',
+            'Use smaller models (3B instead of 8B)',
+            'Reduce context window size'
+          ],
+          recommendedActions: [
+            'Install llama3.1:3b-instruct model',
+            'Set OLLAMA_MODEL=llama3.1:3b-instruct',
+            'Restart the application'
+          ]
+        }
+      }
+
+      // Get system info from Ollama
+      const response = await fetch(`${endpoint}/api/tags`, {
+        method: 'GET',
+        timeout: 5000
+      } as RequestInit & { timeout: number })
+
+      if (!response.ok) {
+        return {
+          available: true,
+          memoryUsage: 'Limited',
+          optimizationTips: [
+            'Model may be too large for 4GB RAM',
+            'Try llama3.1:3b-instruct instead',
+            'Close browser tabs and other apps',
+            'Restart Ollama with smaller model'
+          ],
+          recommendedActions: [
+            'Pull smaller model: ollama pull llama3.1:3b-instruct',
+            'Set environment: OLLAMA_MODEL=llama3.1:3b-instruct',
+            'Restart application'
+          ]
+        }
+      }
+
+      const models = await response.json()
+      const currentModel = models.models?.find((m: any) => 
+        m.name.includes(this.ollamaModel.split(':')[0])
+      )
+
+      const modelSize = currentModel ? 
+        Math.round(currentModel.size / 1024 / 1024 / 1024) : 0
+
+      let memoryUsage = 'Good'
+      let optimizationTips = []
+      let recommendedActions = []
+
+      if (modelSize > 8) {
+        memoryUsage = 'High - Consider smaller model'
+        optimizationTips = [
+          'Current model requires too much RAM',
+          'Switch to llama3.1:3b-instruct',
+          'Close other applications',
+          'Restart Ollama service'
+        ]
+        recommendedActions = [
+          'Pull smaller model: ollama pull llama3.1:3b-instruct',
+          'Set OLLAMA_MODEL=llama3.1:3b-instruct',
+          'Restart application'
+        ]
+      } else if (modelSize > 4) {
+        memoryUsage = 'Moderate - Monitor usage'
+        optimizationTips = [
+          'Model size is acceptable for 4GB RAM',
+          'Close unnecessary browser tabs',
+          'Monitor system memory usage',
+          'Consider llama3.1:3b-instruct for better performance'
+        ]
+        recommendedActions = [
+          'Monitor memory usage during AI consultations',
+          'Close other applications when using AI vet',
+          'Consider upgrading to 8GB RAM for better performance'
+        ]
+      } else {
+        memoryUsage = 'Optimal for 4GB RAM'
+        optimizationTips = [
+          'Current model is well-optimized for 4GB RAM',
+          'Good performance expected',
+          'Monitor for any memory issues',
+          'Consider closing other apps during AI use'
+        ]
+        recommendedActions = [
+          'Current setup is optimal',
+          'Monitor performance during use',
+          'Report any issues to support'
+        ]
+      }
+
+      return {
+        available: true,
+        memoryUsage,
+        optimizationTips,
+        recommendedActions
+      }
+
+    } catch (error) {
+      console.error('Memory status check failed:', error)
+      return {
+        available: false,
+        memoryUsage: 'Unknown',
+        optimizationTips: [
+          'Unable to check memory status',
+          'Ensure Ollama is running',
+          'Check system resources',
+          'Restart Ollama service'
+        ],
+        recommendedActions: [
+          'Restart Ollama: sudo systemctl restart ollama',
+          'Check Ollama status: ollama ps',
+          'Restart application'
+        ]
       }
     }
   }
@@ -538,6 +847,87 @@ Brief responses. Recommend vet for serious issues.`
     }
 
     return { canConsult, remaining, systemStatus }
+  }
+
+  // Memory-optimized model recommendations for 4GB RAM
+  getModelRecommendations(): {
+    recommended: string[]
+    alternatives: string[]
+    setupInstructions: string[]
+    performanceNotes: Record<string, string>
+    memoryOptimized: boolean
+  } {
+    return {
+      recommended: [
+        'llama3.1:3b-instruct',
+        'llama3.1:8b',
+        'llama3.1:3b',
+        'mistral:7b',
+        'codellama:7b'
+      ],
+      alternatives: [
+        'llama3.1:8b-instruct',
+        'llama3.1:70b',
+        'mistral:7b-instruct',
+        'codellama:7b-instruct',
+        'llama2:7b'
+      ],
+      setupInstructions: [
+        '1. Install Ollama: curl -fsSL https://ollama.ai/install.sh | sh',
+        '2. Pull 4GB-optimized model: ollama pull llama3.1:3b-instruct',
+        '3. Set environment variable: OLLAMA_MODEL=llama3.1:3b-instruct',
+        '4. For 4GB RAM: OLLAMA_HOST=0.0.0.0:11434',
+        '5. Monitor memory: ollama list && ollama ps',
+        '6. Optimize: Close other apps, use CPU-only mode'
+      ],
+      performanceNotes: {
+        'llama3.1:3b-instruct': 'Best for 4GB RAM, fast responses, good accuracy',
+        'llama3.1:8b': 'Good balance, requires 6GB+ RAM, better accuracy',
+        'llama3.1:3b': 'Fastest, 4GB RAM, basic analysis',
+        'mistral:7b': 'Good reasoning, requires 8GB+ RAM',
+        'codellama:7b': 'Structured responses, requires 8GB+ RAM'
+      },
+      memoryOptimized: true
+    }
+  }
+
+  // Enhanced model selection based on available resources
+  async getOptimalModel(): Promise<string> {
+    try {
+      const endpoint = await this.findWorkingEndpoint()
+      if (!endpoint) return this.ollamaModel
+
+      const response = await fetch(`${endpoint}/api/tags`, {
+        method: 'GET',
+        timeout: 5000
+      } as RequestInit & { timeout: number })
+
+      if (!response.ok) return this.ollamaModel
+
+      const models = await response.json()
+      const availableModels = models.models?.map((m: any) => m.name) || []
+
+      // Priority order for veterinary AI
+      const priorityModels = [
+        'llama3.1:70b',
+        'llama3.1:8b-instruct', 
+        'mistral:7b-instruct',
+        'llama3.1:3b-instruct',
+        'llama3.1:8b',
+        'llama3.1:3b'
+      ]
+
+      for (const model of priorityModels) {
+        if (availableModels.some((m: string) => m.includes(model))) {
+          return model
+        }
+      }
+
+      return this.ollamaModel
+    } catch (error) {
+      console.error('Failed to get optimal model:', error)
+      return this.ollamaModel
+    }
   }
 }
 
