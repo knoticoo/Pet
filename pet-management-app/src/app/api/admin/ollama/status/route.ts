@@ -18,8 +18,8 @@ async function checkOllamaStatus() {
     // Check if Ollama is running by trying to connect to it
     const { stdout } = await execAsync('ollama list')
     return { isRunning: true, output: stdout }
-  } catch (error) {
-    return { isRunning: false, error: error instanceof Error ? error.message : 'Unknown error' }
+  } catch {
+    return { isRunning: false, error: 'Ollama service not available' }
   }
 }
 
@@ -27,7 +27,7 @@ async function getOllamaVersion() {
   try {
     const { stdout } = await execAsync('ollama --version')
     return stdout.trim()
-  } catch (error) {
+  } catch {
     return null
   }
 }
@@ -48,8 +48,8 @@ async function getSystemInfo() {
       memory: memInfo.trim(),
       disk: diskInfo.trim()
     }
-  } catch (error) {
-    console.error('Error getting system info:', error)
+  } catch {
+    console.error('Error getting system info')
     return null
   }
 }
@@ -58,14 +58,14 @@ async function getOllamaModels() {
   try {
     const { stdout } = await execAsync('ollama list --format json')
     const models = JSON.parse(stdout)
-    return models.map((model: any) => ({
+    return models.map((model: { name: string; size?: string; modified_at?: string; digest?: string }) => ({
       name: model.name,
       size: model.size || 'Unknown',
       modified: model.modified_at || new Date().toISOString(),
       digest: model.digest || 'Unknown'
     }))
-  } catch (error) {
-    console.error('Error getting Ollama models:', error)
+  } catch {
+    console.error('Error getting Ollama models')
     return []
   }
 }
@@ -106,8 +106,8 @@ export async function GET() {
       models: models
     })
 
-  } catch (error) {
-    console.error('Error checking Ollama status:', error)
+  } catch {
+    console.error('Error checking Ollama status')
     return NextResponse.json(
       { 
         status: {

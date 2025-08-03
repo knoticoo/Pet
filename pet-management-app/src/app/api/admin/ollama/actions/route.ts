@@ -18,12 +18,12 @@ async function startOllama() {
     // Try to start Ollama service
     await execAsync('ollama serve')
     return { success: true, message: 'Ollama service started successfully' }
-  } catch (error) {
-    console.error('Error starting Ollama:', error)
+  } catch {
+    console.error('Error starting Ollama')
     return { 
       success: false, 
       message: 'Failed to start Ollama service',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Service start failed'
     }
   }
 }
@@ -38,12 +38,12 @@ async function stopOllama() {
     } else {
       return { success: true, message: 'Ollama service was not running' }
     }
-  } catch (error) {
-    console.error('Error stopping Ollama:', error)
+  } catch {
+    console.error('Error stopping Ollama')
     return { 
       success: false, 
       message: 'Failed to stop Ollama service',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Service stop failed'
     }
   }
 }
@@ -66,12 +66,12 @@ async function restartOllama() {
       message: startResult.success ? 'Ollama service restarted successfully' : startResult.message,
       error: startResult.error
     }
-  } catch (error) {
-    console.error('Error restarting Ollama:', error)
+  } catch {
+    console.error('Error restarting Ollama')
     return { 
       success: false, 
       message: 'Failed to restart Ollama service',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Service restart failed'
     }
   }
 }
@@ -80,12 +80,12 @@ async function pullModel(modelName: string) {
   try {
     await execAsync(`ollama pull ${modelName}`)
     return { success: true, message: `Model ${modelName} pulled successfully` }
-  } catch (error) {
-    console.error(`Error pulling model ${modelName}:`, error)
+  } catch {
+    console.error(`Error pulling model ${modelName}`)
     return { 
       success: false, 
       message: `Failed to pull model ${modelName}`,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Model pull failed'
     }
   }
 }
@@ -94,12 +94,12 @@ async function removeModel(modelName: string) {
   try {
     await execAsync(`ollama rm ${modelName}`)
     return { success: true, message: `Model ${modelName} removed successfully` }
-  } catch (error) {
-    console.error(`Error removing model ${modelName}:`, error)
+  } catch {
+    console.error(`Error removing model ${modelName}`)
     return { 
       success: false, 
       message: `Failed to remove model ${modelName}`,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Model removal failed'
     }
   }
 }
@@ -170,8 +170,8 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-  } catch (error) {
-    console.error('Error performing Ollama action:', error)
+  } catch {
+    console.error('Error performing Ollama action')
     return NextResponse.json({ error: 'Failed to perform action' }, { status: 500 })
   }
 }

@@ -144,6 +144,12 @@ export async function PUT() {
         value: '999',
         description: 'Maximum pets for premium users',
         category: 'limits'
+      },
+      {
+        key: 'system_timezone',
+        value: 'Europe/Riga',
+        description: 'System timezone for date/time display',
+        category: 'system'
       }
     ]
 

@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Bot } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface OllamaStatus {
   isRunning: boolean
@@ -12,7 +11,7 @@ export function OllamaStatusIndicator() {
   const [status, setStatus] = useState<OllamaStatus | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const checkStatus = async () => {
+  const checkStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/ollama/status')
       if (response.ok) {
@@ -21,12 +20,12 @@ export function OllamaStatusIndicator() {
       } else {
         setStatus({ isRunning: false, error: 'Failed to check status' })
       }
-    } catch (error) {
+    } catch {
       setStatus({ isRunning: false, error: 'Connection error' })
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     checkStatus()
@@ -35,7 +34,7 @@ export function OllamaStatusIndicator() {
     const interval = setInterval(checkStatus, 30000)
     
     return () => clearInterval(interval)
-  }, [])
+  }, [checkStatus])
 
   if (loading) {
     return (

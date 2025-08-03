@@ -45,7 +45,7 @@ export function AdminOllamaStatus() {
   const [refreshing, setRefreshing] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
-  const checkOllamaStatus = async () => {
+  const checkOllamaStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/ollama/status')
       if (response.ok) {
@@ -69,9 +69,9 @@ export function AdminOllamaStatus() {
       setLoading(false)
       setRefreshing(false)
     }
-  }
+  }, [])
 
-  const performOllamaAction = async (action: string) => {
+  const performOllamaAction = useCallback(async (action: string) => {
     setActionLoading(action)
     try {
       const response = await fetch('/api/admin/ollama/actions', {
@@ -91,7 +91,7 @@ export function AdminOllamaStatus() {
     } finally {
       setActionLoading(null)
     }
-  }
+  }, [checkOllamaStatus])
 
   useEffect(() => {
     checkOllamaStatus()
@@ -100,7 +100,7 @@ export function AdminOllamaStatus() {
     const interval = setInterval(checkOllamaStatus, 30000)
     
     return () => clearInterval(interval)
-  }, [])
+  }, [checkOllamaStatus])
 
   const getStatusColor = (isRunning: boolean) => {
     return isRunning ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -194,7 +194,7 @@ export function AdminOllamaStatus() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Memory className="h-4 w-4 text-green-500" />
+                      <HardDrive className="h-4 w-4 text-green-500" />
                       <span className="text-xs text-muted-foreground">Memory</span>
                     </div>
                     <span className="text-sm font-medium">{status.systemInfo.memory}</span>

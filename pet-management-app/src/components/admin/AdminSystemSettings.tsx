@@ -116,10 +116,22 @@ export function AdminSystemSettings({ className }: AdminSystemSettingsProps) {
         return 'Subscription Settings'
       case 'limits':
         return 'User Limits'
+      case 'system':
+        return 'System Settings'
       default:
         return category.charAt(0).toUpperCase() + category.slice(1)
     }
   }
+
+  const timezoneOptions = [
+    { value: 'Europe/Riga', label: 'Europe/Riga (Latvia)' },
+    { value: 'Europe/Moscow', label: 'Europe/Moscow (Russia)' },
+    { value: 'UTC', label: 'UTC' },
+    { value: 'America/New_York', label: 'America/New_York' },
+    { value: 'Europe/London', label: 'Europe/London' },
+    { value: 'Asia/Tokyo', label: 'Asia/Tokyo' },
+    { value: 'Australia/Sydney', label: 'Australia/Sydney' }
+  ]
 
   const getInputType = (key: string) => {
     if (key.includes('price') || key.includes('limit') || key.includes('max')) {
@@ -127,6 +139,9 @@ export function AdminSystemSettings({ className }: AdminSystemSettingsProps) {
     }
     if (key.includes('enabled')) {
       return 'select'
+    }
+    if (key.includes('timezone')) {
+      return 'timezone'
     }
     return 'text'
   }
@@ -196,6 +211,18 @@ export function AdminSystemSettings({ className }: AdminSystemSettingsProps) {
                     >
                       <option value="true">Enabled</option>
                       <option value="false">Disabled</option>
+                    </select>
+                  ) : getInputType(setting.key) === 'timezone' ? (
+                    <select
+                      value={setting.value}
+                      onChange={(e) => handleSettingChange(setting.key, e.target.value)}
+                      className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground"
+                    >
+                      {timezoneOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
                     </select>
                   ) : (
                     <input
