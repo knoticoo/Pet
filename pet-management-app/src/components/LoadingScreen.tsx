@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Heart, PawPrint, Sparkles, CheckCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Logo } from './Logo'
 
 interface LoadingScreenProps {
   onComplete: () => void
@@ -98,19 +99,13 @@ export const LoadingScreen = ({ onComplete, isVisible }: LoadingScreenProps) => 
       <div className="relative z-10 text-center space-y-8">
         {/* Logo and title */}
         <div className="space-y-4">
-          <div className="relative">
-            <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center shadow-2xl shadow-primary/25 mx-auto animate-pulse-slow">
-              <Heart className="h-10 w-10 text-white" />
-            </div>
-            <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full border-4 border-white animate-pulse"></div>
+          <div className="flex justify-center">
+            <Logo size="xl" animated={true} />
           </div>
           
           <div className="space-y-2">
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent animate-fade-in">
-              ПетКеа
-            </h1>
             <p className="text-lg text-muted-foreground animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              Уход за питомцами
+              Загружаем ваше приложение...
             </p>
           </div>
         </div>
@@ -208,36 +203,3 @@ export const LoadingScreen = ({ onComplete, isVisible }: LoadingScreenProps) => 
     </div>
   )
 }
-
-// Add custom animations to globals.css
-const additionalStyles = `
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-    opacity: 0.6;
-  }
-  50% {
-    transform: translateY(-20px) rotate(180deg);
-    opacity: 1;
-  }
-}
-
-@keyframes float-reverse {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg) scaleX(-1);
-    opacity: 0.5;
-  }
-  50% {
-    transform: translateY(-15px) rotate(-180deg) scaleX(-1);
-    opacity: 0.8;
-  }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-float-reverse {
-  animation: float-reverse 4s ease-in-out infinite;
-}
-`

@@ -11,6 +11,7 @@ import { useState, useCallback, memo, useMemo, useEffect } from 'react'
 import { t } from '@/lib/translations'
 import { ThemeSelector } from '@/components/ThemeSelector'
 import { Badge } from '@/components/ui/badge'
+import { Logo } from './Logo'
 
 // Memoized navigation item component with improved styling
 const NavigationItem = memo(({ item, pathname, onClick, isMobile = false }: {
@@ -260,19 +261,8 @@ export const Navigation = memo(() => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-xl group-hover:shadow-primary/30 transition-all duration-300">
-                <Heart className="h-5 w-5 text-white" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-lg bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                ПетКеа
-              </span>
-              <span className="text-xs text-muted-foreground -mt-1">Уход за питомцами</span>
-            </div>
+          <Link href="/" className="group">
+            <Logo size="md" animated={true} />
           </Link>
 
           {/* Desktop Navigation */}

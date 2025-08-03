@@ -1,391 +1,340 @@
 'use client'
 
-import { Heart, Calendar, DollarSign, Bell, Camera, TrendingUp, Users, Award, Plus, ChevronRight, Star, Activity } from 'lucide-react'
-
-import { AuthGuard } from '@/components/AuthGuard'
-import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
-import { useEffect, useState, useCallback } from 'react'
-import { t } from '@/lib/translations'
-import Image from 'next/image'
+import { useState, useEffect } from 'react'
+import { Heart, Plus, Calendar, DollarSign, Bell, TrendingUp, Users, Activity } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { AuthGuard } from '@/components/AuthGuard'
+import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
+import { LoadingScreen } from '@/components/LoadingScreen'
+import { t } from '@/lib/translations'
 
-import { RecentPets } from '@/components/RecentPets'
-import { RecentReminders } from '@/components/RecentReminders'
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader'
-import { QuickActions } from '@/components/dashboard/QuickActions'
-
-interface Stats {
+interface DashboardStats {
   totalPets: number
   upcomingAppointments: number
   monthlyExpenses: number
   activeReminders: number
-  socialPosts: number
-  followers: number
 }
 
-interface RecentPost {
+interface Pet {
   id: string
-  petName: string
-  imageUrl: string
-  likes: number
-  createdAt: string
+  name: string
+  species: string
+  breed: string
+  birthDate: string
 }
 
-interface HealthAlert {
+interface Reminder {
   id: string
-  petName: string
+  title: string
+  dueDate: string
   type: string
-  message: string
-  severity: 'low' | 'medium' | 'high'
-  createdAt: string
+  petName: string
 }
 
 export default function DashboardPage() {
   const { session } = useAuthenticatedSession()
-
-  const [stats, setStats] = useState<Stats>({
+  const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState<DashboardStats>({
     totalPets: 0,
     upcomingAppointments: 0,
     monthlyExpenses: 0,
-    activeReminders: 0,
-    socialPosts: 0,
-    followers: 0
+    activeReminders: 0
   })
-  const [recentPosts, setRecentPosts] = useState<RecentPost[]>([])
-  const [healthAlerts, setHealthAlerts] = useState<HealthAlert[]>([])
-  const [loading, setLoading] = useState(true)
-
-  const fetchDashboardData = useCallback(async () => {
-    try {
-      const [
-        petsResponse, 
-        appointmentsResponse, 
-        expensesResponse, 
-        remindersResponse, 
-        socialResponse,
-        profileResponse
-      ] = await Promise.all([
-        fetch('/api/pets'),
-        fetch('/api/appointments'),
-        fetch('/api/expenses'),
-        fetch('/api/reminders'),
-        fetch(`/api/users/${session?.user?.id}/posts`),
-        fetch(`/api/users/${session?.user?.id}/profile`)
-      ])
-
-      const pets = await petsResponse.json()
-      const appointments = await appointmentsResponse.json()
-      const expenses = await expensesResponse.json()
-      const reminders = await remindersResponse.json()
-      const socialPosts = socialResponse.ok ? await socialResponse.json() : []
-      const profile = profileResponse.ok ? await profileResponse.json() : { stats: { followersCount: 0 } }
-
-      // Calculate upcoming appointments (next 7 days)
-      const now = new Date()
-      const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-      const upcomingAppointments = appointments.filter((appointment: { date: string }) => {
-        const appointmentDate = new Date(appointment.date)
-        return appointmentDate >= now && appointmentDate <= nextWeek
-      }).length
-
-      // Calculate monthly expenses
-      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-      const monthlyExpenses = expenses
-        .filter((expense: { date: string; amount: number }) => new Date(expense.date) >= thisMonth)
-        .reduce((sum: number, expense: { amount: number }) => sum + expense.amount, 0)
-
-      // Calculate active reminders
-      const activeReminders = reminders.filter((reminder: { isCompleted: boolean }) => !reminder.isCompleted).length
-
-      setStats({
-        totalPets: pets.length,
-        upcomingAppointments,
-        monthlyExpenses,
-        activeReminders,
-        socialPosts: socialPosts.length,
-        followers: profile.stats?.followersCount || 0
-      })
-
-      // Set recent posts (last 3)
-      setRecentPosts(socialPosts.slice(0, 3).map((post: { id: string; petName: string; imageUrl: string; likes: number; createdAt: string }) => ({
-        id: post.id,
-        petName: post.petName,
-        imageUrl: post.imageUrl,
-        likes: post.likes,
-        createdAt: post.createdAt
-      })))
-
-      // Mock health alerts (you'd implement this based on your health monitoring)
-      setHealthAlerts([
-        {
-          id: '1',
-          petName: pets[0]?.name || 'Your Pet',
-          type: 'vaccination',
-          message: 'Vaccination due in 3 days',
-          severity: 'medium',
-          createdAt: new Date().toISOString()
-        }
-      ])
-
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [session?.user?.id])
+  const [recentPets, setRecentPets] = useState<Pet[]>([])
+  const [recentReminders, setRecentReminders] = useState<Reminder[]>([])
 
   useEffect(() => {
     if (session?.user?.id) {
-      fetchDashboardData()
-    }
-  }, [session, fetchDashboardData])
+      // Simulate loading time for better UX
+      const timer = setTimeout(() => {
+        loadDashboardData()
+        setIsLoading(false)
+      }, 2000)
 
-  const getAlertColor = (severity: string) => {
-    switch (severity) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200'
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'low': return 'bg-green-100 text-green-800 border-green-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      return () => clearTimeout(timer)
+    }
+  }, [session])
+
+  const loadDashboardData = async () => {
+    try {
+      // Fetch dashboard data
+      const [petsRes, remindersRes] = await Promise.all([
+        fetch('/api/pets'),
+        fetch('/api/reminders')
+      ])
+
+      if (petsRes.ok) {
+        const pets = await petsRes.json()
+        setRecentPets(pets.slice(0, 3))
+        setStats(prev => ({ ...prev, totalPets: pets.length }))
+      }
+
+      if (remindersRes.ok) {
+        const reminders = await remindersRes.json()
+        setRecentReminders(reminders.slice(0, 5))
+        setStats(prev => ({ ...prev, activeReminders: reminders.length }))
+      }
+
+      // Mock data for other stats
+      setStats(prev => ({
+        ...prev,
+        upcomingAppointments: 3,
+        monthlyExpenses: 1250
+      }))
+    } catch (error) {
+      console.error('Error loading dashboard data:', error)
     }
   }
 
-  if (loading) {
-    return (
-      <AuthGuard>
-        <div className="space-y-8">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground mt-4">{t('common.loading')}</p>
-          </div>
-        </div>
-      </AuthGuard>
-    )
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('ru-RU', {
+      style: 'currency',
+      currency: 'RUB'
+    }).format(amount)
+  }
+
+  const calculateAge = (birthDate: string) => {
+    const today = new Date()
+    const birth = new Date(birthDate)
+    const age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      return Math.max(0, age - 1)
+    }
+    return age
+  }
+
+  const getGradientColor = (species: string) => {
+    switch (species.toLowerCase()) {
+      case 'dog':
+        return 'from-blue-400 to-blue-600'
+      case 'cat':
+        return 'from-purple-400 to-purple-600'
+      case 'bird':
+        return 'from-green-400 to-green-600'
+      case 'fish':
+        return 'from-cyan-400 to-cyan-600'
+      default:
+        return 'from-pink-400 to-pink-600'
+    }
+  }
+
+  if (isLoading) {
+    return <LoadingScreen isVisible={true} onComplete={() => setIsLoading(false)} />
   }
 
   return (
     <AuthGuard>
       <div className="space-y-8">
-        {/* Header with Theme Info */}
-        <DashboardHeader />
+        {/* Welcome Header */}
+        <div className="text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/25">
+              <Heart className="h-8 w-8 text-white" />
+            </div>
+          </div>
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              {t('dashboard.title')}
+            </h1>
+            <p className="text-lg text-muted-foreground mt-2">
+              {t('dashboard.welcome')}
+            </p>
+          </div>
+        </div>
 
-        {/* Enhanced Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-          <Link href="/pets" className="card p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="card p-6 hover-lift">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-500 rounded-lg">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
                 <Heart className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-blue-700 font-medium">{t('stats.totalPets')}</p>
-                <p className="text-2xl font-bold text-blue-900">{stats.totalPets}</p>
+                <p className="text-sm text-muted-foreground">{t('stats.totalPets')}</p>
+                <p className="text-2xl font-bold text-foreground">{stats.totalPets}</p>
               </div>
             </div>
-          </Link>
+          </div>
 
-          <Link href="/appointments" className="card p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+          <div className="card p-6 hover-lift">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-500 rounded-lg">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
                 <Calendar className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-purple-700 font-medium">{t('stats.upcomingAppointments')}</p>
-                <p className="text-2xl font-bold text-purple-900">{stats.upcomingAppointments}</p>
+                <p className="text-sm text-muted-foreground">{t('stats.upcomingAppointments')}</p>
+                <p className="text-2xl font-bold text-foreground">{stats.upcomingAppointments}</p>
               </div>
             </div>
-          </Link>
+          </div>
 
-          <Link href="/expenses" className="card p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <div className="card p-6 hover-lift">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-500 rounded-lg">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
                 <DollarSign className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-green-700 font-medium">{t('stats.monthlyExpenses')}</p>
-                <p className="text-2xl font-bold text-green-900">${stats.monthlyExpenses.toFixed(2)}</p>
+                <p className="text-sm text-muted-foreground">{t('stats.monthlyExpenses')}</p>
+                <p className="text-2xl font-bold text-foreground">{formatCurrency(stats.monthlyExpenses)}</p>
               </div>
             </div>
-          </Link>
+          </div>
 
-          <Link href="/reminders" className="card p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+          <div className="card p-6 hover-lift">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-orange-500 rounded-lg">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
                 <Bell className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-sm text-orange-700 font-medium">{t('stats.activeReminders')}</p>
-                <p className="text-2xl font-bold text-orange-900">{stats.activeReminders}</p>
+                <p className="text-sm text-muted-foreground">{t('stats.activeReminders')}</p>
+                <p className="text-2xl font-bold text-foreground">{stats.activeReminders}</p>
               </div>
             </div>
-          </Link>
-
-          <Link href="/social" className="card p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-pink-500 rounded-lg">
-                <Camera className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-pink-700 font-medium">Social Posts</p>
-                <p className="text-2xl font-bold text-pink-900">{stats.socialPosts}</p>
-              </div>
-            </div>
-          </Link>
-
-          <Link href={`/profile/${session?.user?.id}`} className="card p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-indigo-500 rounded-lg">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-indigo-700 font-medium">Followers</p>
-                <p className="text-2xl font-bold text-indigo-900">{stats.followers}</p>
-              </div>
-            </div>
-          </Link>
+          </div>
         </div>
 
-        {/* Recent Activity Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {/* Recent Social Posts */}
-          <div className="card p-6 bg-gradient-to-br from-gray-50 to-gray-100">
+        {/* Quick Actions */}
+        <div className="card p-6">
+          <h2 className="text-xl font-semibold text-foreground mb-4">Быстрые действия</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/pets/new">
+              <Button className="w-full h-16 flex flex-col items-center justify-center space-y-2 hover-lift">
+                <Plus className="h-6 w-6" />
+                <span className="text-sm font-medium">Добавить питомца</span>
+              </Button>
+            </Link>
+            
+            <Link href="/appointments/new">
+              <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-2 hover-lift">
+                <Calendar className="h-6 w-6" />
+                <span className="text-sm font-medium">Записаться к врачу</span>
+              </Button>
+            </Link>
+            
+            <Link href="/expenses/new">
+              <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-2 hover-lift">
+                <DollarSign className="h-6 w-6" />
+                <span className="text-sm font-medium">Добавить расход</span>
+              </Button>
+            </Link>
+            
+            <Link href="/reminders/new">
+              <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-2 hover-lift">
+                <Bell className="h-6 w-6" />
+                <span className="text-sm font-medium">Создать напоминание</span>
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Recent Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Recent Pets */}
+          <div className="card p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2">
-                <Camera className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-foreground">Recent Posts</h3>
-              </div>
-              <Link href="/social">
-                <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
-                  View All <ChevronRight className="h-4 w-4 ml-1" />
+              <h2 className="text-xl font-semibold text-foreground">{t('dashboard.recentPets')}</h2>
+              <Link href="/pets">
+                <Button variant="ghost" size="sm">
+                  {t('dashboard.viewAllPets')}
                 </Button>
               </Link>
             </div>
             
-            {recentPosts.length > 0 ? (
-              <div className="space-y-3">
-                {recentPosts.map((post) => (
-                  <div key={post.id} className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                      <Image
-                        src={post.imageUrl}
-                        alt={post.petName}
-                        width={48}
-                        height={48}
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground truncate">{post.petName}</p>
-                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <Heart className="h-3 w-3" />
-                        <span>{post.likes} likes</span>
-                        <span>•</span>
-                        <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+            {recentPets.length > 0 ? (
+              <div className="space-y-4">
+                {recentPets.map((pet) => (
+                  <Link key={pet.id} href={`/pets/${pet.id}`}>
+                    <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
+                      <div className={`w-12 h-12 bg-gradient-to-br ${getGradientColor(pet.species)} rounded-full flex items-center justify-center`}>
+                        <Heart className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-foreground">{pet.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {pet.breed} • {calculateAge(pet.birthDate)} {t('common.years')}
+                        </p>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-6">
-                <Camera className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground mb-3">No posts yet</p>
-                <Link href="/social/upload">
-                  <Button size="sm" className="bg-gradient-to-r from-primary to-primary/80">
+              <div className="text-center py-8">
+                <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">{t('dashboard.noData')}</p>
+                <Link href="/pets/new">
+                  <Button className="mt-4">
                     <Plus className="h-4 w-4 mr-2" />
-                    Share First Photo
+                    {t('pets.addPet')}
                   </Button>
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Health Alerts */}
-          <div className="card p-6 bg-gradient-to-br from-red-50 to-red-100">
+          {/* Recent Reminders */}
+          <div className="card p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2">
-                <Activity className="h-5 w-5 text-red-600" />
-                <h3 className="font-semibold text-foreground">Health Alerts</h3>
-              </div>
-              <Link href="/pets">
-                <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                  View All <ChevronRight className="h-4 w-4 ml-1" />
+              <h2 className="text-xl font-semibold text-foreground">{t('dashboard.recentReminders')}</h2>
+              <Link href="/reminders">
+                <Button variant="ghost" size="sm">
+                  {t('dashboard.viewAllReminders')}
                 </Button>
               </Link>
             </div>
             
-            {healthAlerts.length > 0 ? (
+            {recentReminders.length > 0 ? (
               <div className="space-y-3">
-                {healthAlerts.map((alert) => (
-                  <div key={alert.id} className={`p-3 rounded-lg border ${getAlertColor(alert.severity)}`}>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="font-medium">{alert.petName}</p>
-                        <p className="text-sm">{alert.message}</p>
-                        <p className="text-xs mt-1 opacity-75">
-                          {new Date(alert.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        alert.severity === 'high' ? 'bg-red-200 text-red-800' :
-                        alert.severity === 'medium' ? 'bg-yellow-200 text-yellow-800' :
-                        'bg-green-200 text-green-800'
-                      }`}>
-                        {alert.severity}
-                      </div>
+                {recentReminders.map((reminder) => (
+                  <div key={reminder.id} className="flex items-center space-x-3 p-3 rounded-lg bg-accent/30">
+                    <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
+                      <Bell className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-foreground">{reminder.title}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {reminder.petName} • {new Date(reminder.dueDate).toLocaleDateString('ru-RU')}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-6">
-                <Star className="h-12 w-12 text-green-500 mx-auto mb-3" />
-                <p className="text-green-700 font-medium">All pets are healthy!</p>
-                <p className="text-green-600 text-sm">No health alerts at the moment</p>
+              <div className="text-center py-8">
+                <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">{t('dashboard.noData')}</p>
+                <Link href="/reminders/new">
+                  <Button className="mt-4">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Создать напоминание
+                  </Button>
+                </Link>
               </div>
             )}
           </div>
+        </div>
 
-          {/* Achievement/Insights */}
-          <div className="card p-6 bg-gradient-to-br from-yellow-50 to-yellow-100">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2">
-                <Award className="h-5 w-5 text-yellow-600" />
-                <h3 className="font-semibold text-foreground">Insights</h3>
-              </div>
+        {/* Health Tips */}
+        <div className="card p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+          <h2 className="text-xl font-semibold text-foreground mb-4">💡 Советы по уходу</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 bg-white/50 dark:bg-white/10 rounded-lg">
+              <h3 className="font-medium text-foreground mb-2">Регулярные осмотры</h3>
+              <p className="text-sm text-muted-foreground">
+                Планируйте ежегодные визиты к ветеринару для поддержания здоровья вашего питомца.
+              </p>
             </div>
-            
-            <div className="space-y-4">
-              <div className="p-4 bg-white rounded-lg border border-yellow-200">
-                <div className="flex items-center space-x-3 mb-2">
-                  <TrendingUp className="h-5 w-5 text-yellow-600" />
-                  <span className="font-medium text-yellow-800">Pet Care Streak</span>
-                </div>
-                <p className="text-2xl font-bold text-yellow-900">7 days</p>
-                <p className="text-sm text-yellow-700">Keep up the great work!</p>
-              </div>
-              
-              <div className="p-4 bg-white rounded-lg border border-yellow-200">
-                <div className="flex items-center space-x-3 mb-2">
-                  <Heart className="h-5 w-5 text-yellow-600" />
-                  <span className="font-medium text-yellow-800">Social Engagement</span>
-                </div>
-                <p className="text-2xl font-bold text-yellow-900">{stats.socialPosts > 0 ? '📈' : '🚀'}</p>
-                <p className="text-sm text-yellow-700">
-                  {stats.socialPosts > 0 ? 'Growing community presence' : 'Ready to share your first post'}
-                </p>
-              </div>
+            <div className="p-4 bg-white/50 dark:bg-white/10 rounded-lg">
+              <h3 className="font-medium text-foreground mb-2">Правильное питание</h3>
+              <p className="text-sm text-muted-foreground">
+                Обеспечьте сбалансированное питание в соответствии с возрастом и породой питомца.
+              </p>
             </div>
           </div>
         </div>
-
-        {/* Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <RecentPets />
-          <RecentReminders />
-        </div>
-
-        {/* Quick Actions */}
-        <QuickActions />
       </div>
     </AuthGuard>
   )
