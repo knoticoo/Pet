@@ -7,7 +7,9 @@ import { AdminGuard } from '@/components/admin/AdminGuard'
 import { AdminSystemSettings } from '@/components/admin/AdminSystemSettings'
 import { AdminUserManagement } from '@/components/admin/AdminUserManagement'
 import { AdminPluginManager } from '@/components/admin/AdminPluginManager'
-import { Shield, Settings, Users, Puzzle, Database, LogIn, Trash2, Sparkles, Menu, X, CheckCircle, Activity } from 'lucide-react'
+import { AdminOllamaStatus } from '@/components/admin/AdminOllamaStatus'
+import { OllamaStatusIndicator } from '@/components/admin/OllamaStatusIndicator'
+import { Shield, Settings, Users, Puzzle, Database, LogIn, Trash2, Sparkles, Menu, X, CheckCircle, Activity, Bot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
@@ -58,6 +60,7 @@ export default function AdminPanel() {
     { id: 'settings', label: 'Settings', icon: Settings, description: 'System configuration and preferences' },
     { id: 'features', label: 'Features', icon: Puzzle, description: 'Enable/disable application features' },
     { id: 'plugins', label: 'Plugins', icon: Sparkles, description: 'Manage plugins and extensions' },
+    { id: 'ollama', label: 'AI Status', icon: Bot, description: 'Monitor Ollama AI service status' },
   ]
 
   const systemActions = [
@@ -300,7 +303,7 @@ export default function AdminPanel() {
                         <Activity className="h-5 w-5 text-green-600" />
                         System Status
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="text-center p-4 bg-green-50 rounded-lg">
                           <div className="font-medium text-green-800">Database</div>
                           <div className="text-2xl font-bold text-green-600">Online</div>
@@ -316,6 +319,7 @@ export default function AdminPanel() {
                           <div className="text-2xl font-bold text-purple-600">Running</div>
                           <div className="text-sm text-purple-600">Queue processing normally</div>
                         </div>
+                        <OllamaStatusIndicator />
                       </div>
                     </div>
                   </>
@@ -372,6 +376,20 @@ export default function AdminPanel() {
                     <div className="p-6">
                       <Suspense fallback={<div className="text-center py-8">Loading plugins...</div>}>
                         <AdminPluginManager />
+                      </Suspense>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'ollama' && (
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div className="p-6 border-b border-gray-200">
+                      <h3 className="text-lg font-semibold text-foreground">AI Status</h3>
+                      <p className="text-sm text-muted-foreground mt-1">Monitor and manage Ollama AI service status</p>
+                    </div>
+                    <div className="p-6">
+                      <Suspense fallback={<div className="text-center py-8">Loading AI status...</div>}>
+                        <AdminOllamaStatus />
                       </Suspense>
                     </div>
                   </div>
