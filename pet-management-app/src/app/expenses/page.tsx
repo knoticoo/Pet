@@ -29,7 +29,17 @@ export default function ExpensesPage() {
 
   useEffect(() => {
     if (session?.user?.id) {
-      fetchExpenses()
+      // Only show loading on first visit or if data is not cached
+      const hasVisited = sessionStorage.getItem('expenses-visited')
+      if (!hasVisited) {
+        // First time visit - show loading
+        fetchExpenses()
+        sessionStorage.setItem('expenses-visited', 'true')
+      } else {
+        // Subsequent visits - load data without loading screen
+        setLoading(false)
+        fetchExpenses()
+      }
     }
   }, [session])
 

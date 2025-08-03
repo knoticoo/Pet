@@ -117,7 +117,7 @@ export default function NewAppointmentPage() {
                   id="pet"
                   name="petId"
                   required
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                 >
                   <option value="">Choose a pet</option>
                   {pets.map((pet) => (
@@ -137,7 +137,7 @@ export default function NewAppointmentPage() {
                   id="title"
                   name="title"
                   required
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                   placeholder="e.g., Annual Checkup, Vaccination, Dental Cleaning"
                 />
               </div>
@@ -152,7 +152,7 @@ export default function NewAppointmentPage() {
                   name="date"
                   required
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                 />
               </div>
 
@@ -165,7 +165,7 @@ export default function NewAppointmentPage() {
                   id="time"
                   name="time"
                   required
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                 />
               </div>
 
@@ -177,7 +177,7 @@ export default function NewAppointmentPage() {
                   id="duration"
                   name="duration"
                   defaultValue="60"
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                 >
                   <option value="30">30 minutes</option>
                   <option value="45">45 minutes</option>
@@ -194,7 +194,7 @@ export default function NewAppointmentPage() {
                 <select
                   id="appointmentType"
                   name="appointmentType"
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                 >
                   <option value="">Select type</option>
                   <option value="checkup">General Checkup</option>
@@ -218,7 +218,7 @@ export default function NewAppointmentPage() {
                     type="text"
                     id="vetName"
                     name="vetName"
-                    className="w-full pl-10 pr-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="w-full pl-10 pr-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                     placeholder="Dr. Smith"
                   />
                 </div>
@@ -234,7 +234,7 @@ export default function NewAppointmentPage() {
                     type="text"
                     id="location"
                     name="location"
-                    className="w-full pl-10 pr-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="w-full pl-10 pr-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                     placeholder="Clinic name and address"
                   />
                 </div>
@@ -248,7 +248,7 @@ export default function NewAppointmentPage() {
                   id="description"
                   name="description"
                   rows={4}
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                   placeholder="Any additional notes about the appointment..."
                 />
               </div>

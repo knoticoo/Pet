@@ -46,22 +46,32 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (session?.user?.id) {
-      // Simulate loading time for better UX
-      const timer = setTimeout(() => {
+      // Only show loading on first visit or if data is not cached
+      const hasVisited = sessionStorage.getItem('dashboard-visited')
+      if (!hasVisited) {
+        // First time visit - show loading
+        const timer = setTimeout(() => {
+          loadDashboardData()
+          setIsLoading(false)
+          sessionStorage.setItem('dashboard-visited', 'true')
+        }, 2000)
+        return () => clearTimeout(timer)
+      } else {
+        // Subsequent visits - load data without loading screen
         loadDashboardData()
         setIsLoading(false)
-      }, 2000)
-
-      return () => clearTimeout(timer)
+      }
     }
   }, [session])
 
   const loadDashboardData = async () => {
     try {
       // Fetch dashboard data
-      const [petsRes, remindersRes] = await Promise.all([
+      const [petsRes, remindersRes, appointmentsRes, expensesRes] = await Promise.all([
         fetch('/api/pets'),
-        fetch('/api/reminders')
+        fetch('/api/reminders'),
+        fetch('/api/appointments'),
+        fetch('/api/expenses')
       ])
 
       if (petsRes.ok) {
@@ -76,12 +86,24 @@ export default function DashboardPage() {
         setStats(prev => ({ ...prev, activeReminders: reminders.length }))
       }
 
-      // Mock data for other stats
-      setStats(prev => ({
-        ...prev,
-        upcomingAppointments: 3,
-        monthlyExpenses: 1250
-      }))
+      if (appointmentsRes.ok) {
+        const appointments = await appointmentsRes.json()
+        const upcomingAppointments = appointments.filter(apt => 
+          apt.status === 'scheduled' && new Date(apt.date) > new Date()
+        )
+        setStats(prev => ({ ...prev, upcomingAppointments: upcomingAppointments.length }))
+      }
+
+      if (expensesRes.ok) {
+        const expenses = await expensesRes.json()
+        const thisMonthExpenses = expenses.filter(expense => {
+          const expenseDate = new Date(expense.date)
+          const now = new Date()
+          return expenseDate.getMonth() === now.getMonth() && expenseDate.getFullYear() === now.getFullYear()
+        })
+        const monthlyTotal = thisMonthExpenses.reduce((sum, expense) => sum + expense.amount, 0)
+        setStats(prev => ({ ...prev, monthlyExpenses: monthlyTotal }))
+      }
     } catch (error) {
       console.error('Error loading dashboard data:', error)
     }
