@@ -32,6 +32,32 @@ interface Reminder {
   petName: string
 }
 
+interface Appointment {
+  id: string
+  title: string
+  date: string
+  duration: number
+  location?: string
+  vetName?: string
+  appointmentType: string
+  status: string
+  notes?: string
+  petId: string
+  pet: {
+    name: string
+    species: string
+  }
+}
+
+interface Expense {
+  id: string
+  title: string
+  amount: number
+  date: string
+  category: string
+  petId: string
+}
+
 export default function DashboardPage() {
   const { session } = useAuthenticatedSession()
   const [isLoading, setIsLoading] = useState(true)
@@ -88,7 +114,7 @@ export default function DashboardPage() {
 
       if (appointmentsRes.ok) {
         const appointments = await appointmentsRes.json()
-        const upcomingAppointments = appointments.filter(apt => 
+        const upcomingAppointments = appointments.filter((apt: Appointment) => 
           apt.status === 'scheduled' && new Date(apt.date) > new Date()
         )
         setStats(prev => ({ ...prev, upcomingAppointments: upcomingAppointments.length }))
@@ -96,12 +122,12 @@ export default function DashboardPage() {
 
       if (expensesRes.ok) {
         const expenses = await expensesRes.json()
-        const thisMonthExpenses = expenses.filter(expense => {
+        const thisMonthExpenses = expenses.filter((expense: Expense) => {
           const expenseDate = new Date(expense.date)
           const now = new Date()
           return expenseDate.getMonth() === now.getMonth() && expenseDate.getFullYear() === now.getFullYear()
         })
-        const monthlyTotal = thisMonthExpenses.reduce((sum, expense) => sum + expense.amount, 0)
+        const monthlyTotal = thisMonthExpenses.reduce((sum: number, expense: Expense) => sum + expense.amount, 0)
         setStats(prev => ({ ...prev, monthlyExpenses: monthlyTotal }))
       }
     } catch (error) {
