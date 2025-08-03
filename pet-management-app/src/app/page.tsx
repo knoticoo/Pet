@@ -146,7 +146,7 @@ export default function DashboardPage() {
       // No session, stop loading
       setIsLoading(false)
     }
-  }, [session, sessionLoading, hasMounted, loadDashboardData])
+  }, [session, sessionLoading, hasMounted]) // Remove loadDashboardData from dependencies to prevent infinite loop
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('de-DE', {
