@@ -611,8 +611,6 @@ END_ANALYSIS`
           analysis: JSON.stringify(analysis),
           severity: analysis.severity,
           urgency: analysis.urgency,
-          confidence: analysis.confidence,
-          reasoning: analysis.reasoning,
           createdAt: new Date()
         }
       })
