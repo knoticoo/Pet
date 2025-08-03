@@ -16,8 +16,8 @@ export function useFeatures(userId?: string) {
 
   // Memoize the cache key to avoid recreating it on every render
   const cacheKey = useMemo(() => {
-    return userId || session?.user?.id || 'anonymous'
-  }, [userId, session?.user?.id])
+    return userId || (session?.user as { id?: string })?.id || 'anonymous'
+  }, [userId, session?.user])
 
   const loadFeatures = useCallback(async () => {
     if (status === 'loading') return
@@ -32,7 +32,7 @@ export function useFeatures(userId?: string) {
     }
     
     try {
-      const currentUserId = userId || session?.user?.id
+      const currentUserId = userId || (session?.user as { id?: string })?.id
       const url = currentUserId 
         ? `/api/features?userId=${currentUserId}`
         : '/api/features'
@@ -64,21 +64,21 @@ export function useFeatures(userId?: string) {
     } catch (error) {
       console.error('Failed to load features:', error)
       // Don't fail completely - provide default features
-      const defaultFeatures = [
-        { name: 'dashboard', displayName: 'Dashboard', category: 'core', isCore: true },
-        { name: 'pets', displayName: 'Pet Management', category: 'core', isCore: true },
-        { name: 'social-profile', displayName: 'Social Profiles', category: 'social', isCore: true },
-        { name: 'expenses', displayName: 'Expenses', category: 'finance', isCore: true },
-        { name: 'appointments', displayName: 'Appointments', category: 'health', isCore: true },
-        { name: 'reminders', displayName: 'Reminders', category: 'health', isCore: true },
-        { name: 'settings', displayName: 'Settings', category: 'core', isCore: true }
+      const defaultFeatures: FeatureConfig[] = [
+        { id: 'dashboard', name: 'dashboard', displayName: 'Dashboard', category: 'core', isCore: true, version: '1.0.0' },
+        { id: 'pets', name: 'pets', displayName: 'Pet Management', category: 'core', isCore: true, version: '1.0.0' },
+        { id: 'social-profile', name: 'social-profile', displayName: 'Social Profiles', category: 'social', isCore: true, version: '1.0.0' },
+        { id: 'expenses', name: 'expenses', displayName: 'Expenses', category: 'finance', isCore: true, version: '1.0.0' },
+        { id: 'appointments', name: 'appointments', displayName: 'Appointments', category: 'health', isCore: true, version: '1.0.0' },
+        { id: 'reminders', name: 'reminders', displayName: 'Reminders', category: 'health', isCore: true, version: '1.0.0' },
+        { id: 'settings', name: 'settings', displayName: 'Settings', category: 'core', isCore: true, version: '1.0.0' }
       ]
       setAvailableFeatures(defaultFeatures)
       setEnabledFeatures(new Set(defaultFeatures.map(f => f.name)))
     } finally {
       setLoading(false)
     }
-  }, [status, cacheKey, userId, session?.user?.id])
+  }, [status, cacheKey, userId, session?.user])
 
   useEffect(() => {
     loadFeatures()
@@ -113,7 +113,7 @@ export function useFeatures(userId?: string) {
     enabledFeatures,
     availableFeatures,
     loading: loading || status === 'loading',
-    isAdmin: session?.user?.isAdmin || false,
+    isAdmin: (session?.user as { isAdmin?: boolean })?.isAdmin || false,
     isAuthenticated: !!session,
     user: session?.user,
     ...memoizedValues

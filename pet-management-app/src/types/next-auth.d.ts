@@ -4,12 +4,17 @@ declare module "next-auth" {
       id: string
       email: string
       name?: string
+      image?: string
       isAdmin: boolean
       rememberMe?: boolean
     }
   }
 
   interface User {
+    id: string
+    email: string
+    name?: string
+    image?: string
     isAdmin: boolean
     rememberMe?: boolean
   }
