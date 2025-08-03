@@ -100,6 +100,32 @@ export const authOptions = {
         (session.user as any).isAdmin = token.isAdmin as boolean;
         (session.user as any).rememberMe = token.rememberMe as boolean
         
+        // Ensure user exists in database
+        if (token.sub) {
+          try {
+            const existingUser = await prisma.user.findUnique({
+              where: { id: token.sub as string }
+            })
+            
+            if (!existingUser && session.user) {
+              // Create user if they don't exist
+              await prisma.user.create({
+                data: {
+                  id: token.sub as string,
+                  email: (session.user as any).email,
+                  name: (session.user as any).name || 'User',
+                  isAdmin: token.isAdmin as boolean || false,
+                  subscriptionTier: 'free',
+                  subscriptionStatus: 'inactive'
+                }
+              })
+              console.log('Created missing user in database:', token.sub)
+            }
+          } catch (error) {
+            console.error('Error ensuring user exists in database:', error)
+          }
+        }
+        
         // Set session expiry based on remember me
         if ((session.user as any).rememberMe) {
           (session as any).expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
@@ -112,7 +138,8 @@ export const authOptions = {
   },
   pages: {
     signIn: "/auth/signin",
-    signUp: "/auth/signup"
+    signUp: "/auth/signup",
+    signOut: "/auth/signin"
   },
   // Configure cookies for better persistence, especially on mobile
   cookies: {
