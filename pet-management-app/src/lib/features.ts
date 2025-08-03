@@ -431,8 +431,21 @@ export class FeatureManager {
 
   async initializeFeatures() {
     try {
-      // Ensure all features exist in database
+      // List of features that should be enabled by default (matching PWA)
+      const defaultEnabledFeatures = [
+        'dashboard', 'pets', 'appointments', 'expenses', 'reminders', 
+        'ai-vet', 'social-profile', 'settings', 'admin', 'health-tracking',
+        'medications', 'feeding-schedule', 'activities', 'documents',
+        'lost-pet-alerts', 'ai-health-insights', 'photo-timeline',
+        'weather-activity-alerts', 'breed-specific-care', 'emergency-contacts',
+        'pet-insurance-tracker', 'training-progress', 'multi-pet-comparison',
+        'vet-telemedicine', 'microchip-registry', 'grooming-scheduler', 'backup-sync'
+      ]
+
+      // Ensure all features exist in database and enable default ones
       for (const feature of [...CORE_FEATURES, ...AVAILABLE_FEATURES]) {
+        const shouldEnable = feature.isCore || defaultEnabledFeatures.includes(feature.name)
+        
         await prisma.feature.upsert({
           where: { name: feature.name },
           update: {
@@ -440,6 +453,7 @@ export class FeatureManager {
             description: feature.description,
             category: feature.category,
             version: feature.version,
+            isEnabled: shouldEnable,
             config: JSON.stringify(feature.config || {})
           },
           create: {
@@ -447,7 +461,7 @@ export class FeatureManager {
             displayName: feature.displayName,
             description: feature.description,
             category: feature.category,
-            isEnabled: true,
+            isEnabled: shouldEnable,
             isCore: feature.isCore,
             version: feature.version,
             config: JSON.stringify(feature.config || {})

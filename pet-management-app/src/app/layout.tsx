@@ -92,19 +92,50 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
         
-        {/* Service Worker Registration */}
+        {/* Service Worker Registration with Cache Busting */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js')
+                  // Add cache busting parameter
+                  const swUrl = '/sw.js?v=' + Date.now();
+                  
+                  navigator.serviceWorker.register(swUrl)
                     .then(function(registration) {
                       console.log('SW registered: ', registration);
+                      
+                      // Check for updates
+                      registration.addEventListener('updatefound', function() {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', function() {
+                          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // New service worker available
+                            if (confirm('Новая версия приложения доступна. Обновить сейчас?')) {
+                              newWorker.postMessage({ type: 'SKIP_WAITING' });
+                              window.location.reload();
+                            }
+                          }
+                        });
+                      });
                     })
                     .catch(function(registrationError) {
                       console.log('SW registration failed: ', registrationError);
                     });
+                });
+              }
+              
+              // Clear old caches on page load
+              if ('caches' in window) {
+                caches.keys().then(function(cacheNames) {
+                  return Promise.all(
+                    cacheNames.map(function(cacheName) {
+                      if (cacheName.startsWith('petcare-') && !cacheName.includes('v2')) {
+                        console.log('Clearing old cache:', cacheName);
+                        return caches.delete(cacheName);
+                      }
+                    })
+                  );
                 });
               }
             `,
