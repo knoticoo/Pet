@@ -449,10 +449,10 @@ export default function SocialGalleryPage() {
                     {/* Add Comment */}
                     <div className="flex items-center space-x-2">
                       <div className="w-6 h-6 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center flex-shrink-0">
-                        {session?.user?.image ? (
+                        {false ? (
                           <Image
-                            src={session.user.image}
-                            alt={session.user.name || 'You'}
+                            src=""
+                            alt={session?.user?.name || 'You'}
                             width={24}
                             height={24}
                             className="object-cover w-full h-full"
