@@ -33,7 +33,7 @@ export default function ReminderDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const reminderId = params.id as string
+  const reminderId = params?.id as string
 
   const fetchReminderDetails = useCallback(async () => {
     try {
@@ -150,6 +150,26 @@ export default function ReminderDetailPage() {
 
   const isOverdue = (dueDate: string) => {
     return new Date(dueDate) < new Date() && !reminder?.isCompleted
+  }
+
+  if (!reminderId) {
+    return (
+      <AuthGuard>
+        <div className="text-center py-12">
+          <div className="text-red-500 mb-4">
+            <h3 className="text-lg font-semibold mb-2">Invalid Reminder ID</h3>
+            <p className="text-muted-foreground mb-6">
+              The reminder ID is missing or invalid.
+            </p>
+            <Link href="/reminders">
+              <Button>
+                Back to Reminders
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </AuthGuard>
+    )
   }
 
   if (loading) {

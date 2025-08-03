@@ -1,10 +1,10 @@
-import type { AuthOptions } from "next-auth"
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
-export const authOptions: AuthOptions = {
+export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -96,15 +96,15 @@ export const authOptions: AuthOptions = {
     },
     async session({ session, token }: { session: Record<string, unknown>; token: Record<string, unknown> }) {
       if (session.user && token) {
-        session.user.id = token.sub as string
-        session.user.isAdmin = token.isAdmin as boolean
-        session.user.rememberMe = token.rememberMe as boolean
+        (session.user as any).id = token.sub as string;
+        (session.user as any).isAdmin = token.isAdmin as boolean;
+        (session.user as any).rememberMe = token.rememberMe as boolean
         
         // Set session expiry based on remember me
-        if (session.user.rememberMe) {
-          session.expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        if ((session.user as any).rememberMe) {
+          (session as any).expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
         } else {
-          session.expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          (session as any).expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         }
       }
       return session
@@ -153,7 +153,7 @@ export const authOptions: AuthOptions = {
   events: {
     async session({ session }: { session: Record<string, unknown> }) {
       // Log session access for debugging
-      console.log('Session accessed:', { userId: session.user.id, expires: session.expires })
+      console.log('Session accessed:', { userId: (session.user as any)?.id, expires: session.expires })
     }
   }
 }

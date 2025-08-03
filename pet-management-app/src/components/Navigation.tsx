@@ -87,7 +87,7 @@ const UserMenu = memo(({ user, onSignOut }: {
 UserMenu.displayName = 'UserMenu'
 
 export const Navigation = memo(() => {
-  const pathname = usePathname()
+  const pathname = usePathname() || ''
   const { enabledFeatures, isAdmin, isAuthenticated, user } = useFeatures()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 

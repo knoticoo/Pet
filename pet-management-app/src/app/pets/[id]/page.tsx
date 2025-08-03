@@ -120,7 +120,7 @@ export default function PetDetailPage() {
   const [showPhotoUpload, setShowPhotoUpload] = useState(false)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
-  const petId = params.id as string
+  const petId = params?.id as string
 
   const fetchPetDetails = useCallback(async () => {
     try {
@@ -347,6 +347,28 @@ export default function PetDetailPage() {
       console.error('Error removing photo:', error)
       alert('Failed to remove photo')
     }
+  }
+
+  if (!petId) {
+    return (
+      <AuthGuard>
+        <div className="text-center py-12">
+          <div className="text-red-500 mb-4">
+            <Heart className="h-16 w-16 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Invalid Pet ID</h3>
+            <p className="text-muted-foreground mb-6">
+              The pet ID is missing or invalid.
+            </p>
+            <Link href="/pets">
+              <Button>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Pets
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </AuthGuard>
+    )
   }
 
   if (loading) {

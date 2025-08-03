@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 
@@ -13,7 +14,7 @@ export interface AuthenticatedSession {
 }
 
 export async function getAuthenticatedSession(): Promise<AuthenticatedSession | null> {
-  const session = await getServerSession(authOptions) as { user?: { id?: string } } | null
+  const session = await getServerSession(authOptions as any) as { user?: { id?: string } } | null
   if (!session?.user?.id) {
     return null
   }
