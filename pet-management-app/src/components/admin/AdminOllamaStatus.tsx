@@ -100,7 +100,7 @@ export function AdminOllamaStatus() {
     const interval = setInterval(checkOllamaStatus, 30000)
     
     return () => clearInterval(interval)
-  }, [checkOllamaStatus])
+  }, []) // Remove checkOllamaStatus from dependencies to prevent infinite loop
 
   const getStatusColor = (isRunning: boolean) => {
     return isRunning ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
