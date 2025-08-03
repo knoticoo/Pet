@@ -15,7 +15,7 @@ export const LoadingScreen = ({ isVisible, onComplete }: LoadingScreenProps) => 
   const [showParticles, setShowParticles] = useState(true)
   const [isPlaying, setIsPlaying] = useState(true)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animationRef = useRef<number>()
+  const animationRef = useRef<number | null>(null)
 
   const steps = [
     { name: 'Инициализация системы', icon: Activity, color: 'from-blue-500 to-blue-600' },
@@ -65,7 +65,7 @@ export const LoadingScreen = ({ isVisible, onComplete }: LoadingScreenProps) => 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       
-      particles.forEach((particle, index) => {
+      particles.forEach((particle) => {
         particle.x += particle.vx
         particle.y += particle.vy
         particle.life -= 1
@@ -140,7 +140,7 @@ export const LoadingScreen = ({ isVisible, onComplete }: LoadingScreenProps) => 
     }, 1500)
 
     return () => clearInterval(stepInterval)
-  }, [isVisible])
+  }, [isVisible, steps.length])
 
   if (!isVisible) return null
 

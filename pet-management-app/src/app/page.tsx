@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Heart, Plus, Calendar, DollarSign, Bell, Sparkles, TrendingUp, Activity, Zap, Star, ArrowRight, Play, Pause, Settings, Users, Shield, Award } from 'lucide-react'
+import { Heart, Plus, Calendar, DollarSign, Bell, Sparkles, TrendingUp, Activity, Zap, ArrowRight, Play, Pause, Shield, Award } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
@@ -64,7 +64,7 @@ export default function DashboardPage() {
   const [hasMounted, setHasMounted] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
-  const [activeTab, setActiveTab] = useState('overview')
+
   const [showParticles, setShowParticles] = useState(true)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Palette, Dog, Cat, Bird, Fish, Rabbit, Zap, Sparkles, Check, ChevronDown, Settings } from 'lucide-react'
 import { useTheme, themes } from '@/lib/theme-provider'
@@ -85,7 +85,7 @@ export function ThemeSelector() {
               ? "bg-gradient-to-br from-yellow-400 to-orange-500 scale-110 rotate-12" 
               : `bg-gradient-to-br ${currentColor}`
           )}>
-            <currentIcon className="h-4 w-4 text-white transition-all duration-300" />
+            {React.createElement(currentIcon, { className: "h-4 w-4 text-white transition-all duration-300" })}
             {isAnimating && (
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-ping" />
             )}

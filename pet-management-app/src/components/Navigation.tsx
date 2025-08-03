@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Heart, Home, Calendar, DollarSign, Settings, Bell, Shield, LogOut, User, Menu, X, Brain, Camera, ChevronDown, Search, Sparkles, Activity, Zap, Star, Plus, TrendingUp } from 'lucide-react'
+import { Heart, Home, Calendar, DollarSign, Settings, Bell, Shield, LogOut, User, Brain, Camera, ChevronDown, Search, Sparkles, Plus, TrendingUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useFeatures } from '@/hooks/useFeatures'
 import { signOut } from 'next-auth/react'
@@ -235,12 +235,6 @@ SearchBar.displayName = 'SearchBar'
 
 // Advanced Stats Display
 const StatsDisplay = memo(() => {
-  const [stats, setStats] = useState({
-    pets: 3,
-    appointments: 2,
-    expenses: 150,
-    reminders: 5
-  })
 
   return (
     <div className="hidden xl:flex items-center gap-4 px-4 py-2 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
