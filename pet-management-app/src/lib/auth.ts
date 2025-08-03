@@ -108,18 +108,32 @@ export const authOptions = {
             })
             
             if (!existingUser && session.user) {
-              // Create user if they don't exist
-              await prisma.user.create({
-                data: {
-                  id: token.sub as string,
-                  email: (session.user as any).email,
-                  name: (session.user as any).name || 'User',
-                  isAdmin: token.isAdmin as boolean || false,
-                  subscriptionTier: 'free',
-                  subscriptionStatus: 'inactive'
-                }
+              // Check if user exists by email first
+              const userByEmail = await prisma.user.findUnique({
+                where: { email: (session.user as any).email }
               })
-              console.log('Created missing user in database:', token.sub)
+              
+              if (userByEmail) {
+                // User exists with same email but different ID - update the ID
+                await prisma.user.update({
+                  where: { email: (session.user as any).email },
+                  data: { id: token.sub as string }
+                })
+                console.log('Updated existing user ID in database:', token.sub)
+              } else {
+                // Create new user if they don't exist
+                await prisma.user.create({
+                  data: {
+                    id: token.sub as string,
+                    email: (session.user as any).email,
+                    name: (session.user as any).name || 'User',
+                    isAdmin: token.isAdmin as boolean || false,
+                    subscriptionTier: 'free',
+                    subscriptionStatus: 'inactive'
+                  }
+                })
+                console.log('Created missing user in database:', token.sub)
+              }
             }
           } catch (error) {
             console.error('Error ensuring user exists in database:', error)

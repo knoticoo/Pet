@@ -69,6 +69,15 @@ check_npm() {
 setup_environment() {
     print_status "Setting up environment variables..."
     
+    # Get the server IP for public access
+    SERVER_IP=$(hostname -I | awk '{print $1}')
+    if [ -z "$SERVER_IP" ]; then
+        SERVER_IP="localhost"
+        print_warning "Could not detect server IP, using localhost"
+    else
+        print_status "Detected server IP: $SERVER_IP"
+    fi
+    
     if [ ! -f .env ]; then
         print_status "Creating .env file..."
         cat > .env << EOL
@@ -76,11 +85,11 @@ setup_environment() {
 DATABASE_URL="file:./dev.db"
 
 # NextAuth.js
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://$SERVER_IP:3000"
 NEXTAUTH_SECRET="your-secret-key-change-in-production"
 
 # AI Configuration
-OLLAMA_ENDPOINT="http://localhost:11434"
+OLLAMA_ENDPOINT="http://$SERVER_IP:11434"
 OLLAMA_MODEL="llama3.1:8b"
 
 # Production optimizations
@@ -193,6 +202,12 @@ build_application() {
 
 # Start production server
 start_production_server() {
+    # Get the server IP for status display
+    SERVER_IP=$(hostname -I | awk '{print $1}')
+    if [ -z "$SERVER_IP" ]; then
+        SERVER_IP="localhost"
+    fi
+    
     print_status "Starting production server..."
     echo ""
     echo "🚀 Production server starting..."
@@ -201,8 +216,8 @@ start_production_server() {
     echo "   Email: emalinovskis@me.com"
     echo "   Password: Millie1991"
     echo ""
-    echo "🌐 Application will be available at: http://localhost:3000"
-    echo "🔐 Admin panel: http://localhost:3000/admin"
+    echo "🌐 Application will be available at: http://$SERVER_IP:3000"
+    echo "🔐 Admin panel: http://$SERVER_IP:3000/admin"
     echo ""
     echo "⚡ Production Performance Features:"
     echo "   ✅ Optimized build with minification"
@@ -227,6 +242,12 @@ start_production_server() {
 
 # Start development server (fallback)
 start_development_server() {
+    # Get the server IP for status display
+    SERVER_IP=$(hostname -I | awk '{print $1}')
+    if [ -z "$SERVER_IP" ]; then
+        SERVER_IP="localhost"
+    fi
+    
     print_warning "Starting in development mode (slower performance)..."
     echo ""
     echo "🔧 Development server starting..."
@@ -235,8 +256,8 @@ start_development_server() {
     echo "   Email: emalinovskis@me.com"
     echo "   Password: Millie1991"
     echo ""
-    echo "🌐 Application will be available at: http://localhost:3000"
-    echo "🔐 Admin panel: http://localhost:3000/admin"
+    echo "🌐 Application will be available at: http://$SERVER_IP:3000"
+    echo "🔐 Admin panel: http://$SERVER_IP:3000/admin"
     echo ""
     echo "⚠️  Development Mode Active:"
     echo "   ⏳ Slower page loads (hot reloading enabled)"

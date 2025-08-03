@@ -153,12 +153,16 @@ export const Navigation = memo(() => {
 
   const handleSignOut = useCallback(async () => {
     try {
-      // Use the current origin instead of hardcoded localhost
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
-      await signOut({ 
-        callbackUrl: `${baseUrl}/auth/signin`,
-        redirect: true 
-      })
+      // Use the current origin for the callback URL, or let NextAuth handle it with default configuration
+      if (typeof window !== 'undefined') {
+        await signOut({ 
+          callbackUrl: `${window.location.origin}/auth/signin`,
+          redirect: true 
+        })
+      } else {
+        // On server-side, let NextAuth use its configured NEXTAUTH_URL
+        await signOut({ redirect: true })
+      }
     } catch (error) {
       console.error('Error signing out:', error)
     }
