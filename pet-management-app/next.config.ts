@@ -98,6 +98,16 @@ const nextConfig: NextConfig = {
   // Enable static optimization
   output: 'standalone',
   
+  // Handle uploads routing
+  async rewrites() {
+    return [
+      {
+        source: '/uploads/social/:path*',
+        destination: '/api/uploads/social/:path*',
+      },
+    ];
+  },
+  
   // Optimize headers for caching
   async headers() {
     return [
@@ -112,6 +122,15 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/uploads/:path*',
         headers: [
           {
             key: 'Cache-Control',
