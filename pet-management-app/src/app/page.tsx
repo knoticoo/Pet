@@ -88,9 +88,9 @@ export default function DashboardPage() {
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ru-RU', {
+    return new Intl.NumberFormat('de-DE', {
       style: 'currency',
-      currency: 'RUB'
+      currency: 'EUR'
     }).format(amount)
   }
 
@@ -147,53 +147,61 @@ export default function DashboardPage() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="card p-6 hover-lift">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                <Heart className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t('stats.totalPets')}</p>
-                <p className="text-2xl font-bold text-foreground">{stats.totalPets}</p>
+          <Link href="/pets">
+            <div className="card p-6 hover-lift cursor-pointer transition-all duration-200 hover:shadow-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                  <Heart className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('stats.totalPets')}</p>
+                  <p className="text-2xl font-bold text-foreground">{stats.totalPets}</p>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
 
-          <div className="card p-6 hover-lift">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t('stats.upcomingAppointments')}</p>
-                <p className="text-2xl font-bold text-foreground">{stats.upcomingAppointments}</p>
+          <Link href="/appointments">
+            <div className="card p-6 hover-lift cursor-pointer transition-all duration-200 hover:shadow-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                  <Calendar className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('stats.upcomingAppointments')}</p>
+                  <p className="text-2xl font-bold text-foreground">{stats.upcomingAppointments}</p>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
 
-          <div className="card p-6 hover-lift">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t('stats.monthlyExpenses')}</p>
-                <p className="text-2xl font-bold text-foreground">{formatCurrency(stats.monthlyExpenses)}</p>
+          <Link href="/expenses">
+            <div className="card p-6 hover-lift cursor-pointer transition-all duration-200 hover:shadow-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('stats.monthlyExpenses')}</p>
+                  <p className="text-2xl font-bold text-foreground">{formatCurrency(stats.monthlyExpenses)}</p>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
 
-          <div className="card p-6 hover-lift">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
-                <Bell className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t('stats.activeReminders')}</p>
-                <p className="text-2xl font-bold text-foreground">{stats.activeReminders}</p>
+          <Link href="/reminders">
+            <div className="card p-6 hover-lift cursor-pointer transition-all duration-200 hover:shadow-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
+                  <Bell className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">{t('stats.activeReminders')}</p>
+                  <p className="text-2xl font-bold text-foreground">{stats.activeReminders}</p>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Quick Actions */}

@@ -305,16 +305,38 @@ Brief responses. Recommend vet for serious issues.`
   private getDefaultResponses(language: string) {
     if (language === 'ru') {
       return {
-        recommendations: ['Наблюдайте за питомцем', 'Обратитесь к ветеринару'],
-        nextSteps: ['Запишитесь к ветеринару', 'Обеспечьте покой питомцу'],
-        estimatedCause: ['Требуется профессиональная оценка']
+        recommendations: [
+          'Наблюдайте за питомцем в течение 24 часов',
+          'Обеспечьте доступ к чистой воде',
+          'Предложите легкую пищу (курица с рисом)',
+          'Измерьте температуру, если возможно',
+          'Обратитесь к ветеринару при ухудшении состояния'
+        ],
+        nextSteps: [
+          'Запишитесь к ветеринару в ближайшее время',
+          'Ведите дневник симптомов и поведения',
+          'Обеспечьте покой и комфорт питомцу',
+          'Подготовьте информацию о рационе и активности'
+        ],
+        estimatedCause: ['Требуется профессиональная оценка для точного диагноза']
       }
     }
     
     return {
-      recommendations: ['Monitor symptoms', 'Contact veterinarian'],
-      nextSteps: ['Schedule vet appointment', 'Keep pet comfortable'],
-      estimatedCause: ['Requires professional assessment']
+      recommendations: [
+        'Monitor your pet for 24 hours',
+        'Ensure access to clean water',
+        'Offer bland food (chicken and rice)',
+        'Check temperature if possible',
+        'Contact veterinarian if condition worsens'
+      ],
+      nextSteps: [
+        'Schedule vet appointment soon',
+        'Keep symptom and behavior diary',
+        'Ensure pet is comfortable and rested',
+        'Prepare information about diet and activity'
+      ],
+      estimatedCause: ['Requires professional assessment for accurate diagnosis']
     }
   }
 
@@ -329,13 +351,90 @@ Brief responses. Recommend vet for serious issues.`
         const score = key.length
         if (score > highestScore) {
           highestScore = score
+          
+          // Provide language-specific recommendations
+          let recommendations = data.recommendations
+          let nextSteps = data.recommendations
+          let causes = data.causes
+          
+          if (language === 'ru') {
+            // Russian-specific recommendations
+            const russianRecommendations: Record<string, string[]> = {
+              'limping': [
+                'Обеспечьте полный покой питомцу',
+                'Не позволяйте прыгать и бегать',
+                'Проверьте лапы на наличие инородных предметов',
+                'Приложите холодный компресс на 10-15 минут',
+                'Запишитесь к ветеринару в течение 24 часов'
+              ],
+              'vomiting': [
+                'Не кормите питомца в течение 12 часов',
+                'Предлагайте небольшие порции воды каждые 2 часа',
+                'После 12 часов предложите легкую пищу (курица с рисом)',
+                'Следите за частотой рвоты',
+                'Обратитесь к ветеринару при повторной рвоте'
+              ],
+              'diarrhea': [
+                'Предложите легкую диету (курица с рисом)',
+                'Обеспечьте доступ к чистой воде',
+                'Следите за цветом и консистенцией стула',
+                'Соберите образец для анализа',
+                'Обратитесь к ветеринару при кровавом поносе'
+              ],
+              'lethargy': [
+                'Измерьте температуру питомца',
+                'Следите за аппетитом и потреблением воды',
+                'Отмечайте любые изменения в поведении',
+                'Обеспечьте комфорт и покой',
+                'Запишитесь к ветеринару при отсутствии улучшений'
+              ],
+              'scratching': [
+                'Проверьте на наличие блох и клещей',
+                'Используйте мягкий шампунь для животных',
+                'Пересмотрите рацион на предмет аллергенов',
+                'Обеспечьте достаточную физическую активность',
+                'Обратитесь к ветеринару при сильном зуде'
+              ]
+            }
+            
+            recommendations = russianRecommendations[key] || data.recommendations
+            nextSteps = [
+              'Запишитесь к ветеринару в ближайшее время',
+              'Ведите дневник симптомов и поведения',
+              'Подготовьте информацию о рационе и активности',
+              'Будьте готовы к возможным анализам'
+            ]
+            causes = data.causes.map(cause => {
+              const russianCauses: Record<string, string> = {
+                'injury': 'травма',
+                'arthritis': 'артрит',
+                'muscle strain': 'растяжение мышц',
+                'paw pad injury': 'травма подушечки лапы',
+                'dietary indiscretion': 'нарушение диеты',
+                'stomach upset': 'расстройство желудка',
+                'illness': 'заболевание',
+                'dietary change': 'изменение рациона',
+                'stress': 'стресс',
+                'parasites': 'паразиты',
+                'pain': 'боль',
+                'depression': 'депрессия',
+                'medication side effects': 'побочные эффекты лекарств',
+                'allergies': 'аллергия',
+                'fleas': 'блохи',
+                'dry skin': 'сухая кожа',
+                'boredom': 'скука'
+              }
+              return russianCauses[cause] || cause
+            })
+          }
+          
           bestMatch = {
             severity: data.severity as 'low' | 'medium' | 'high' | 'emergency',
             urgency: data.urgency,
             shouldSeeVet: data.vetNeeded,
-            recommendations: data.recommendations,
-            nextSteps: data.recommendations, // Using recommendations as nextSteps
-            estimatedCause: data.causes
+            recommendations,
+            nextSteps,
+            estimatedCause: causes
           }
         }
       }
@@ -348,16 +447,19 @@ Brief responses. Recommend vet for serious issues.`
         urgency: 5,
         shouldSeeVet: true,
         recommendations: [
-          language === 'ru' ? 'Внимательно наблюдайте за питомцем' : 'Monitor your pet closely',
-          language === 'ru' ? 'Отмечайте любые изменения в поведении' : 'Note any changes in behavior',
-          language === 'ru' ? 'Рассмотрите консультацию с ветеринаром' : 'Consider consulting with a veterinarian'
+          language === 'ru' ? 'Внимательно наблюдайте за питомцем в течение 24 часов' : 'Monitor your pet closely for 24 hours',
+          language === 'ru' ? 'Обеспечьте доступ к чистой воде' : 'Ensure access to clean water',
+          language === 'ru' ? 'Предложите легкую пищу (курица с рисом)' : 'Offer bland food (chicken and rice)',
+          language === 'ru' ? 'Измерьте температуру, если возможно' : 'Check temperature if possible',
+          language === 'ru' ? 'Обратитесь к ветеринару при ухудшении состояния' : 'Contact veterinarian if condition worsens'
         ],
         nextSteps: [
-          language === 'ru' ? 'Ведите дневник симптомов' : 'Keep a symptom diary',
-          language === 'ru' ? 'Запишитесь к ветеринару, если симптомы сохраняются' : 'Schedule vet appointment if symptoms persist',
-          language === 'ru' ? 'Обеспечьте комфорт и увлажнение питомца' : 'Ensure pet is comfortable and hydrated'
+          language === 'ru' ? 'Запишитесь к ветеринару в ближайшее время' : 'Schedule vet appointment soon',
+          language === 'ru' ? 'Ведите дневник симптомов и поведения' : 'Keep a symptom diary',
+          language === 'ru' ? 'Обеспечьте покой и комфорт питомцу' : 'Ensure pet is comfortable and rested',
+          language === 'ru' ? 'Подготовьте информацию о рационе и активности' : 'Prepare information about diet and activity'
         ],
-        estimatedCause: [language === 'ru' ? 'Неизвестно - требуется профессиональная оценка' : 'Unknown - requires professional evaluation']
+        estimatedCause: [language === 'ru' ? 'Требуется профессиональная оценка для точного диагноза' : 'Requires professional assessment for accurate diagnosis']
       }
     }
 

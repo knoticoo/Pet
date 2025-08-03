@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Heart, MessageCircle, Share2, Camera, Sparkles, Grid, List, Upload, Send, User } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { t } from '@/lib/translations'
 
 interface SocialPost {
   id: string
@@ -490,14 +491,14 @@ export default function SocialGalleryPage() {
       ) : (
         <div className="text-center py-12">
           <Camera className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No photos yet</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-2">{t('social.noPhotos')}</h3>
           <p className="text-muted-foreground mb-6">
-            Share your first pet photo to start building your gallery with AI insights.
+            {t('social.startBuildingGallery')}
           </p>
           <Link href="/social/upload">
             <Button className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70">
               <Upload className="h-4 w-4 mr-2" />
-              Share First Photo
+              {t('social.shareFirstPhoto')}
             </Button>
           </Link>
         </div>
@@ -507,28 +508,28 @@ export default function SocialGalleryPage() {
       <div className="card p-6 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
         <div className="flex items-center gap-3 mb-4">
           <Sparkles className="h-6 w-6 text-purple-600" />
-          <h3 className="text-lg font-semibold text-purple-900">AI-Powered Features</h3>
+          <h3 className="text-lg font-semibold text-purple-900">{t('social.aiPoweredFeatures')}</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div className="flex items-start space-x-2">
             <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
             <div>
-              <p className="font-medium text-purple-800">Mood Detection</p>
-              <p className="text-purple-700">AI analyzes your pet&apos;s facial expressions and body language</p>
+              <p className="font-medium text-purple-800">{t('social.moodDetection')}</p>
+              <p className="text-purple-700">{t('social.moodDetectionDesc')}</p>
             </div>
           </div>
           <div className="flex items-start space-x-2">
             <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
             <div>
-              <p className="font-medium text-purple-800">Activity Recognition</p>
-              <p className="text-purple-700">Automatically identifies what your pet is doing</p>
+              <p className="font-medium text-purple-800">{t('social.activityRecognition')}</p>
+              <p className="text-purple-700">{t('social.activityRecognitionDesc')}</p>
             </div>
           </div>
           <div className="flex items-start space-x-2">
             <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
             <div>
-              <p className="font-medium text-purple-800">Health Insights</p>
-              <p className="text-purple-700">Provides general wellness observations</p>
+              <p className="font-medium text-purple-800">{t('social.healthInsights')}</p>
+              <p className="text-purple-700">{t('social.healthInsightsDesc')}</p>
             </div>
           </div>
         </div>
