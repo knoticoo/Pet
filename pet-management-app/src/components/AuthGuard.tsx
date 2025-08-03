@@ -5,6 +5,7 @@ import { Heart } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { t } from '@/lib/translations'
+import { useState, useEffect } from 'react'
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -12,6 +13,23 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children }: AuthGuardProps) {
   const { isAuthenticated, loading } = useFeatures()
+  const [hasMounted, setHasMounted] = useState(false)
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
+
+  // During SSR or before mounting, render a consistent loading state
+  if (!hasMounted) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Heart className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
+          <p className="text-muted-foreground">{t('common.loading')}</p>
+        </div>
+      </div>
+    )
+  }
 
   if (loading) {
     return (

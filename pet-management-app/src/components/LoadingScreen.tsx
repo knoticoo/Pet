@@ -68,10 +68,10 @@ export const LoadingScreen = ({ onComplete, isVisible }: LoadingScreenProps) => 
             key={i}
             className="absolute animate-float"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${(i * 15 + 10) % 100}%`,
+              top: `${(i * 20 + 15) % 100}%`,
               animationDelay: `${i * 0.5}s`,
-              animationDuration: `${3 + Math.random() * 2}s`
+              animationDuration: `${3 + (i % 2)}s`
             }}
           >
             <Heart className="h-4 w-4 text-pink-300 opacity-60" />
@@ -84,10 +84,10 @@ export const LoadingScreen = ({ onComplete, isVisible }: LoadingScreenProps) => 
             key={i + 6}
             className="absolute animate-float-reverse"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${(i * 25 + 5) % 100}%`,
+              top: `${(i * 30 + 10) % 100}%`,
               animationDelay: `${i * 0.7}s`,
-              animationDuration: `${4 + Math.random() * 2}s`
+              animationDuration: `${4 + (i % 2)}s`
             }}
           >
             <PawPrint className="h-5 w-5 text-blue-300 opacity-50" />
