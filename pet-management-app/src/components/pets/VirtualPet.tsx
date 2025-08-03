@@ -76,11 +76,25 @@ export function VirtualPet({ pet, onInteraction }: VirtualPetProps) {
       return speciesEmojis[species.toLowerCase() as keyof typeof speciesEmojis] || '🐾'
     }
     
+    const getSpeciesIdleEmoji = (species: string) => {
+      const speciesLower = species.toLowerCase()
+      switch (speciesLower) {
+        case 'dog': return '🐕'
+        case 'cat': return '🐱'
+        case 'bird': return '🐦'
+        case 'rabbit': return '🐰'
+        case 'fish': return '🐠'
+        case 'hamster': return '🐹'
+        case 'reptile': return '🦎'
+        default: return '🐾'
+      }
+    }
+    
     return {
       idle: { 
         type: 'idle', 
         duration: 2000, 
-        emoji: getSpeciesEmoji(pet.species), 
+        emoji: getSpeciesIdleEmoji(pet.species), 
         color: 'text-gray-600',
         scale: 1,
         rotation: 0,
@@ -140,7 +154,7 @@ export function VirtualPet({ pet, onInteraction }: VirtualPetProps) {
       eating: {
         type: 'eating',
         duration: 2000,
-        emoji: '😋',
+        emoji: pet.species.toLowerCase() === 'dog' ? '🦴' : pet.species.toLowerCase() === 'cat' ? '🐟' : '😋',
         color: 'text-amber-500',
         scale: 1.1,
         rotation: 0,
@@ -150,7 +164,7 @@ export function VirtualPet({ pet, onInteraction }: VirtualPetProps) {
       grooming: {
         type: 'grooming',
         duration: 2500,
-        emoji: '✨',
+        emoji: pet.species.toLowerCase() === 'cat' ? '🐱' : pet.species.toLowerCase() === 'dog' ? '🐕' : '✨',
         color: 'text-pink-500',
         scale: 1.05,
         rotation: 0,
@@ -517,7 +531,33 @@ export function VirtualPet({ pet, onInteraction }: VirtualPetProps) {
               className="flex items-center gap-2 hover:scale-105 transition-transform"
             >
               <Zap className="h-4 w-4" />
-              <span className="hidden sm:inline">Walk</span>
+              <span className="hidden sm:inline">Прогулка</span>
+            </Button>
+          )}
+          
+          {pet.species.toLowerCase() === 'cat' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleInteraction('play')}
+              disabled={isInteracting}
+              className="flex items-center gap-2 hover:scale-105 transition-transform"
+            >
+              <Sparkles className="h-4 w-4" />
+              <span className="hidden sm:inline">Играть</span>
+            </Button>
+          )}
+          
+          {pet.species.toLowerCase() === 'bird' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleInteraction('play')}
+              disabled={isInteracting}
+              className="flex items-center gap-2 hover:scale-105 transition-transform"
+            >
+              <Star className="h-4 w-4" />
+              <span className="hidden sm:inline">Полет</span>
             </Button>
           )}
           

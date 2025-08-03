@@ -335,21 +335,25 @@ export function PetPhotoGallery({ petId, petName }: PetPhotoGalleryProps) {
       {/* Photo Modal */}
       {selectedPhoto && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="relative max-w-4xl max-h-full">
+          <div className="relative max-w-4xl max-h-full w-full h-full">
             <Button
               variant="ghost"
               size="sm"
-              className="absolute top-4 right-4 text-white hover:bg-white/20"
+              className="absolute top-4 right-4 text-white hover:bg-white/20 z-10"
               onClick={() => setSelectedPhoto(null)}
             >
               <X className="h-6 w-6" />
             </Button>
-                         <Image
-               src={selectedPhoto.photoUrl}
-               alt={selectedPhoto.title}
-               fill
-               className="object-contain rounded-lg"
-             />
+            <div className="relative w-full h-full flex items-center justify-center">
+              <Image
+                src={selectedPhoto.photoUrl}
+                alt={selectedPhoto.title}
+                width={800}
+                height={600}
+                className="object-contain rounded-lg max-w-full max-h-full"
+                priority
+              />
+            </div>
             <div className="absolute bottom-4 left-4 right-4 bg-black/50 text-white p-4 rounded-lg">
               <h3 className="font-semibold">{selectedPhoto.title}</h3>
               {selectedPhoto.description && (
