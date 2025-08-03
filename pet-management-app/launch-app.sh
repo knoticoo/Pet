@@ -155,6 +155,16 @@ print_success "Application built successfully"
 
 # 7. Setup environment variables
 print_status "Checking environment configuration..."
+
+# Get the server IP for public access
+SERVER_IP=$(hostname -I | awk '{print $1}')
+if [ -z "$SERVER_IP" ]; then
+    SERVER_IP="localhost"
+    print_warning "Could not detect server IP, using localhost"
+else
+    print_status "Detected server IP: $SERVER_IP"
+fi
+
 if [ ! -f ".env.local" ]; then
     print_status "Creating environment file..."
     cat > .env.local << EOF
@@ -162,12 +172,12 @@ if [ ! -f ".env.local" ]; then
 DATABASE_URL="file:./dev.db"
 
 # NextAuth
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://$SERVER_IP:3000"
 NEXTAUTH_SECRET="$(openssl rand -base64 32)"
 
 # AI Vet Consultation - Ollama Configuration
-OLLAMA_ENDPOINT=http://localhost:11434
-OLLAMA_FALLBACK_ENDPOINT=http://localhost:11435
+OLLAMA_ENDPOINT=http://$SERVER_IP:11434
+OLLAMA_FALLBACK_ENDPOINT=http://$SERVER_IP:11435
 OLLAMA_MODEL=phi3:mini
 AI_VET_FREE_LIMIT=3
 AI_VET_PREMIUM_PRICE=9.99
@@ -211,9 +221,9 @@ print_status "Starting the web application..."
 echo ""
 echo "🎉 Setup complete! Starting Pet Management App..."
 echo ""
-echo "📱 Web App: http://localhost:3000"
-echo "🤖 AI Vet: http://localhost:3000/ai-vet"
-echo "⚙️  Admin Panel: http://localhost:3000/admin"
+echo "📱 Web App: http://$SERVER_IP:3000"
+echo "🤖 AI Vet: http://$SERVER_IP:3000/ai-vet"
+echo "⚙️  Admin Panel: http://$SERVER_IP:3000/admin"
 echo ""
 echo "💡 Features available:"
 echo "   - AI Vet Consultation (3 free per month)"
