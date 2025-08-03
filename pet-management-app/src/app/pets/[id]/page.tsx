@@ -191,7 +191,7 @@ export default function PetDetailPage() {
     if (session?.user?.id && petId) {
       fetchPetDetails()
     }
-  }, [session, petId, fetchPetDetails])
+  }, [session?.user?.id, petId])
 
   const handlePetInteraction = async (interactionType: string) => {
     try {

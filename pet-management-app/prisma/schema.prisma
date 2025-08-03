@@ -49,11 +49,19 @@ model User {
   password      String?   // For credential-based auth
   isAdmin       Boolean   @default(false)
   
+  // Profile enhancements
+  avatar        String?   // Custom avatar URL
+  bio           String?   // User bio
+  location      String?   // User location
+  
   // Subscription fields
   subscriptionTier String? @default("free") // "free", "premium"
   subscriptionId   String? // Stripe subscription ID
   subscriptionStatus String? @default("inactive") // "active", "inactive", "cancelled"
   subscriptionEndsAt DateTime?
+  
+  // Behavior tracking
+  lastActiveAt  DateTime? @default(now())
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -76,6 +84,15 @@ model User {
   socialGroupMembers SocialGroupMember[]
   petPhotos         PetPhoto[]
   photoAlbums       PhotoAlbum[]
+  
+  // New social features
+  petStories        PetStory[]
+  challengeEntries  ChallengeEntry[]
+  challengeVotes    ChallengeVote[]
+  followersFrom     UserFollow[] @relation("UserFollowing")
+  followingTo       UserFollow[] @relation("UserFollower")
+  behaviorInsights  BehaviorInsight[]
+  personalizedTips  PersonalizedTip[]
 
   @@map("users")
 }
@@ -114,6 +131,11 @@ model Pet {
   trainingLevel   String?   // basic, intermediate, advanced
   socialBehavior  String?   // how they interact with other pets/people
   
+  // AI behavior patterns
+  walkPattern     String?   // JSON storing walk preferences/patterns
+  feedingPattern  String?   // JSON storing feeding preferences/patterns
+  attentionPattern String?  // JSON storing attention needs patterns
+  
   // Relationships
   userId          String
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -135,6 +157,12 @@ model Pet {
   photoAlbums    PhotoAlbum[]
   healthMetrics  HealthMetric[]
   healthAlerts   HealthAlert[]
+  
+  // New features
+  petStories      PetStory[]
+  challengeEntries ChallengeEntry[]
+  behaviorData    BehaviorData[]
+  smartSchedules  SmartSchedule[]
   
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -541,4 +569,187 @@ model HealthAlert {
   pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
 
   @@map("health_alerts")
+}
+
+// New Social Features
+
+// Pet Stories (24-hour stories like Instagram)
+model PetStory {
+  id          String   @id @default(cuid())
+  petId       String
+  userId      String
+  imageUrl    String
+  caption     String?
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime // 24 hours after creation
+  
+  pet  Pet  @relation(fields: [petId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("pet_stories")
+}
+
+// User Follow System
+model UserFollow {
+  id          String   @id @default(cuid())
+  followerId  String   // User who is following
+  followingId String   // User being followed
+  createdAt   DateTime @default(now())
+  
+  follower  User @relation("UserFollower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+  
+  @@unique([followerId, followingId])
+  @@map("user_follows")
+}
+
+// Pet Photo Challenges
+model Challenge {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  category    String   // "cutest", "funniest", "best_trick", etc.
+  imageUrl    String?  // Challenge banner image
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean  @default(true)
+  prizeDescription String?
+  totalEntries Int     @default(0)
+  totalVotes  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  entries ChallengeEntry[]
+  
+  @@map("challenges")
+}
+
+// Challenge Entries
+model ChallengeEntry {
+  id          String   @id @default(cuid())
+  challengeId String
+  petId       String
+  userId      String
+  imageUrl    String
+  caption     String?
+  voteCount   Int      @default(0)
+  isWinner    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  pet       Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  votes     ChallengeVote[]
+  
+  @@unique([challengeId, petId]) // One entry per pet per challenge
+  @@map("challenge_entries")
+}
+
+// Challenge Voting
+model ChallengeVote {
+  id        String   @id @default(cuid())
+  entryId   String
+  userId    String
+  createdAt DateTime @default(now())
+  
+  entry ChallengeEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([entryId, userId]) // One vote per user per entry
+  @@map("challenge_votes")
+}
+
+// AI Behavior Prediction & Analytics
+
+// Behavior Data Collection
+model BehaviorData {
+  id          String   @id @default(cuid())
+  petId       String
+  dataType    String   // "feeding", "walking", "attention", "play", "sleep"
+  timestamp   DateTime
+  value       Float?   // duration, amount, intensity, etc.
+  context     String?  // JSON with environmental context (weather, time, etc.)
+  source      String   // "manual", "auto_detected", "predicted"
+  createdAt   DateTime @default(now())
+  
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+  
+  @@index([petId, dataType, timestamp])
+  @@map("behavior_data")
+}
+
+// Behavior Insights (AI predictions)
+model BehaviorInsight {
+  id          String   @id @default(cuid())
+  userId      String
+  insightType String   // "walk_prediction", "feeding_prediction", "attention_needed"
+  petId       String?  // Specific pet or general user insight
+  title       String
+  description String
+  confidence  Float    // 0.0 - 1.0 confidence score
+  predictedFor DateTime? // When this behavior is predicted to occur
+  isViewed    Boolean  @default(false)
+  isAccurate  Boolean? // User feedback on prediction accuracy
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime? // When this insight becomes irrelevant
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("behavior_insights")
+}
+
+// Smart Scheduling
+model SmartSchedule {
+  id          String   @id @default(cuid())
+  petId       String
+  activityType String  // "walk", "feeding", "grooming", "play"
+  suggestedTime DateTime
+  confidence  Float    // How confident the AI is about this timing
+  reasoning   String   // Why this time was suggested
+  isAccepted  Boolean? // User feedback
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+  
+  @@map("smart_schedules")
+}
+
+// Personalized Tips
+model PersonalizedTip {
+  id          String   @id @default(cuid())
+  userId      String
+  petId       String?  // Pet-specific or general tip
+  category    String   // "health", "training", "nutrition", "behavior"
+  title       String
+  content     String
+  source      String   // "ai_generated", "breed_specific", "age_specific"
+  priority    Int      @default(0) // Higher = more important
+  isViewed    Boolean  @default(false)
+  isHelpful   Boolean? // User feedback
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime? // When tip becomes irrelevant
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, category, priority])
+  @@map("personalized_tips")
+}
+
+// Photo Recognition Results
+model PhotoAnalysis {
+  id          String   @id @default(cuid())
+  imageUrl    String
+  petId       String?  // If pet was identified in photo
+  userId      String   
+  analysisType String  // "pet_identification", "health_check", "emotion_detection"
+  results     String   // JSON with analysis results
+  confidence  Float    // Overall confidence score
+  tags        String?  // JSON array of detected tags
+  healthFlags String?  // JSON array of potential health concerns
+  createdAt   DateTime @default(now())
+  
+  @@index([petId, analysisType])
+  @@map("photo_analyses")
 }
