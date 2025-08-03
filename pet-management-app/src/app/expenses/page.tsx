@@ -29,7 +29,17 @@ export default function ExpensesPage() {
 
   useEffect(() => {
     if (session?.user?.id) {
-      fetchExpenses()
+      // Only show loading on first visit or if data is not cached
+      const hasVisited = sessionStorage.getItem('expenses-visited')
+      if (!hasVisited) {
+        // First time visit - show loading
+        fetchExpenses()
+        sessionStorage.setItem('expenses-visited', 'true')
+      } else {
+        // Subsequent visits - load data without loading screen
+        setLoading(false)
+        fetchExpenses()
+      }
     }
   }, [session])
 
@@ -138,7 +148,7 @@ export default function ExpensesPage() {
             <div className="flex items-center space-x-2">
               <DollarSign className="h-8 w-8 text-green-600" />
               <div>
-                <p className="text-sm text-muted-foreground">Total Expenses</p>
+                <p className="text-sm text-muted-foreground">{t('expenses.totalExpenses')}</p>
                 <p className="text-2xl font-bold text-foreground">{formatCurrency(totalExpenses)}</p>
               </div>
             </div>
@@ -148,7 +158,7 @@ export default function ExpensesPage() {
             <div className="flex items-center space-x-2">
               <Calendar className="h-8 w-8 text-blue-600" />
               <div>
-                <p className="text-sm text-muted-foreground">This Month</p>
+                <p className="text-sm text-muted-foreground">{t('expenses.thisMonth')}</p>
                 <p className="text-2xl font-bold text-foreground">{formatCurrency(monthlyTotal)}</p>
               </div>
             </div>
@@ -158,7 +168,7 @@ export default function ExpensesPage() {
             <div className="flex items-center space-x-2">
               <Receipt className="h-8 w-8 text-purple-600" />
               <div>
-                <p className="text-sm text-muted-foreground">Total Transactions</p>
+                <p className="text-sm text-muted-foreground">{t('expenses.totalTransactions')}</p>
                 <p className="text-2xl font-bold text-foreground">{expenses.length}</p>
               </div>
             </div>
@@ -168,7 +178,7 @@ export default function ExpensesPage() {
             <div className="flex items-center space-x-2">
               <TrendingUp className="h-8 w-8 text-orange-600" />
               <div>
-                <p className="text-sm text-muted-foreground">Avg per Month</p>
+                <p className="text-sm text-muted-foreground">{t('expenses.avgPerMonth')}</p>
                 <p className="text-2xl font-bold text-foreground">
                   {formatCurrency(expenses.length > 0 ? totalExpenses / Math.max(1, expenses.length) : 0)}
                 </p>
@@ -182,7 +192,7 @@ export default function ExpensesPage() {
           <div className="card p-6">
             <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center">
               <PieChart className="h-5 w-5 mr-2" />
-              Expenses by Category
+              {t('expenses.expensesByCategory')}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {Object.entries(categoryTotals).map(([category, amount]) => (
@@ -200,7 +210,7 @@ export default function ExpensesPage() {
 
         {/* Recent Expenses */}
         <div className="card p-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Recent Expenses</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-4">{t('expenses.recentExpenses')}</h2>
           {expenses.length > 0 ? (
             <div className="space-y-4">
               {expenses.slice(0, 10).map((expense) => (
@@ -233,14 +243,14 @@ export default function ExpensesPage() {
           ) : (
             <div className="text-center py-12">
               <Receipt className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No expenses yet</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">{t('expenses.noExpensesYet')}</h3>
               <p className="text-muted-foreground mb-6">
-                Start tracking your pet expenses to get insights into your spending.
+                {t('expenses.startTracking')}
               </p>
               <Link href="/expenses/new">
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add First Expense
+                  {t('expenses.addFirstExpense')}
                 </Button>
               </Link>
             </div>

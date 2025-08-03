@@ -238,7 +238,7 @@ export default function NewExpensePage() {
                     value={formData.title}
                     onChange={handleTitleChange}
                     required
-                    className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                     placeholder="e.g., Vet Visit, Dog Food, Grooming"
                   />
                   {aiSuggesting && (
@@ -263,7 +263,7 @@ export default function NewExpensePage() {
                     step="0.01"
                     min="0"
                     required
-                    className="w-full pl-10 pr-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="w-full pl-10 pr-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                     placeholder="0.00"
                   />
                 </div>
@@ -277,7 +277,7 @@ export default function NewExpensePage() {
                   type="date"
                   id="date"
                   value={new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                 />
               </div>
 
@@ -290,7 +290,7 @@ export default function NewExpensePage() {
                   value={formData.category}
                   onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                   required
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                 >
                   <option value="">Select category</option>
                   <option value="vet">🏥 Veterinary Care</option>
@@ -314,7 +314,7 @@ export default function NewExpensePage() {
                   id="pet"
                   value={formData.petId}
                   onChange={(e) => setFormData(prev => ({ ...prev, petId: e.target.value }))}
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                 >
                   <option value="">General/Multiple Pets</option>
                   {pets.map((pet) => (
@@ -334,7 +334,7 @@ export default function NewExpensePage() {
                   value={formData.description}
                   onChange={handleDescriptionChange}
                   rows={3}
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                   placeholder="Additional details about this expense..."
                 />
               </div>

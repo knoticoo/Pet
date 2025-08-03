@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { AuthGuard } from '@/components/AuthGuard'
 import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { useEffect, useState } from 'react'
+import { t } from '@/lib/translations'
 
 interface Appointment {
   id: string
@@ -31,7 +32,17 @@ export default function AppointmentsPage() {
 
   useEffect(() => {
     if (session?.user?.id) {
-      fetchAppointments()
+      // Only show loading on first visit or if data is not cached
+      const hasVisited = sessionStorage.getItem('appointments-visited')
+      if (!hasVisited) {
+        // First time visit - show loading
+        fetchAppointments()
+        sessionStorage.setItem('appointments-visited', 'true')
+      } else {
+        // Subsequent visits - load data without loading screen
+        setLoading(false)
+        fetchAppointments()
+      }
     }
   }, [session])
 
@@ -112,15 +123,15 @@ export default function AppointmentsPage() {
         {/* Header */}
         <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Appointments</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('appointments.title')}</h1>
             <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
-              Manage your pets&apos; veterinary appointments and schedules.
+              Управляйте записями к ветеринару и расписанием ваших питомцев.
             </p>
           </div>
           <Link href="/appointments/new">
             <Button className="flex items-center space-x-2 w-full md:w-auto">
               <Plus className="h-4 w-4" />
-              <span>Schedule Appointment</span>
+              <span>{t('appointments.scheduleAppointment')}</span>
             </Button>
           </Link>
         </div>
@@ -128,7 +139,7 @@ export default function AppointmentsPage() {
         {/* Upcoming Appointments */}
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold text-foreground mb-4">Upcoming Appointments</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">{t('appointments.upcomingAppointments')}</h2>
             {upcomingAppointments.length > 0 ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {upcomingAppointments.map((appointment) => (
@@ -181,14 +192,14 @@ export default function AppointmentsPage() {
             ) : (
               <div className="text-center py-12 bg-gray-50 rounded-lg">
                 <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">No upcoming appointments</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t('appointments.noUpcomingAppointments')}</h3>
                 <p className="text-muted-foreground mb-6">
-                  Schedule your pet&apos;s next veterinary visit to keep them healthy.
+                  Запланируйте следующую запись к ветеринару для поддержания здоровья вашего питомца.
                 </p>
                 <Link href="/appointments/new">
                   <Button>
                     <Plus className="h-4 w-4 mr-2" />
-                    Schedule First Appointment
+                    {t('appointments.scheduleFirstAppointment')}
                   </Button>
                 </Link>
               </div>
@@ -198,7 +209,7 @@ export default function AppointmentsPage() {
           {/* Past Appointments */}
           {pastAppointments.length > 0 && (
             <div>
-              <h2 className="text-xl font-semibold text-foreground mb-4">Past Appointments</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-4">{t('appointments.pastAppointments')}</h2>
               <div className="space-y-4">
                 {pastAppointments.map((appointment) => (
                   <Link key={appointment.id} href={`/appointments/${appointment.id}`}>

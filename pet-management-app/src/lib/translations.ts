@@ -107,7 +107,20 @@ export const translations = {
     completed: 'Завершено',
     cancelled: 'Отменено',
     noAppointments: 'У вас нет записей к врачу',
-    scheduleFirst: 'Запланируйте свою первую запись!'
+    scheduleFirst: 'Запланируйте свою первую запись!',
+    upcomingAppointments: 'Предстоящие записи',
+    pastAppointments: 'Прошедшие записи',
+    noUpcomingAppointments: 'Нет предстоящих записей',
+    scheduleFirstAppointment: 'Запланируйте первую запись',
+    generalCheckup: 'Общий осмотр',
+    dentalCare: 'Стоматологическая помощь',
+    followUp: 'Повторный прием',
+    other: 'Другое',
+    time: 'Время',
+    clinic: 'Клиника',
+    notes: 'Заметки',
+    scheduleAppointment: 'Запланировать запись',
+    scheduling: 'Планирование...'
   },
 
   // Expenses
@@ -135,7 +148,23 @@ export const translations = {
     totalExpenses: 'Общие расходы',
     thisMonth: 'в этом месяце',
     noExpenses: 'У вас нет записей о расходах',
-    trackFirst: 'Отследите свой первый расход!'
+    trackFirst: 'Отследите свой первый расход!',
+    totalTransactions: 'Всего транзакций',
+    avgPerMonth: 'Среднее за месяц',
+    expensesByCategory: 'Расходы по категориям',
+    recentExpenses: 'Недавние расходы',
+    noExpensesYet: 'Пока нет расходов',
+    startTracking: 'Начните отслеживать расходы на питомцев',
+    addFirstExpense: 'Добавить первый расход',
+    veterinaryCare: 'Ветеринарная помощь',
+    foodAndTreats: 'Еда и лакомства',
+    toysAndEntertainment: 'Игрушки и развлечения',
+    boarding: 'Передержка',
+    general: 'Общие/Несколько питомцев',
+    additionalDetails: 'Дополнительные детали о расходе...',
+    dropReceiptHere: 'Перетащите изображение чека сюда или нажмите для выбора',
+    createExpense: 'Создать расход',
+    creating: 'Создание...'
   },
 
   // Documents

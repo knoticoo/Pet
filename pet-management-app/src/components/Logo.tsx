@@ -19,7 +19,7 @@ export const Logo = ({ size = 'md', showText = true, animated = false, className
   }
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn("flex items-center gap-3 cursor-pointer", className)}>
       {/* Logo Icon */}
       <div className="relative">
         {/* Main logo container */}
@@ -111,7 +111,7 @@ export const PawLogo = ({ size = 'md', showText = true, animated = false, classN
   }
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn("flex items-center gap-3 cursor-pointer", className)}>
       {/* Logo Icon */}
       <div className="relative">
         <div className={cn(
@@ -182,7 +182,7 @@ export const HeartLogo = ({ size = 'md', showText = true, animated = false, clas
   }
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn("flex items-center gap-3 cursor-pointer", className)}>
       {/* Logo Icon */}
       <div className="relative">
         <div className={cn(
