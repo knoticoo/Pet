@@ -51,6 +51,26 @@ const categoryColors = {
 
 const availablePlugins: Plugin[] = [
   {
+    id: 'ai-vet',
+    name: 'ИИ Ветеринар',
+    description: 'Искусственный интеллект для анализа здоровья питомцев, диагностики по фотографиям и предоставления рекомендаций.',
+    version: '1.0.0',
+    category: 'ai',
+    isEnabled: true,
+    isCore: true,
+    dependencies: [],
+    settings: {
+      enablePhotoAnalysis: true,
+      enableHealthInsights: true,
+      enableHealthScoring: true,
+      enablePredictiveAlerts: true,
+      maxAnalysisPerDay: 50,
+      confidenceThreshold: 0.7,
+      enableAutoDiagnosis: true
+    },
+    permissions: ['ai-vet:read', 'ai-vet:write', 'ai-vet:admin']
+  },
+  {
     id: 'pet-social-network',
     name: 'Социальная сеть питомцев',
     description: 'Общайтесь с другими владельцами питомцев, делитесь фотографиями, присоединяйтесь к группам по породам и участвуйте в конкурсах питомцев с ИИ-анализом здоровья.',
