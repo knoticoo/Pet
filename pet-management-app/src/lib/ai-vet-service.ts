@@ -211,42 +211,73 @@ END`
 
       const prompt = this.buildVetPrompt(input, language)
       
-      const response = await fetch(`${endpoint}/api/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: this.ollamaModel,
-          prompt: prompt,
-          stream: false,
-          options: {
-            temperature: 0.1, // Slightly higher for creativity while maintaining consistency
-            top_p: 0.85, // Balanced for medical accuracy
-            num_predict: language === 'ru' ? 200 : 150, // Optimized for 4GB RAM
-            num_ctx: 1024, // Reduced context for memory efficiency
-            num_thread: 2, // Optimized for 4GB RAM
-            repeat_penalty: 1.15, // Prevent repetition
-            top_k: 30, // Balanced token selection
-            tfs_z: 0.95, // Tail free sampling
-            mirostat: 1, // Simplified dynamic adjustment
-            mirostat_tau: 4.0, // Lower target entropy
-            mirostat_eta: 0.2, // Faster learning rate
-            num_gpu: 0, // CPU-only for 4GB RAM
-            num_gqa: 8, // Group query attention for efficiency
-            rope_freq_base: 10000, // Optimized rope scaling
-            rope_freq_scale: 0.5, // Reduced frequency scaling
+      // Try multiple endpoints with better error handling
+      const endpoints = [endpoint, this.ollamaFallbackEndpoint]
+      let lastError: Error | null = null
+      
+      for (const currentEndpoint of endpoints) {
+        try {
+          console.log(`Trying Ollama endpoint: ${currentEndpoint}`)
+          
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 15000)
+          
+          const response = await fetch(`${currentEndpoint}/api/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              model: this.ollamaModel,
+              prompt: prompt,
+              stream: false,
+              options: {
+                temperature: 0.1,
+                top_p: 0.85,
+                num_predict: language === 'ru' ? 200 : 150,
+                num_ctx: 1024,
+                num_thread: 2,
+                repeat_penalty: 1.15,
+                top_k: 30,
+                tfs_z: 0.95,
+                mirostat: 1,
+                mirostat_tau: 4.0,
+                mirostat_eta: 0.2,
+                num_gpu: 0,
+                num_gqa: 8,
+                rope_freq_base: 10000,
+                rope_freq_scale: 0.5,
+              }
+            }),
+            signal: controller.signal
+          })
+
+          clearTimeout(timeoutId)
+
+          if (!response.ok) {
+            throw new Error(`Ollama API error: ${response.status} - ${response.statusText}`)
           }
-        }),
-        timeout: 15000
-      } as RequestInit & { timeout: number })
 
-      if (!response.ok) {
-        throw new Error(`Ollama API error: ${response.status}`)
+          const data = await response.json()
+          const aiResponse = data.response || data.text || ''
+          
+          if (aiResponse.trim()) {
+            console.log(`Successfully got AI response from ${currentEndpoint}`)
+            this.activeEndpoint = currentEndpoint
+            return this.parseAIResponse(aiResponse, language)
+          } else {
+            throw new Error('Empty response from Ollama')
+          }
+        } catch (error) {
+          console.error(`Failed to get AI analysis from ${currentEndpoint}:`, error)
+          lastError = error as Error
+          this.activeEndpoint = null
+          continue
+        }
       }
-
-      const data = await response.json()
-      return this.parseAIResponse(data.response, language)
+      
+      console.error('All Ollama endpoints failed:', lastError)
+      return null
     } catch (error) {
-      console.log('AI analysis failed:', error)
+      console.error('AI analysis failed:', error)
       this.activeEndpoint = null
       return null
     }

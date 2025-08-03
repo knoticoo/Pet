@@ -571,7 +571,42 @@ export const translations = {
     healthInsightsDesc: 'Предоставляет общие наблюдения о самочувствии',
     noPhotos: 'Пока нет фотографий',
     shareFirstPhoto: 'Поделитесь первой фотографией питомца',
-    startBuildingGallery: 'Поделитесь первой фотографией питомца, чтобы начать создавать галерею с ИИ-анализом'
+    startBuildingGallery: 'Поделитесь первой фотографией питомца, чтобы начать создавать галерею с ИИ-анализом',
+    filters: {
+      all: 'Все',
+      myPets: 'Мои питомцы',
+      friends: 'Друзья',
+      trending: 'Популярные',
+      recent: 'Недавние'
+    },
+    viewModes: {
+      grid: 'Сетка',
+      list: 'Список'
+    },
+    interactions: {
+      pet: 'Погладить',
+      play: 'Играть',
+      feed: 'Кормить',
+      groom: 'Ухаживать',
+      walk: 'Прогулка',
+      treat: 'Лакомство'
+    },
+    aiAnalysis: {
+      mood: 'Настроение',
+      activity: 'Активность',
+      healthNotes: 'Заметки о здоровье',
+      tags: 'Теги'
+    },
+    categories: {
+      daily: 'Повседневные',
+      special: 'Особые моменты',
+      health: 'Здоровье',
+      training: 'Дрессировка',
+      grooming: 'Уход',
+      play: 'Игры',
+      travel: 'Путешествия',
+      celebration: 'Праздники'
+    }
   },
 
   // Photography Plugin

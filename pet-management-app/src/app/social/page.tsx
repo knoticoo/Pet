@@ -49,6 +49,7 @@ export default function SocialGalleryPage() {
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [selectedFilter, setSelectedFilter] = useState<string>('all')
+  const [selectedImage, setSelectedImage] = useState<SocialPost | null>(null)
   const [selectedPost, setSelectedPost] = useState<string | null>(null)
   const [comments, setComments] = useState<{ [postId: string]: Comment[] }>({})
   const [newComment, setNewComment] = useState<{ [postId: string]: string }>({})

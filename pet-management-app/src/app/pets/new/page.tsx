@@ -91,7 +91,7 @@ export default function NewPetPage() {
                   id="name"
                   name="name"
                   required
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                   placeholder="Введите имя питомца"
                 />
               </div>
@@ -104,7 +104,7 @@ export default function NewPetPage() {
                   id="species"
                   name="species"
                   required
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                 >
                   <option value="">Выберите вид</option>
                   <option value="dog">{t('pets.dog')}</option>
@@ -126,7 +126,7 @@ export default function NewPetPage() {
                   type="text"
                   id="breed"
                   name="breed"
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                   placeholder="Введите породу (необязательно)"
                 />
               </div>
@@ -140,7 +140,7 @@ export default function NewPetPage() {
                   id="age"
                   name="age"
                   min="0"
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                   placeholder="Возраст в годах"
                 />
               </div>
@@ -155,7 +155,7 @@ export default function NewPetPage() {
                   name="weight"
                   step="0.1"
                   min="0"
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                   placeholder="Вес в кг"
                 />
               </div>
@@ -168,7 +168,7 @@ export default function NewPetPage() {
                   type="text"
                   id="color"
                   name="color"
-                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                   placeholder="Окрас и отметины"
                 />
               </div>
@@ -182,7 +182,7 @@ export default function NewPetPage() {
                 id="notes"
                 name="notes"
                 rows={4}
-                className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                 placeholder="Любая дополнительная информация о вашем питомце..."
               />
             </div>
