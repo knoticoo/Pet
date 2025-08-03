@@ -54,7 +54,7 @@ export const LoadingScreen = ({ onComplete, isVisible }: LoadingScreenProps) => 
       clearInterval(timer)
       clearInterval(stepTimer)
     }
-  }, [isVisible, onComplete])
+  }, [isVisible, onComplete, loadingSteps.length])
 
   if (!isVisible) return null
 
