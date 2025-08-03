@@ -62,20 +62,6 @@ export function VirtualPet({ pet, onInteraction }: VirtualPetProps) {
   const particleRef = useRef<number>(0)
 
   const animations: Record<string, PetAnimation> = useMemo(() => {
-    const speciesEmojis = {
-      dog: '🐕',
-      cat: '🐱',
-      bird: '🐦',
-      rabbit: '🐰',
-      fish: '🐠',
-      hamster: '🐹',
-      reptile: '🦎'
-    }
-    
-    const getSpeciesEmoji = (species: string) => {
-      return speciesEmojis[species.toLowerCase() as keyof typeof speciesEmojis] || '🐾'
-    }
-    
     const getSpeciesIdleEmoji = (species: string) => {
       const speciesLower = species.toLowerCase()
       switch (speciesLower) {
