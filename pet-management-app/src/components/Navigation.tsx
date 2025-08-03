@@ -153,8 +153,10 @@ export const Navigation = memo(() => {
 
   const handleSignOut = useCallback(async () => {
     try {
+      // Use the current origin instead of hardcoded localhost
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
       await signOut({ 
-        callbackUrl: '/auth/signin',
+        callbackUrl: `${baseUrl}/auth/signin`,
         redirect: true 
       })
     } catch (error) {
