@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Heart, Home, Calendar, DollarSign, Settings, Bell, Shield, LogOut, User, Menu, X, Brain, Camera, ChevronDown, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -96,9 +97,11 @@ const UserMenu = memo(({ user, onSignOut }: {
     <div className="flex items-center gap-3 px-3 py-3 mb-3 bg-accent/50 rounded-lg">
       <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-primary/40 rounded-full flex items-center justify-center ring-2 ring-primary/20">
         {user?.avatar ? (
-          <img
+          <Image
             src={user.avatar}
             alt={user.name || 'User'}
+            width={40}
+            height={40}
             className="w-full h-full rounded-full object-cover"
           />
         ) : (

@@ -568,7 +568,6 @@ export const translations = {
     moodDetectionDesc: 'ИИ анализирует мимику и язык тела вашего питомца',
     activityRecognition: 'Распознавание активности',
     activityRecognitionDesc: 'Автоматически определяет, что делает ваш питомец',
-    healthInsights: 'Анализ здоровья',
     healthInsightsDesc: 'Предоставляет общие наблюдения о самочувствии',
     noPhotos: 'Пока нет фотографий',
     shareFirstPhoto: 'Поделитесь первой фотографией питомца',
