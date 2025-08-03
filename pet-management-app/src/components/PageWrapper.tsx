@@ -13,7 +13,7 @@ export function PageWrapper({ children }: PageWrapperProps) {
   const { setCurrentPage } = useTheme()
 
   useEffect(() => {
-    setCurrentPage(pathname)
+    setCurrentPage(pathname || '')
   }, [pathname, setCurrentPage])
 
   return <>{children}</>
