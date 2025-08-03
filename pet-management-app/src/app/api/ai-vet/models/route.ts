@@ -13,11 +13,13 @@ export async function GET(request: NextRequest) {
     const systemStatus = await aiVetService.getSystemStatus()
     const modelRecommendations = aiVetService.getModelRecommendations()
     const optimalModel = await aiVetService.getOptimalModel()
+    const memoryStatus = await aiVetService.getMemoryStatus()
 
     return NextResponse.json({
       systemStatus,
       modelRecommendations,
       optimalModel,
+      memoryStatus,
       currentModel: aiVetService['ollamaModel'],
       timestamp: new Date().toISOString()
     })

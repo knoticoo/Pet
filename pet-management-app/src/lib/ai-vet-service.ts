@@ -23,9 +23,10 @@ export class AIVetService {
   private static instance: AIVetService
   private ollamaEndpoint = process.env.OLLAMA_ENDPOINT || 'http://localhost:11434'
   private ollamaFallbackEndpoint = process.env.OLLAMA_FALLBACK_ENDPOINT || 'http://localhost:11435'
-  private ollamaModel = process.env.OLLAMA_MODEL || 'llama3.1:70b'
+  private ollamaModel = process.env.OLLAMA_MODEL || 'llama3.1:8b'
   private freeLimit = parseInt(process.env.AI_VET_FREE_LIMIT || '3')
   private activeEndpoint: string | null = null
+  private memoryOptimized = true // Flag for 4GB RAM optimization
 
   static getInstance(): AIVetService {
     if (!AIVetService.instance) {
@@ -161,73 +162,43 @@ export class AIVetService {
 
   private buildVetPrompt(input: ConsultationInput, language: string = 'en'): string {
     if (language === 'ru') {
-      return `Ты опытный ветеринарный врач с 15-летним стажем. Твоя задача - проанализировать симптомы питомца и дать профессиональные рекомендации. ВАЖНО: Это НЕ заменяет очный осмотр у ветеринара.
+      return `Ветеринарный анализ. Питомец: ${input.petSpecies} ${input.petBreed}, ${input.petAge} лет. Симптомы: ${input.symptoms} (${input.duration}).
 
-ИНФОРМАЦИЯ О ПИТОМЦЕ:
-- Вид: ${input.petSpecies}
-- Порода: ${input.petBreed}
-- Возраст: ${input.petAge} лет
-- Симптомы: ${input.symptoms}
-- Длительность: ${input.duration}
+КРИТИЧЕСКИЕ ПРИЗНАКИ:
+- Температура >40°C = экстренная помощь
+- Рвота >2 раз = к врачу
+- Отказ от еды >24ч = к врачу
+- Затрудненное дыхание = немедленно к врачу
 
-ВЕТЕРИНАРНЫЕ ЗНАНИЯ:
-- У собак нормальная температура 37.5-39°C
-- У кошек нормальная температура 38-39.5°C
-- Обезвоживание: проверь эластичность кожи на загривке
-- Цвет слизистых: должны быть розовые, не бледные
-- Аппетит и активность - важные показатели
-
-ПРОАНАЛИЗИРУЙ И ОТВЕТЬ В ТОЧНОМ ФОРМАТЕ:
+ФОРМАТ ОТВЕТА:
 ТЯЖЕСТЬ: [низкая/средняя/высокая/экстренная]
 СРОЧНОСТЬ: [1-10]
 НУЖЕН_ВРАЧ: [да/нет]
-ПРИЧИНЫ: [медицинская причина1], [причина2], [причина3]
-РЕКОМЕНДАЦИИ: [конкретная рекомендация1], [рекомендация2], [рекомендация3]
-СЛЕДУЮЩИЕ_ШАГИ: [конкретный шаг1], [шаг2], [шаг3]
+ПРИЧИНЫ: [причина1], [причина2]
+РЕКОМЕНДАЦИИ: [рекомендация1], [рекомендация2]
+СЛЕДУЮЩИЕ_ШАГИ: [шаг1], [шаг2]
 
-ВАЖНО:
-- При температуре выше 40°C - экстренная помощь
-- При рвоте более 2 раз - к врачу
-- При отказе от еды более 24 часов - к врачу
-- При затрудненном дыхании - немедленно к врачу
-- При травмах - к врачу
-
-КОНЕЦ_АНАЛИЗА`
+КОНЕЦ`
     }
 
-    // Enhanced English prompt
-    return `You are an experienced veterinary doctor with 15 years of practice. Analyze pet symptoms and provide professional recommendations. IMPORTANT: This does NOT replace in-person veterinary examination.
+    // Memory-efficient English prompt
+    return `Vet analysis. Pet: ${input.petSpecies} ${input.petBreed}, ${input.petAge} years. Symptoms: ${input.symptoms} (${input.duration}).
 
-PET INFORMATION:
-- Species: ${input.petSpecies}
-- Breed: ${input.petBreed}
-- Age: ${input.petAge} years
-- Symptoms: ${input.symptoms}
-- Duration: ${input.duration}
+CRITICAL SIGNS:
+- Temp >40°C = emergency
+- Vomiting >2x = see vet
+- No appetite >24h = see vet
+- Breathing difficulty = immediate vet
 
-VETERINARY KNOWLEDGE:
-- Dogs normal temperature: 37.5-39°C (99.5-102.2°F)
-- Cats normal temperature: 38-39.5°C (100.4-103.1°F)
-- Dehydration: check skin elasticity on scruff
-- Mucous membranes: should be pink, not pale
-- Appetite and activity are crucial indicators
-
-ANALYZE AND RESPOND IN EXACT FORMAT:
+FORMAT:
 SEVERITY: [low/medium/high/emergency]
 URGENCY: [1-10]
 VET_NEEDED: [yes/no]
-CAUSES: [medical cause1], [cause2], [cause3]
-CARE: [specific recommendation1], [recommendation2], [recommendation3]
-NEXT: [specific step1], [step2], [step3]
+CAUSES: [cause1], [cause2]
+CARE: [recommendation1], [recommendation2]
+NEXT: [step1], [step2]
 
-CRITICAL ALERTS:
-- Temperature above 40°C (104°F) = emergency
-- Vomiting more than 2 times = see vet
-- No appetite for 24+ hours = see vet
-- Difficulty breathing = immediate vet
-- Trauma = see vet
-
-END_ANALYSIS`
+END`
   }
 
   private async getAIAnalysis(input: ConsultationInput, language: string = 'en'): Promise<SymptomAnalysis | null> {
@@ -248,17 +219,21 @@ END_ANALYSIS`
           prompt: prompt,
           stream: false,
           options: {
-            temperature: 0.05, // Lower for more consistent medical responses
-            top_p: 0.9, // Higher for better medical knowledge
-            num_predict: language === 'ru' ? 400 : 300, // More tokens for detailed responses
-            num_ctx: 2048, // Larger context for better understanding
-            num_thread: 4, // More threads for faster processing
-            repeat_penalty: 1.2, // Prevent repetition
-            top_k: 40, // Better token selection
-            tfs_z: 1.0, // Tail free sampling
-            mirostat: 2, // Dynamic temperature adjustment
-            mirostat_tau: 5.0, // Target entropy
-            mirostat_eta: 0.1, // Learning rate
+            temperature: 0.1, // Slightly higher for creativity while maintaining consistency
+            top_p: 0.85, // Balanced for medical accuracy
+            num_predict: language === 'ru' ? 200 : 150, // Optimized for 4GB RAM
+            num_ctx: 1024, // Reduced context for memory efficiency
+            num_thread: 2, // Optimized for 4GB RAM
+            repeat_penalty: 1.15, // Prevent repetition
+            top_k: 30, // Balanced token selection
+            tfs_z: 0.95, // Tail free sampling
+            mirostat: 1, // Simplified dynamic adjustment
+            mirostat_tau: 4.0, // Lower target entropy
+            mirostat_eta: 0.2, // Faster learning rate
+            num_gpu: 0, // CPU-only for 4GB RAM
+            num_gqa: 8, // Group query attention for efficiency
+            rope_freq_base: 10000, // Optimized rope scaling
+            rope_freq_scale: 0.5, // Reduced frequency scaling
           }
         }),
         timeout: 15000
@@ -716,6 +691,137 @@ END_ANALYSIS`
     }
   }
 
+  // Memory monitoring for 4GB RAM systems
+  async getMemoryStatus(): Promise<{
+    available: boolean
+    memoryUsage: string
+    optimizationTips: string[]
+    recommendedActions: string[]
+  }> {
+    try {
+      const endpoint = await this.findWorkingEndpoint()
+      if (!endpoint) {
+        return {
+          available: false,
+          memoryUsage: 'Unknown',
+          optimizationTips: [
+            'Close unnecessary applications',
+            'Restart Ollama service',
+            'Use smaller models (3B instead of 8B)',
+            'Reduce context window size'
+          ],
+          recommendedActions: [
+            'Install llama3.1:3b-instruct model',
+            'Set OLLAMA_MODEL=llama3.1:3b-instruct',
+            'Restart the application'
+          ]
+        }
+      }
+
+      // Get system info from Ollama
+      const response = await fetch(`${endpoint}/api/tags`, {
+        method: 'GET',
+        timeout: 5000
+      } as RequestInit & { timeout: number })
+
+      if (!response.ok) {
+        return {
+          available: true,
+          memoryUsage: 'Limited',
+          optimizationTips: [
+            'Model may be too large for 4GB RAM',
+            'Try llama3.1:3b-instruct instead',
+            'Close browser tabs and other apps',
+            'Restart Ollama with smaller model'
+          ],
+          recommendedActions: [
+            'Pull smaller model: ollama pull llama3.1:3b-instruct',
+            'Set environment: OLLAMA_MODEL=llama3.1:3b-instruct',
+            'Restart application'
+          ]
+        }
+      }
+
+      const models = await response.json()
+      const currentModel = models.models?.find((m: any) => 
+        m.name.includes(this.ollamaModel.split(':')[0])
+      )
+
+      const modelSize = currentModel ? 
+        Math.round(currentModel.size / 1024 / 1024 / 1024) : 0
+
+      let memoryUsage = 'Good'
+      let optimizationTips = []
+      let recommendedActions = []
+
+      if (modelSize > 8) {
+        memoryUsage = 'High - Consider smaller model'
+        optimizationTips = [
+          'Current model requires too much RAM',
+          'Switch to llama3.1:3b-instruct',
+          'Close other applications',
+          'Restart Ollama service'
+        ]
+        recommendedActions = [
+          'Pull smaller model: ollama pull llama3.1:3b-instruct',
+          'Set OLLAMA_MODEL=llama3.1:3b-instruct',
+          'Restart application'
+        ]
+      } else if (modelSize > 4) {
+        memoryUsage = 'Moderate - Monitor usage'
+        optimizationTips = [
+          'Model size is acceptable for 4GB RAM',
+          'Close unnecessary browser tabs',
+          'Monitor system memory usage',
+          'Consider llama3.1:3b-instruct for better performance'
+        ]
+        recommendedActions = [
+          'Monitor memory usage during AI consultations',
+          'Close other applications when using AI vet',
+          'Consider upgrading to 8GB RAM for better performance'
+        ]
+      } else {
+        memoryUsage = 'Optimal for 4GB RAM'
+        optimizationTips = [
+          'Current model is well-optimized for 4GB RAM',
+          'Good performance expected',
+          'Monitor for any memory issues',
+          'Consider closing other apps during AI use'
+        ]
+        recommendedActions = [
+          'Current setup is optimal',
+          'Monitor performance during use',
+          'Report any issues to support'
+        ]
+      }
+
+      return {
+        available: true,
+        memoryUsage,
+        optimizationTips,
+        recommendedActions
+      }
+
+    } catch (error) {
+      console.error('Memory status check failed:', error)
+      return {
+        available: false,
+        memoryUsage: 'Unknown',
+        optimizationTips: [
+          'Unable to check memory status',
+          'Ensure Ollama is running',
+          'Check system resources',
+          'Restart Ollama service'
+        ],
+        recommendedActions: [
+          'Restart Ollama: sudo systemctl restart ollama',
+          'Check Ollama status: ollama ps',
+          'Restart application'
+        ]
+      }
+    }
+  }
+
   async canUserConsult(userId: string): Promise<{ canConsult: boolean; remaining: number; systemStatus: string }> {
     const currentMonth = new Date()
     const consultationCount = await this.getUserConsultationCount(userId, currentMonth)
@@ -743,42 +849,45 @@ END_ANALYSIS`
     return { canConsult, remaining, systemStatus }
   }
 
-  // Model recommendations for better veterinary AI
+  // Memory-optimized model recommendations for 4GB RAM
   getModelRecommendations(): {
     recommended: string[]
     alternatives: string[]
     setupInstructions: string[]
     performanceNotes: Record<string, string>
+    memoryOptimized: boolean
   } {
     return {
       recommended: [
-        'llama3.1:70b',
-        'llama3.1:8b-instruct',
         'llama3.1:3b-instruct',
-        'mistral:7b-instruct',
-        'codellama:7b-instruct'
-      ],
-      alternatives: [
         'llama3.1:8b',
         'llama3.1:3b',
         'mistral:7b',
-        'codellama:7b',
-        'llama2:70b'
+        'codellama:7b'
+      ],
+      alternatives: [
+        'llama3.1:8b-instruct',
+        'llama3.1:70b',
+        'mistral:7b-instruct',
+        'codellama:7b-instruct',
+        'llama2:7b'
       ],
       setupInstructions: [
         '1. Install Ollama: curl -fsSL https://ollama.ai/install.sh | sh',
-        '2. Pull recommended model: ollama pull llama3.1:70b',
-        '3. Set environment variable: OLLAMA_MODEL=llama3.1:70b',
-        '4. For better performance, use GPU: OLLAMA_HOST=0.0.0.0:11434',
-        '5. Monitor with: ollama list && ollama ps'
+        '2. Pull 4GB-optimized model: ollama pull llama3.1:3b-instruct',
+        '3. Set environment variable: OLLAMA_MODEL=llama3.1:3b-instruct',
+        '4. For 4GB RAM: OLLAMA_HOST=0.0.0.0:11434',
+        '5. Monitor memory: ollama list && ollama ps',
+        '6. Optimize: Close other apps, use CPU-only mode'
       ],
       performanceNotes: {
-        'llama3.1:70b': 'Best accuracy, requires 16GB+ RAM, slower responses',
-        'llama3.1:8b-instruct': 'Good balance, 8GB RAM, faster responses',
-        'llama3.1:3b-instruct': 'Fastest, 4GB RAM, good for basic analysis',
-        'mistral:7b-instruct': 'Excellent reasoning, 8GB RAM, good medical knowledge',
-        'codellama:7b-instruct': 'Good for structured responses, 8GB RAM'
-      }
+        'llama3.1:3b-instruct': 'Best for 4GB RAM, fast responses, good accuracy',
+        'llama3.1:8b': 'Good balance, requires 6GB+ RAM, better accuracy',
+        'llama3.1:3b': 'Fastest, 4GB RAM, basic analysis',
+        'mistral:7b': 'Good reasoning, requires 8GB+ RAM',
+        'codellama:7b': 'Structured responses, requires 8GB+ RAM'
+      },
+      memoryOptimized: true
     }
   }
 
