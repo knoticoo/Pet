@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
 import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -58,7 +58,7 @@ interface SocialPost {
 export default function UserProfilePage() {
   const { session } = useAuthenticatedSession()
   const params = useParams()
-  const userId = params.userId as string
+  const userId = params?.userId as string
 
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [pets, setPets] = useState<Pet[]>([])
@@ -67,15 +67,7 @@ export default function UserProfilePage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [activeTab, setActiveTab] = useState<'posts' | 'pets'>('posts')
 
-  useEffect(() => {
-    if (session?.user?.id) {
-      fetchProfile()
-      fetchUserPets()
-      fetchUserPosts()
-    }
-  }, [session, userId])
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       const response = await fetch(`/api/users/${userId}/profile`)
       if (response.ok) {
@@ -85,9 +77,9 @@ export default function UserProfilePage() {
     } catch (error) {
       console.error('Error fetching profile:', error)
     }
-  }
+  }, [userId])
 
-  const fetchUserPets = async () => {
+  const fetchUserPets = useCallback(async () => {
     try {
       const response = await fetch(`/api/users/${userId}/pets`)
       if (response.ok) {
@@ -97,9 +89,9 @@ export default function UserProfilePage() {
     } catch (error) {
       console.error('Error fetching pets:', error)
     }
-  }
+  }, [userId])
 
-  const fetchUserPosts = async () => {
+  const fetchUserPosts = useCallback(async () => {
     try {
       const response = await fetch(`/api/users/${userId}/posts`)
       if (response.ok) {
@@ -111,7 +103,15 @@ export default function UserProfilePage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId])
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchProfile()
+      fetchUserPets()
+      fetchUserPosts()
+    }
+  }, [session, userId, fetchProfile, fetchUserPets, fetchUserPosts])
 
   const handleFollow = async () => {
     if (!profile) return
@@ -178,17 +178,7 @@ export default function UserProfilePage() {
     }
   }
 
-  const calculateAge = (birthDate: string) => {
-    const today = new Date()
-    const birth = new Date(birthDate)
-    const age = today.getFullYear() - birth.getFullYear()
-    const monthDiff = today.getMonth() - birth.getMonth()
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      return age - 1
-    }
-    return age
-  }
+
 
   if (loading) {
     return (
@@ -208,7 +198,7 @@ export default function UserProfilePage() {
       <AuthGuard>
         <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-foreground mb-4">Profile not found</h2>
-          <p className="text-muted-foreground">The user profile you're looking for doesn't exist.</p>
+                        <p className="text-muted-foreground">The user profile you&apos;re looking for doesn&apos;t exist.</p>
         </div>
       </AuthGuard>
     )
@@ -447,7 +437,7 @@ export default function UserProfilePage() {
               <Camera className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">No posts yet</h3>
               <p className="text-muted-foreground">
-                {profile.isOwnProfile ? 'Share your first pet story!' : `${profile.name} hasn't shared any stories yet.`}
+                {profile.isOwnProfile ? 'Share your first pet story!' : `${profile.name} hasn&apos;t shared any stories yet.`}
               </p>
             </div>
           )
@@ -489,7 +479,7 @@ export default function UserProfilePage() {
               <PawPrint className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">No pets added</h3>
               <p className="text-muted-foreground">
-                {profile.isOwnProfile ? 'Add your first pet to get started!' : `${profile.name} hasn't added any pets yet.`}
+                {profile.isOwnProfile ? 'Add your first pet to get started!' : `${profile.name} hasn&apos;t added any pets yet.`}
               </p>
             </div>
           )

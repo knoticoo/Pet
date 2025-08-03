@@ -4,7 +4,7 @@ import { Heart, Calendar, DollarSign, Bell, Camera, TrendingUp, Users, Award, Pl
 
 import { AuthGuard } from '@/components/AuthGuard'
 import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { t } from '@/lib/translations'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -56,13 +56,7 @@ export default function DashboardPage() {
   const [healthAlerts, setHealthAlerts] = useState<HealthAlert[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (session?.user?.id) {
-      fetchDashboardData()
-    }
-  }, [session])
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       const [
         petsResponse, 
@@ -114,7 +108,7 @@ export default function DashboardPage() {
       })
 
       // Set recent posts (last 3)
-      setRecentPosts(socialPosts.slice(0, 3).map((post: any) => ({
+      setRecentPosts(socialPosts.slice(0, 3).map((post: { id: string; petName: string; imageUrl: string; likes: number; createdAt: string }) => ({
         id: post.id,
         petName: post.petName,
         imageUrl: post.imageUrl,
@@ -139,7 +133,13 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [session?.user?.id])
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetchDashboardData()
+    }
+  }, [session, fetchDashboardData])
 
   const getAlertColor = (severity: string) => {
     switch (severity) {
