@@ -1,0 +1,28 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="96" cy="96" r="88" fill="url(#gradient)" stroke="#3b82f6" stroke-width="4"/>
+  
+  <!-- Pet paw print -->
+  <g transform="translate(96, 96)">
+    <!-- Main paw pad -->
+    <ellipse cx="0" cy="0" rx="20" ry="16" fill="#ffffff" opacity="0.9"/>
+    
+    <!-- Toe pads -->
+    <ellipse cx="-15" cy="-15" rx="8" ry="6" fill="#ffffff" opacity="0.9"/>
+    <ellipse cx="15" cy="-15" rx="8" ry="6" fill="#ffffff" opacity="0.9"/>
+    <ellipse cx="-10" cy="-25" rx="6" ry="4" fill="#ffffff" opacity="0.9"/>
+    <ellipse cx="10" cy="-25" rx="6" ry="4" fill="#ffffff" opacity="0.9"/>
+    
+    <!-- Heart symbol -->
+    <path d="M0 10 L-8 2 L-4 -2 L0 2 L4 -2 L8 2 Z" fill="#ef4444" opacity="0.8"/>
+  </g>
+  
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1d4ed8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>
