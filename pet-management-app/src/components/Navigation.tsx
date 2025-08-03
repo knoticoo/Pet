@@ -2,20 +2,22 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Heart, Home, Calendar, DollarSign, Settings, Bell, Shield, LogOut, User, Menu, X, Brain, Camera } from 'lucide-react'
+import { Heart, Home, Calendar, DollarSign, Settings, Bell, Shield, LogOut, User, Menu, X, Brain, Camera, ChevronDown, Search, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useFeatures } from '@/hooks/useFeatures'
 import { signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
-import { useState, useCallback, memo, useMemo } from 'react'
+import { useState, useCallback, memo, useMemo, useEffect } from 'react'
 import { t } from '@/lib/translations'
 import { ThemeSelector } from '@/components/ThemeSelector'
+import { Badge } from '@/components/ui/badge'
 
-// Memoized navigation item component
-const NavigationItem = memo(({ item, pathname, onClick }: {
-  item: { name: string; href: string; icon: React.ComponentType<{ className?: string }>; feature: string }
+// Memoized navigation item component with improved styling
+const NavigationItem = memo(({ item, pathname, onClick, isMobile = false }: {
+  item: { name: string; href: string; icon: React.ComponentType<{ className?: string }>; feature: string; badge?: string }
   pathname: string
   onClick?: () => void
+  isMobile?: boolean
 }) => {
   const isActive = pathname === item.href
   const Icon = item.icon
@@ -25,21 +27,36 @@ const NavigationItem = memo(({ item, pathname, onClick }: {
       href={item.href}
       onClick={onClick}
       className={cn(
-        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+        'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden',
         isActive
-          ? 'bg-primary text-primary-foreground'
-          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+          ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25'
+          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:shadow-sm'
       )}
     >
-      <Icon className="h-4 w-4" />
-      {item.name}
+      {/* Active indicator */}
+      {isActive && (
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg" />
+      )}
+      
+      <div className="relative z-10 flex items-center gap-3 w-full">
+        <Icon className={cn(
+          "h-4 w-4 transition-transform duration-200",
+          isActive ? "scale-110" : "group-hover:scale-105"
+        )} />
+        <span className="flex-1">{item.name}</span>
+        {item.badge && (
+          <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+            {item.badge}
+          </Badge>
+        )}
+      </div>
     </Link>
   )
 })
 
 NavigationItem.displayName = 'NavigationItem'
 
-// Memoized mobile menu button
+// Memoized mobile menu button with improved animation
 const MobileMenuButton = memo(({ isOpen, onClick }: {
   isOpen: boolean
   onClick: () => void
@@ -47,28 +64,49 @@ const MobileMenuButton = memo(({ isOpen, onClick }: {
   <Button
     variant="ghost"
     size="sm"
-    className="md:hidden"
+    className="md:hidden relative p-2 hover:bg-accent transition-all duration-200"
     onClick={onClick}
-    aria-label={isOpen ? 'Close menu' : 'Open menu'}
+    aria-label={isOpen ? 'Закрыть меню' : 'Открыть меню'}
   >
-    {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+    <div className="relative w-5 h-5">
+      <span className={cn(
+        "absolute inset-0 transform transition-all duration-200",
+        isOpen ? "rotate-45 translate-y-0" : "-translate-y-1"
+      )}>
+        <Menu className="h-5 w-5" />
+      </span>
+      <span className={cn(
+        "absolute inset-0 transform transition-all duration-200",
+        isOpen ? "opacity-0" : "opacity-100"
+      )}>
+        <X className="h-5 w-5" />
+      </span>
+    </div>
   </Button>
 ))
 
 MobileMenuButton.displayName = 'MobileMenuButton'
 
-// Memoized user menu
+// Memoized user menu with improved design
 const UserMenu = memo(({ user, onSignOut }: {
-  user: { name?: string; email?: string } | null
+  user: { name?: string; email?: string; avatar?: string } | null
   onSignOut: () => void
 }) => (
-  <div className="border-t pt-4 mt-4">
-    <div className="flex items-center gap-3 px-3 py-2 mb-2">
-      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-        <User className="h-4 w-4 text-primary" />
+  <div className="border-t border-border/50 pt-4 mt-4">
+    <div className="flex items-center gap-3 px-3 py-3 mb-3 bg-accent/50 rounded-lg">
+      <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-primary/40 rounded-full flex items-center justify-center ring-2 ring-primary/20">
+        {user?.avatar ? (
+          <img
+            src={user.avatar}
+            alt={user.name || 'User'}
+            className="w-full h-full rounded-full object-cover"
+          />
+        ) : (
+          <User className="h-5 w-5 text-primary" />
+        )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{user?.name}</p>
+        <p className="text-sm font-medium truncate text-foreground">{user?.name || 'Пользователь'}</p>
         <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
       </div>
     </div>
@@ -76,7 +114,7 @@ const UserMenu = memo(({ user, onSignOut }: {
       variant="ghost"
       size="sm"
       onClick={onSignOut}
-      className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+      className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200"
     >
       <LogOut className="h-4 w-4" />
       {t('auth.signOut')}
@@ -86,17 +124,61 @@ const UserMenu = memo(({ user, onSignOut }: {
 
 UserMenu.displayName = 'UserMenu'
 
+// Search component
+const SearchBar = memo(() => {
+  const [isOpen, setIsOpen] = useState(false)
+  
+  return (
+    <div className="relative hidden lg:block">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setIsOpen(!isOpen)}
+        className="gap-2 text-muted-foreground hover:text-foreground"
+      >
+        <Search className="h-4 w-4" />
+        <span className="hidden xl:inline">Поиск...</span>
+      </Button>
+      
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-2 p-2 bg-card border rounded-lg shadow-lg z-50">
+          <input
+            type="text"
+            placeholder="Поиск питомцев, записей..."
+            className="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+            autoFocus
+            onBlur={() => setIsOpen(false)}
+          />
+        </div>
+      )}
+    </div>
+  )
+})
+
+SearchBar.displayName = 'SearchBar'
+
 export const Navigation = memo(() => {
   const pathname = usePathname() || ''
   const { enabledFeatures, isAdmin, isAuthenticated, user } = useFeatures()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Memoize navigation items to prevent recreation on every render
   const navigationItems = useMemo(() => {
     // Base navigation items that are always available
     const baseNavigation = [
       { name: t('navigation.dashboard'), href: '/', icon: Home, feature: 'dashboard' },
-      { name: t('navigation.myPets'), href: '/pets', icon: Heart, feature: 'pets' },
+      { name: t('navigation.myPets'), href: '/pets', icon: Heart, feature: 'pets', badge: 'Новое' },
     ]
 
     // Feature-dependent navigation items
@@ -104,7 +186,7 @@ export const Navigation = memo(() => {
       { name: t('navigation.appointments'), href: '/appointments', icon: Calendar, feature: 'appointments' },
       { name: t('navigation.expenses'), href: '/expenses', icon: DollarSign, feature: 'expenses' },
       { name: t('navigation.reminders'), href: '/reminders', icon: Bell, feature: 'reminders' },
-      { name: t('navigation.aiVet'), href: '/ai-vet', icon: Brain, feature: 'ai-vet' },
+      { name: t('navigation.aiVet'), href: '/ai-vet', icon: Brain, feature: 'ai-vet', badge: 'ИИ' },
     ]
 
     // Core features that should always be visible
@@ -153,14 +235,12 @@ export const Navigation = memo(() => {
 
   const handleSignOut = useCallback(async () => {
     try {
-      // Use the current origin for the callback URL, or let NextAuth handle it with default configuration
       if (typeof window !== 'undefined') {
         await signOut({ 
           callbackUrl: `${window.location.origin}/auth/signin`,
           redirect: true 
         })
       } else {
-        // On server-side, let NextAuth use its configured NEXTAUTH_URL
         await signOut({ redirect: true })
       }
     } catch (error) {
@@ -173,13 +253,26 @@ export const Navigation = memo(() => {
   }
 
   return (
-    <nav className="bg-card border-b">
+    <nav className={cn(
+      "sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-200",
+      isScrolled && "shadow-sm"
+    )}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <Heart className="h-6 w-6 text-primary" />
-            <span className="font-bold text-lg">ПетКеа</span>
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="relative">
+              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/25 group-hover:shadow-xl group-hover:shadow-primary/30 transition-all duration-300">
+                <Heart className="h-5 w-5 text-white" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-lg bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                ПетКеа
+              </span>
+              <span className="text-xs text-muted-foreground -mt-1">Уход за питомцами</span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -193,8 +286,11 @@ export const Navigation = memo(() => {
             ))}
           </div>
 
-          {/* User Menu & Mobile Toggle */}
+          {/* Right side controls */}
           <div className="flex items-center gap-2">
+            {/* Search */}
+            <SearchBar />
+            
             {/* Theme Selector */}
             <div className="hidden md:block">
               <ThemeSelector />
@@ -202,17 +298,18 @@ export const Navigation = memo(() => {
             
             {/* Desktop User Menu */}
             <div className="hidden md:flex items-center gap-2">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent/50">
-                <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent/50 hover:bg-accent/70 transition-all duration-200">
+                <div className="w-6 h-6 bg-gradient-to-br from-primary/20 to-primary/40 rounded-full flex items-center justify-center">
                   <User className="h-3 w-3 text-primary" />
                 </div>
-                <span className="text-sm font-medium">{user?.name}</span>
+                <span className="text-sm font-medium">{user?.name || 'Пользователь'}</span>
+                <ChevronDown className="h-3 w-3 text-muted-foreground" />
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleSignOut}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200"
               >
                 <LogOut className="h-4 w-4" />
               </Button>
@@ -228,7 +325,7 @@ export const Navigation = memo(() => {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t py-4">
+          <div className="md:hidden border-t border-border/50 py-4 slide-in-from-top">
             <div className="space-y-1">
               {navigationItems.map((item) => (
                 <NavigationItem
@@ -236,12 +333,25 @@ export const Navigation = memo(() => {
                   item={item}
                   pathname={pathname}
                   onClick={handleMobileMenuClose}
+                  isMobile={true}
                 />
               ))}
             </div>
             
             {/* Mobile User Menu */}
-            <UserMenu user={user ? { name: user.name || undefined, email: user.email || undefined } : null} onSignOut={handleSignOut} />
+            <UserMenu 
+              user={user ? { 
+                name: user.name || undefined, 
+                email: user.email || undefined,
+                avatar: user.avatar || undefined
+              } : null} 
+              onSignOut={handleSignOut} 
+            />
+            
+            {/* Mobile Theme Selector */}
+            <div className="md:hidden mt-4 px-3">
+              <ThemeSelector />
+            </div>
           </div>
         )}
       </div>
