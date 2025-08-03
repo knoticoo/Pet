@@ -21,7 +21,20 @@ export async function GET() {
 
     // For now, return empty array since we don't have social posts table yet
     // In a real implementation, you would query the social_posts table
-    const posts: any[] = []
+    const posts: Array<{
+      id: string;
+      petId: string;
+      petName: string;
+      petSpecies: string;
+      imageUrl: string;
+      caption: string;
+      aiAnalysis: object;
+      likes: number;
+      comments: number;
+      createdAt: string;
+      isLiked: boolean;
+      isSample?: boolean;
+    }> = []
 
     // If no real posts exist, show a sample post to demonstrate functionality
     if (posts.length === 0 && petIds.length > 0) {

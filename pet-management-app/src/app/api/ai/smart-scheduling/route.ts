@@ -85,7 +85,14 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function generateSmartSchedule(pet: any, days: number) {
+async function generateSmartSchedule(pet: { 
+  id: string; 
+  name: string; 
+  species: string; 
+  breed?: string | null; 
+  birthDate?: Date | null; 
+  temperament?: string | null 
+}, days: number) {
   try {
     const endpoint = await aiVetService.findWorkingEndpoint()
     if (!endpoint) {
@@ -103,16 +110,16 @@ async function generateSmartSchedule(pet: any, days: number) {
       orderBy: { date: 'desc' }
     })
 
-    // Get behavior patterns
-    const behaviorData = await prisma.behaviorData.findMany({
-      where: {
-        petId: pet.id,
-        timestamp: {
-          gte: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) // Last 14 days
-        }
-      },
-      orderBy: { timestamp: 'desc' }
-    })
+    // Get behavior patterns (commented out since it's not used)
+    // const behaviorData = await prisma.behaviorData.findMany({
+    //   where: {
+    //     petId: pet.id,
+    //     timestamp: {
+    //       gte: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) // Last 14 days
+    //     }
+    //   },
+    //   orderBy: { timestamp: 'desc' }
+    // })
 
     // Get feeding schedules
     const feedingSchedules = await prisma.feedingSchedule.findMany({
@@ -288,7 +295,7 @@ function parseSmartSchedule(aiResponse: string, petName: string, days: number) {
   return schedule.length > 0 ? schedule : getFallbackSchedule({ name: petName }, days)
 }
 
-function getFallbackSchedule(pet: any, days: number) {
+function getFallbackSchedule(pet: { name: string }, days: number) {
   const schedule = []
   
   for (let day = 1; day <= days; day++) {

@@ -16,13 +16,13 @@ export async function POST(request: NextRequest) {
 
     let imageUrl: string
     let analysisType: string = 'general_analysis'
-    let petId: string | null = null
+    // let petId: string | null = null  // Not currently used in analysis
 
     if (contentType?.includes('multipart/form-data')) {
       const formData = await request.formData()
       const imageFile = formData.get('image') as File
       analysisType = formData.get('analysisType') as string || 'general_analysis'
-      petId = formData.get('petId') as string || null
+      // petId = formData.get('petId') as string || null  // Not currently used in analysis
 
       if (!imageFile || imageFile.size === 0) {
         return NextResponse.json({ error: 'No image provided' }, { status: 400 })
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       const body = await request.json()
       imageUrl = body.imageUrl
       analysisType = body.analysisType || 'general_analysis'
-      petId = body.petId || null
+      // petId = body.petId || null  // Not currently used in analysis
     }
 
     if (!imageUrl) {
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Perform AI analysis
-    const analysis = await performPhotoAnalysis(imageUrl, analysisType, userPets, petId)
+    const analysis = await performPhotoAnalysis(imageUrl, analysisType, userPets)
 
     // Store analysis results
     const photoAnalysis = await prisma.photoAnalysis.create({
@@ -100,8 +100,7 @@ export async function POST(request: NextRequest) {
 async function performPhotoAnalysis(
   imageUrl: string,
   analysisType: string,
-  userPets: any[],
-  targetPetId?: string | null
+  userPets: { id: string; name: string; species: string; breed?: string | null; color?: string | null }[]
 ) {
   try {
     const endpoint = await aiVetService.findWorkingEndpoint()
@@ -214,9 +213,24 @@ Be specific and observational, avoid speculation.`
   }
 }
 
-function parsePhotoAnalysis(aiResponse: string, analysisType: string, userPets: any[]) {
+function parsePhotoAnalysis(aiResponse: string, analysisType: string, userPets: { id: string; name?: string }[]) {
   const lines = aiResponse.split('\n')
-  const result: any = {
+  const result: {
+    analysisType: string;
+    overallConfidence: number;
+    tags: string[];
+    healthFlags: string[];
+    identifiedPetId: string | null;
+    identifiedPetName?: string;
+    species?: string;
+    breed?: string;
+    mood?: string;
+    activity?: string;
+    healthStatus?: string;
+    urgency?: number;
+    reasoning?: string;
+    notes?: string;
+  } = {
     analysisType: analysisType,
     overallConfidence: 0.7,
     tags: [],

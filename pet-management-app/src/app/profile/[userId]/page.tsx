@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { useAuthenticatedSession } from '@/hooks/useAuthenticatedSession'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -60,13 +60,7 @@ export default function UserProfilePage() {
 
   const userId = params?.userId as string
 
-  useEffect(() => {
-    if (userId && session?.user?.id) {
-      fetchUserProfile()
-    }
-  }, [userId, session?.user?.id])
-
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -100,7 +94,13 @@ export default function UserProfilePage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId])
+
+  useEffect(() => {
+    if (userId && session?.user?.id) {
+      fetchUserProfile()
+    }
+  }, [userId, session?.user?.id, fetchUserProfile])
 
   const handleFollow = async () => {
     if (!profile) return

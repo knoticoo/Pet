@@ -83,9 +83,9 @@ export async function GET(request: NextRequest) {
 }
 
 async function generateBehaviorPredictions(
-  pet: any,
-  behaviorData: any[],
-  activities: any[]
+  pet: { id: string; name: string; species: string; breed?: string | null; birthDate?: Date | null; temperament?: string | null },
+  behaviorData: { id: string; petId: string; dataType: string; timestamp: Date; value?: number | null }[],
+  activities: { id: string; petId: string; activityType: string; date: Date; duration?: number | null }[]
 ) {
   try {
     const endpoint = await aiVetService.findWorkingEndpoint()
@@ -255,7 +255,7 @@ function parseBehaviorPredictions(aiResponse: string, petName: string) {
   return predictions.length > 0 ? predictions : getFallbackPredictions({ name: petName })
 }
 
-function getFallbackPredictions(pet: any) {
+function getFallbackPredictions(pet: { name: string }) {
   const currentHour = new Date().getHours()
   
   // Simple fallback based on common pet patterns
