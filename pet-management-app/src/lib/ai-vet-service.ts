@@ -23,7 +23,7 @@ export class AIVetService {
   private static instance: AIVetService
   private ollamaEndpoint = process.env.OLLAMA_ENDPOINT || 'http://localhost:11434'
   private ollamaFallbackEndpoint = process.env.OLLAMA_FALLBACK_ENDPOINT || 'http://localhost:11435'
-  private ollamaModel = process.env.OLLAMA_MODEL || 'llama3.1:8b'
+  private ollamaModel = process.env.OLLAMA_MODEL || 'llama3.1:3b-instruct'
   private freeLimit = parseInt(process.env.AI_VET_FREE_LIMIT || '3')
   private activeEndpoint: string | null = null
   private memoryOptimized = true // Flag for 4GB RAM optimization
