@@ -187,18 +187,28 @@ export default function DashboardPage() {
     return <LoadingScreen isVisible={true} onComplete={() => setIsLoading(false)} />
   }
 
-  // Show a simple loading state during SSR
+  // Show a simple loading state during SSR and before mounting
   if (isLoading && !hasMounted) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
       </div>
     )
   }
 
   // Don't render anything until mounted to prevent hydration issues
   if (!hasMounted) {
-    return null
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
