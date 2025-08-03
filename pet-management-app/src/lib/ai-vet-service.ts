@@ -598,7 +598,7 @@ END`
     }
   }> {
     try {
-      const startTime = Date.now()
+      // const startTime = Date.now() // Unused variable removed
       const endpoint = await this.findWorkingEndpoint()
       
       if (!endpoint) {
@@ -620,7 +620,7 @@ END`
       if (modelResponse.ok) {
         const models = await modelResponse.json()
         const targetModel = this.ollamaModel.split(':')[0]
-        const loadedModel = models.models?.find((model: any) => 
+        const loadedModel = models.models?.find((model: { name: string }) => 
           model.name.includes(targetModel)
         )
         
@@ -743,7 +743,7 @@ END`
       }
 
       const models = await response.json()
-      const currentModel = models.models?.find((m: any) => 
+      const currentModel = models.models?.find((m: { name: string }) => 
         m.name.includes(this.ollamaModel.split(':')[0])
       )
 
@@ -905,7 +905,7 @@ END`
       if (!response.ok) return this.ollamaModel
 
       const models = await response.json()
-      const availableModels = models.models?.map((m: any) => m.name) || []
+      const availableModels = models.models?.map((m: { name: string }) => m.name) || []
 
       // Priority order for veterinary AI
       const priorityModels = [

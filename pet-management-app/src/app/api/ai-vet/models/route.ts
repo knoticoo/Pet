@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedSession } from "@/lib/session-types"
 import { aiVetService } from '@/lib/ai-vet-service'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getAuthenticatedSession()
     if (!session?.user?.id) {
