@@ -13,7 +13,7 @@ export function PWAWrapper({ children }: PWAWrapperProps) {
     // Check if running as PWA
     const checkPWA = () => {
       const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches
-      const isInWebApp = window.navigator.standalone === true
+      const isInWebApp = (window.navigator as any).standalone === true
       const isPWA = isStandaloneMode || isInWebApp
       
       setIsPWA(isPWA)
