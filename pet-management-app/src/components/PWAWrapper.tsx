@@ -6,6 +6,11 @@ interface PWAWrapperProps {
   children: React.ReactNode
 }
 
+// Extend Navigator interface to include standalone property
+interface NavigatorWithStandalone extends Navigator {
+  standalone?: boolean
+}
+
 export function PWAWrapper({ children }: PWAWrapperProps) {
   const [isPWA, setIsPWA] = useState(false)
 
@@ -13,7 +18,7 @@ export function PWAWrapper({ children }: PWAWrapperProps) {
     // Check if running as PWA
     const checkPWA = () => {
       const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches
-      const isInWebApp = (window.navigator as any).standalone === true
+      const isInWebApp = (window.navigator as NavigatorWithStandalone).standalone === true
       const isPWA = isStandaloneMode || isInWebApp
       
       setIsPWA(isPWA)
