@@ -13,7 +13,8 @@ export interface AuthenticatedSession {
 }
 
 export async function getAuthenticatedSession(): Promise<AuthenticatedSession | null> {
-  const session = await getServerSession(authOptions) as { user?: { id?: string } } | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const session = await getServerSession(authOptions as any) as { user?: { id?: string } } | null
   if (!session?.user?.id) {
     return null
   }

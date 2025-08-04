@@ -3,14 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
-// Define proper interfaces for type safety
-interface ExtendedUser {
-  id: string
-  email: string
-  name?: string
-  isAdmin: boolean
-  rememberMe: boolean
-}
+
 
 interface ExtendedToken {
   sub?: string
@@ -19,16 +12,7 @@ interface ExtendedToken {
   exp?: number
 }
 
-interface ExtendedSession {
-  user?: {
-    id?: string
-    email?: string
-    name?: string
-    isAdmin?: boolean
-    rememberMe?: boolean
-  }
-  expires?: string
-}
+
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -85,7 +69,8 @@ export const authOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user }: { token: ExtendedToken; user: ExtendedUser }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async jwt({ token, user }: { token: any; user: any }) {
       if (user) {
         token.sub = user.id
         token.isAdmin = user.isAdmin
@@ -120,58 +105,12 @@ export const authOptions = {
       
       return token
     },
-    async session({ session, token }: { session: ExtendedSession; token: ExtendedToken }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session, token }: { session: any; token: ExtendedToken }) {
       if (session.user && token) {
         session.user.id = token.sub
         session.user.isAdmin = token.isAdmin
         session.user.rememberMe = token.rememberMe
-        
-        // Ensure user exists in database
-        if (token.sub) {
-          try {
-            const existingUser = await prisma.user.findUnique({
-              where: { id: token.sub }
-            })
-            
-            if (!existingUser && session.user) {
-              // Check if user exists by email first
-              const userByEmail = await prisma.user.findUnique({
-                where: { email: session.user.email }
-              })
-              
-              if (userByEmail) {
-                // User exists with same email but different ID - update the ID
-                await prisma.user.update({
-                  where: { email: session.user.email },
-                  data: { id: token.sub }
-                })
-                console.log('Updated existing user ID in database:', token.sub)
-              } else {
-                // Create new user if they don't exist
-                await prisma.user.create({
-                  data: {
-                    id: token.sub,
-                    email: session.user.email!,
-                    name: session.user.name || 'User',
-                    isAdmin: token.isAdmin || false,
-                    subscriptionTier: 'free',
-                    subscriptionStatus: 'inactive'
-                  }
-                })
-                console.log('Created missing user in database:', token.sub)
-              }
-            }
-          } catch (error) {
-            console.error('Error ensuring user exists in database:', error)
-          }
-        }
-        
-        // Set session expiry based on remember me
-        if (session.user.rememberMe) {
-          session.expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-        } else {
-          session.expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-        }
       }
       return session
     }
@@ -187,7 +126,7 @@ export const authOptions = {
       name: `next-auth.session-token`,
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'lax' as const,
         path: '/',
         secure: process.env.NODE_ENV === 'production',
         // Longer cookie expiry for better persistence on mobile
@@ -197,7 +136,7 @@ export const authOptions = {
     callbackUrl: {
       name: `next-auth.callback-url`,
       options: {
-        sameSite: 'lax',
+        sameSite: 'lax' as const,
         path: '/',
         secure: process.env.NODE_ENV === 'production',
         maxAge: 30 * 24 * 60 * 60
@@ -207,7 +146,7 @@ export const authOptions = {
       name: `next-auth.csrf-token`,
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'lax' as const,
         path: '/',
         secure: process.env.NODE_ENV === 'production',
         maxAge: 30 * 24 * 60 * 60
@@ -215,12 +154,5 @@ export const authOptions = {
     }
   },
   // Improve mobile session handling
-  useSecureCookies: process.env.NODE_ENV === 'production',
-  // Add events to handle session updates
-  events: {
-    async session({ session }: { session: ExtendedSession }) {
-      // Log session access for debugging
-      console.log('Session accessed:', { userId: session.user?.id, expires: session.expires })
-    }
-  }
+  useSecureCookies: process.env.NODE_ENV === 'production'
 }
