@@ -1,8 +1,34 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+
+// Define proper interfaces for type safety
+interface ExtendedUser {
+  id: string
+  email: string
+  name?: string
+  isAdmin: boolean
+  rememberMe: boolean
+}
+
+interface ExtendedToken {
+  sub?: string
+  isAdmin?: boolean
+  rememberMe?: boolean
+  exp?: number
+}
+
+interface ExtendedSession {
+  user?: {
+    id?: string
+    email?: string
+    name?: string
+    isAdmin?: boolean
+    rememberMe?: boolean
+  }
+  expires?: string
+}
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -49,7 +75,7 @@ export const authOptions = {
     })
   ],
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as const,
     // Increase session max age and make it more persistent
     maxAge: 30 * 24 * 60 * 60, // 30 days
     updateAge: 24 * 60 * 60, // Update session every 24 hours
@@ -59,15 +85,15 @@ export const authOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user }: { token: Record<string, unknown>; user: Record<string, unknown> }) {
+    async jwt({ token, user }: { token: ExtendedToken; user: ExtendedUser }) {
       if (user) {
         token.sub = user.id
-        token.isAdmin = (user as { isAdmin: boolean }).isAdmin
-        token.rememberMe = (user as { rememberMe: boolean }).rememberMe
+        token.isAdmin = user.isAdmin
+        token.rememberMe = user.rememberMe
         
         // Set different expiration times based on remember me
         const now = Math.floor(Date.now() / 1000)
-        if ((user as { rememberMe: boolean }).rememberMe) {
+        if (user.rememberMe) {
           // Remember me: 30 days
           token.exp = now + (30 * 24 * 60 * 60)
         } else {
@@ -94,40 +120,40 @@ export const authOptions = {
       
       return token
     },
-    async session({ session, token }: { session: Record<string, unknown>; token: Record<string, unknown> }) {
+    async session({ session, token }: { session: ExtendedSession; token: ExtendedToken }) {
       if (session.user && token) {
-        (session.user as any).id = token.sub as string;
-        (session.user as any).isAdmin = token.isAdmin as boolean;
-        (session.user as any).rememberMe = token.rememberMe as boolean
+        session.user.id = token.sub
+        session.user.isAdmin = token.isAdmin
+        session.user.rememberMe = token.rememberMe
         
         // Ensure user exists in database
         if (token.sub) {
           try {
             const existingUser = await prisma.user.findUnique({
-              where: { id: token.sub as string }
+              where: { id: token.sub }
             })
             
             if (!existingUser && session.user) {
               // Check if user exists by email first
               const userByEmail = await prisma.user.findUnique({
-                where: { email: (session.user as any).email }
+                where: { email: session.user.email }
               })
               
               if (userByEmail) {
                 // User exists with same email but different ID - update the ID
                 await prisma.user.update({
-                  where: { email: (session.user as any).email },
-                  data: { id: token.sub as string }
+                  where: { email: session.user.email },
+                  data: { id: token.sub }
                 })
                 console.log('Updated existing user ID in database:', token.sub)
               } else {
                 // Create new user if they don't exist
                 await prisma.user.create({
                   data: {
-                    id: token.sub as string,
-                    email: (session.user as any).email,
-                    name: (session.user as any).name || 'User',
-                    isAdmin: token.isAdmin as boolean || false,
+                    id: token.sub,
+                    email: session.user.email!,
+                    name: session.user.name || 'User',
+                    isAdmin: token.isAdmin || false,
                     subscriptionTier: 'free',
                     subscriptionStatus: 'inactive'
                   }
@@ -141,10 +167,10 @@ export const authOptions = {
         }
         
         // Set session expiry based on remember me
-        if ((session.user as any).rememberMe) {
-          (session as any).expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        if (session.user.rememberMe) {
+          session.expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
         } else {
-          (session as any).expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          session.expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
         }
       }
       return session
@@ -192,9 +218,9 @@ export const authOptions = {
   useSecureCookies: process.env.NODE_ENV === 'production',
   // Add events to handle session updates
   events: {
-    async session({ session }: { session: Record<string, unknown> }) {
+    async session({ session }: { session: ExtendedSession }) {
       // Log session access for debugging
-      console.log('Session accessed:', { userId: (session.user as any)?.id, expires: session.expires })
+      console.log('Session accessed:', { userId: session.user?.id, expires: session.expires })
     }
   }
 }
