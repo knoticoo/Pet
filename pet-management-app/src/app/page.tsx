@@ -221,7 +221,7 @@ export default function DashboardPage() {
     } else if (!sessionLoading) {
       setIsLoading(false)
     }
-  }, [session, sessionLoading, hasMounted, loadDashboardData])
+  }, [session?.user?.id, sessionLoading, hasMounted, loadDashboardData])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('de-DE', {
