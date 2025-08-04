@@ -49,7 +49,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  userScalable: true,
+  userScalable: false,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" }
@@ -58,8 +58,6 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   // Ensure proper scaling on mobile devices
   minimumScale: 1,
-  // Prevent zoom on input focus
-  userScalable: false,
 };
 
 export default function RootLayout({
