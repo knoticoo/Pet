@@ -19,16 +19,7 @@ interface ExtendedToken {
   exp?: number
 }
 
-interface ExtendedSession {
-  user?: {
-    id?: string
-    email?: string
-    name?: string
-    isAdmin?: boolean
-    rememberMe?: boolean
-  }
-  expires?: string
-}
+
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -120,7 +111,7 @@ export const authOptions = {
       
       return token
     },
-    async session({ session, token }: { session: ExtendedSession; token: ExtendedToken }) {
+    async session({ session, token }: { session: { user?: { id?: string; email?: string; name?: string; isAdmin?: boolean; rememberMe?: boolean }; expires?: string }; token: ExtendedToken }) {
       if (session.user && token) {
         session.user.id = token.sub
         session.user.isAdmin = token.isAdmin
@@ -187,7 +178,7 @@ export const authOptions = {
       name: `next-auth.session-token`,
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'lax' as const,
         path: '/',
         secure: process.env.NODE_ENV === 'production',
         // Longer cookie expiry for better persistence on mobile
@@ -197,7 +188,7 @@ export const authOptions = {
     callbackUrl: {
       name: `next-auth.callback-url`,
       options: {
-        sameSite: 'lax',
+        sameSite: 'lax' as const,
         path: '/',
         secure: process.env.NODE_ENV === 'production',
         maxAge: 30 * 24 * 60 * 60
@@ -207,7 +198,7 @@ export const authOptions = {
       name: `next-auth.csrf-token`,
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'lax' as const,
         path: '/',
         secure: process.env.NODE_ENV === 'production',
         maxAge: 30 * 24 * 60 * 60
@@ -215,12 +206,5 @@ export const authOptions = {
     }
   },
   // Improve mobile session handling
-  useSecureCookies: process.env.NODE_ENV === 'production',
-  // Add events to handle session updates
-  events: {
-    async session({ session }: { session: ExtendedSession }) {
-      // Log session access for debugging
-      console.log('Session accessed:', { userId: session.user?.id, expires: session.expires })
-    }
-  }
+  useSecureCookies: process.env.NODE_ENV === 'production'
 }
