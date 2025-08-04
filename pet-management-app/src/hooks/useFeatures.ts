@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { FeatureConfig, ClientFeatureManager } from '@/lib/features-client'
 
@@ -13,14 +13,22 @@ export function useFeatures(userId?: string) {
   const [enabledFeatures, setEnabledFeatures] = useState<Set<string>>(new Set())
   const [availableFeatures, setAvailableFeatures] = useState<FeatureConfig[]>([])
   const [loading, setLoading] = useState(true)
+  const loadingRef = useRef(false)
 
   // Memoize the cache key to avoid recreating it on every render
   const cacheKey = useMemo(() => {
     return userId || (session?.user as { id?: string })?.id || 'anonymous'
   }, [userId, session?.user])
 
+  // Memoize the current user ID to prevent unnecessary re-renders
+  const currentUserId = useMemo(() => {
+    return userId || (session?.user as { id?: string })?.id
+  }, [userId, session?.user])
+
   const loadFeatures = useCallback(async () => {
-    if (status === 'loading') return
+    if (status === 'loading' || loadingRef.current) return
+    
+    loadingRef.current = true
     
     // Check cache first
     const cached = featuresCache.get(cacheKey)
@@ -28,11 +36,11 @@ export function useFeatures(userId?: string) {
       setAvailableFeatures(cached.features)
       setEnabledFeatures(new Set(cached.features.map((f: FeatureConfig) => f.name)))
       setLoading(false)
+      loadingRef.current = false
       return
     }
     
     try {
-      const currentUserId = userId || (session?.user as { id?: string })?.id
       const url = currentUserId 
         ? `/api/features?userId=${currentUserId}`
         : '/api/features'
@@ -48,6 +56,7 @@ export function useFeatures(userId?: string) {
         // If unauthorized, don't throw error immediately - session might be refreshing
         if (response.status === 401 && status !== 'unauthenticated') {
           console.warn('Features request unauthorized, but session status is:', status)
+          loadingRef.current = false
           return
         }
         throw new Error('Failed to fetch features')
@@ -77,12 +86,15 @@ export function useFeatures(userId?: string) {
       setEnabledFeatures(new Set(defaultFeatures.map(f => f.name)))
     } finally {
       setLoading(false)
+      loadingRef.current = false
     }
-  }, [status, cacheKey, userId, session?.user])
+  }, [status, cacheKey, currentUserId])
 
   useEffect(() => {
-    loadFeatures()
-  }, [loadFeatures])
+    if (status !== 'loading') {
+      loadFeatures()
+    }
+  }, [loadFeatures, status])
 
   // Memoize expensive calculations
   const memoizedValues = useMemo(() => ({

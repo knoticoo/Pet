@@ -6,6 +6,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { PageWrapper } from "@/components/PageWrapper";
+import { PWAWrapper } from "@/components/PWAWrapper";
 
 // Optimize font loading with multiple fonts
 const inter = Inter({ 
@@ -53,6 +54,12 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" }
   ],
+  // PWA-specific viewport settings
+  viewportFit: "cover",
+  // Ensure proper scaling on mobile devices
+  minimumScale: 1,
+  // Prevent zoom on input focus
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -85,6 +92,17 @@ export default function RootLayout({
         <meta name="theme-color" content="#3b82f6" />
         <meta name="msapplication-TileColor" content="#3b82f6" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
+        
+        {/* Additional PWA meta tags for consistency */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        
+        {/* Ensure consistent theme colors */}
+        <meta name="theme-color" content="#3b82f6" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
         
         {/* Icons */}
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -145,33 +163,35 @@ export default function RootLayout({
       <body className={`${inter.className} h-full antialiased bg-background text-foreground`}>
         <ThemeProvider defaultTheme="default" storageKey="petcare-theme">
           <AuthProvider>
-            <div className="min-h-screen flex flex-col">
-              <Navigation />
-              <main className="flex-1 container mx-auto px-4 py-6 md:py-8 max-w-7xl">
-                <ErrorBoundary>
-                  <PageWrapper>
-                    {children}
-                  </PageWrapper>
-                </ErrorBoundary>
-              </main>
-              
-              {/* Footer */}
-              <footer className="border-t bg-card/50 backdrop-blur-sm">
-                <div className="container mx-auto px-4 py-6">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">П</span>
+            <PWAWrapper>
+              <div className="min-h-screen flex flex-col">
+                <Navigation />
+                <main className="flex-1 container mx-auto px-4 py-6 md:py-8 max-w-7xl">
+                  <ErrorBoundary>
+                    <PageWrapper>
+                      {children}
+                    </PageWrapper>
+                  </ErrorBoundary>
+                </main>
+                
+                {/* Footer */}
+                <footer className="border-t bg-card/50 backdrop-blur-sm">
+                  <div className="container mx-auto px-4 py-6">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">П</span>
+                        </div>
+                        <span className="font-semibold text-sm">ПетКеа</span>
                       </div>
-                      <span className="font-semibold text-sm">ПетКеа</span>
-                    </div>
-                    <div className="text-xs text-muted-foreground text-center md:text-right">
-                      © 2024 ПетКеа. Все права защищены.
+                      <div className="text-xs text-muted-foreground text-center md:text-right">
+                        © 2024 ПетКеа. Все права защищены.
+                      </div>
                     </div>
                   </div>
-                </div>
-              </footer>
-            </div>
+                </footer>
+              </div>
+            </PWAWrapper>
           </AuthProvider>
         </ThemeProvider>
       </body>
