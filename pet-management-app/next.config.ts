@@ -26,8 +26,8 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-toast'],
   },
   
-  // Simplified webpack configuration
-  webpack: (config, { isServer, dev }) => {
+  // Simplified webpack configuration to avoid potential issues
+  webpack: (config, { isServer }) => {
     if (!isServer) {
       // Exclude Prisma from client-side bundles
       config.resolve.fallback = {
@@ -36,14 +36,6 @@ const nextConfig: NextConfig = {
         net: false,
         tls: false,
         crypto: false,
-      };
-    }
-    
-    // Reduce webpack logging in development
-    if (dev) {
-      config.stats = 'errors-warnings';
-      config.infrastructureLogging = {
-        level: 'error',
       };
     }
     
