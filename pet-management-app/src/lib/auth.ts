@@ -111,58 +111,11 @@ export const authOptions = {
       
       return token
     },
-    async session({ session, token }: { session: { user?: { id?: string; email?: string; name?: string; isAdmin?: boolean; rememberMe?: boolean }; expires?: string }; token: ExtendedToken }) {
+    async session({ session, token }: any) {
       if (session.user && token) {
         session.user.id = token.sub
         session.user.isAdmin = token.isAdmin
         session.user.rememberMe = token.rememberMe
-        
-        // Ensure user exists in database
-        if (token.sub) {
-          try {
-            const existingUser = await prisma.user.findUnique({
-              where: { id: token.sub }
-            })
-            
-            if (!existingUser && session.user) {
-              // Check if user exists by email first
-              const userByEmail = await prisma.user.findUnique({
-                where: { email: session.user.email }
-              })
-              
-              if (userByEmail) {
-                // User exists with same email but different ID - update the ID
-                await prisma.user.update({
-                  where: { email: session.user.email },
-                  data: { id: token.sub }
-                })
-                console.log('Updated existing user ID in database:', token.sub)
-              } else {
-                // Create new user if they don't exist
-                await prisma.user.create({
-                  data: {
-                    id: token.sub,
-                    email: session.user.email!,
-                    name: session.user.name || 'User',
-                    isAdmin: token.isAdmin || false,
-                    subscriptionTier: 'free',
-                    subscriptionStatus: 'inactive'
-                  }
-                })
-                console.log('Created missing user in database:', token.sub)
-              }
-            }
-          } catch (error) {
-            console.error('Error ensuring user exists in database:', error)
-          }
-        }
-        
-        // Set session expiry based on remember me
-        if (session.user.rememberMe) {
-          session.expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-        } else {
-          session.expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-        }
       }
       return session
     }
