@@ -3,14 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
-// Define proper interfaces for type safety
-interface ExtendedUser {
-  id: string
-  email: string
-  name?: string
-  isAdmin: boolean
-  rememberMe: boolean
-}
+
 
 interface ExtendedToken {
   sub?: string
@@ -76,7 +69,8 @@ export const authOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user }: { token: ExtendedToken; user: ExtendedUser }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async jwt({ token, user }: { token: any; user: any }) {
       if (user) {
         token.sub = user.id
         token.isAdmin = user.isAdmin
@@ -111,7 +105,8 @@ export const authOptions = {
       
       return token
     },
-    async session({ session, token }: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session, token }: { session: any; token: ExtendedToken }) {
       if (session.user && token) {
         session.user.id = token.sub
         session.user.isAdmin = token.isAdmin
