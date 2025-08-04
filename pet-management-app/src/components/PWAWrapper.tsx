@@ -8,7 +8,6 @@ interface PWAWrapperProps {
 
 export function PWAWrapper({ children }: PWAWrapperProps) {
   const [isPWA, setIsPWA] = useState(false)
-  const [isStandalone, setIsStandalone] = useState(false)
 
   useEffect(() => {
     // Check if running as PWA
@@ -18,7 +17,6 @@ export function PWAWrapper({ children }: PWAWrapperProps) {
       const isPWA = isStandaloneMode || isInWebApp
       
       setIsPWA(isPWA)
-      setIsStandalone(isStandaloneMode)
       
       // Add PWA-specific classes to body
       if (isPWA) {
