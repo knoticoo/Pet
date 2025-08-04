@@ -26,73 +26,40 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-toast'],
   },
   
-  // Enable bundle analyzer when ANALYZE=true
-  ...(process.env.ANALYZE === 'true' && {
-    webpack: (config, { isServer, dev }) => {
-      if (!isServer) {
-        // Exclude Prisma from client-side bundles
-        config.resolve.fallback = {
-          ...config.resolve.fallback,
-          fs: false,
-          net: false,
-          tls: false,
-          crypto: false,
-        };
-        
-        config.externals.push({
-          '@prisma/client': 'commonjs @prisma/client',
-        });
-      }
-      
-      // Reduce webpack logging in development
-      if (dev) {
-        config.stats = 'errors-warnings';
-        config.infrastructureLogging = {
-          level: 'error',
-        };
-      }
-      
-      // Bundle analyzer
-      if (process.env.ANALYZE === 'true') {
-        const { BundleAnalyzerPlugin } = require('@next/bundle-analyzer')();
-        config.plugins.push(
-          new BundleAnalyzerPlugin({
-            analyzerMode: 'server',
-            analyzerPort: isServer ? 8888 : 8889,
-            openAnalyzer: true,
-          })
-        );
-      }
-      
-      return config;
-    },
-  }) || {
-    webpack: (config, { isServer, dev }) => {
-      if (!isServer) {
-        // Exclude Prisma from client-side bundles
-        config.resolve.fallback = {
-          ...config.resolve.fallback,
-          fs: false,
-          net: false,
-          tls: false,
-          crypto: false,
-        };
-        
-        config.externals.push({
-          '@prisma/client': 'commonjs @prisma/client',
-        });
-      }
-      
-      // Reduce webpack logging in development
-      if (dev) {
-        config.stats = 'errors-warnings';
-        config.infrastructureLogging = {
-          level: 'error',
-        };
-      }
-      
-      return config;
-    },
+  // Simplified webpack configuration
+  webpack: (config, { isServer, dev }) => {
+    if (!isServer) {
+      // Exclude Prisma from client-side bundles
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+      };
+    }
+    
+    // Reduce webpack logging in development
+    if (dev) {
+      config.stats = 'errors-warnings';
+      config.infrastructureLogging = {
+        level: 'error',
+      };
+    }
+    
+    // Bundle analyzer (only when ANALYZE=true)
+    if (process.env.ANALYZE === 'true') {
+      const { BundleAnalyzerPlugin } = require('@next/bundle-analyzer')();
+      config.plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'server',
+          analyzerPort: isServer ? 8888 : 8889,
+          openAnalyzer: true,
+        })
+      );
+    }
+    
+    return config;
   },
 
   // Enable static optimization
