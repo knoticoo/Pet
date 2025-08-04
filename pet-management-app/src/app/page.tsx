@@ -257,8 +257,12 @@ export default function DashboardPage() {
     }
   }
 
+  const handleLoadingComplete = useCallback(() => {
+    setIsLoading(false)
+  }, [])
+
   if (isLoading && hasMounted) {
-    return <LoadingScreen isVisible={true} onComplete={() => setIsLoading(false)} />
+    return <LoadingScreen isVisible={true} onComplete={handleLoadingComplete} />
   }
 
   if (isLoading && !hasMounted) {

@@ -1,15 +1,18 @@
-nohup: ignoring input
 
 > pet-management-app@1.0.0 dev
 > next dev
 
- ⚠ Port 3000 is in use, trying 3001 instead.
- ⚠ Port 3001 is in use, trying 3002 instead.
- ⚠ Port 3002 is in use, trying 3003 instead.
- ⚠ Port 3003 is in use, trying 3004 instead.
    ▲ Next.js 15.1.6
-   - Local:        http://localhost:3004
-   - Network:      http://172.30.0.2:3004
+   - Local:        http://localhost:3000
+   - Network:      http://172.30.0.2:3000
+   - Experiments (use with caution):
+     · optimizeCss
 
  ✓ Starting...
- ✓ Ready in 1137ms
+ ✓ Ready in 1050ms
+ ○ Compiling / ...
+
+warn - You have enabled experimental features: optimizeUniversalDefaults
+warn - Experimental features in Tailwind CSS are not covered by semver, may introduce breaking changes, and can change at any time.
+ ✓ Compiled / in 3.7s (900 modules)
+ GET / 200 in 4033ms
